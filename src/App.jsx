@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronRight,
+  CircleDollarSign,
   Cloud,
   CreditCard,
   LayoutDashboard,
@@ -25,6 +26,9 @@ import {
   Upload,
   UserCircle2,
   Wallet,
+  Clock3,
+  Check,
+  Pencil,
 } from "lucide-react";
 
 const STORAGE_KEY = "sentimo_transactions_v3";
@@ -109,6 +113,7 @@ const seedFixedExpenses = [
     nextDueDate: "2026-05-01",
     status: "Scheduled",
     autoIncludeTarget: true,
+    notes: "",
   },
   {
     id: "fx-2",
@@ -119,8 +124,9 @@ const seedFixedExpenses = [
     amount: 425,
     dueDay: 12,
     nextDueDate: "2026-05-12",
-    status: "Scheduled",
+    status: "Paid",
     autoIncludeTarget: true,
+    notes: "",
   },
   {
     id: "fx-3",
@@ -131,8 +137,9 @@ const seedFixedExpenses = [
     amount: 1250,
     dueDay: 15,
     nextDueDate: "2026-05-15",
-    status: "Scheduled",
+    status: "Pending",
     autoIncludeTarget: true,
+    notes: "",
   },
   {
     id: "fx-4",
@@ -143,8 +150,9 @@ const seedFixedExpenses = [
     amount: 98,
     dueDay: 20,
     nextDueDate: "2026-05-20",
-    status: "Scheduled",
+    status: "Overdue",
     autoIncludeTarget: true,
+    notes: "",
   },
 ];
 
@@ -275,7 +283,7 @@ function toDateInput(date = new Date()) {
 
 function monthlyEquivalent(frequency, amount) {
   const value = Number(amount || 0);
-  if (frequency === "Weekly") return value * 52 / 12;
+  if (frequency === "Weekly") return (value * 52) / 12;
   if (frequency === "Monthly") return value;
   if (frequency === "Quarterly") return value / 3;
   if (frequency === "Annual") return value / 12;
@@ -367,7 +375,8 @@ function matchPeriod(dateStr, mode) {
   const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
   if (mode === "7d") return diffDays <= 7;
   if (mode === "30d") return diffDays <= 30;
-  if (mode === "month") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  if (mode === "month")
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   if (mode === "year") return d.getFullYear() === now.getFullYear();
   return true;
 }
@@ -611,6 +620,14 @@ function appStyles() {
       color: var(--text);
     }
 
+    .btn-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      padding: 0;
+      justify-content: center;
+    }
+
     .grid-4, .grid-3, .grid-2 {
       display: grid;
       gap: 14px;
@@ -821,6 +838,40 @@ function appStyles() {
 
     .hero-panel {
       min-height: 250px;
+    }
+
+    .table-footer-total {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 4px 0;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .fx-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .fx-sub {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .fx-kicker {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
     }
 
     @media (max-width: 1200px) {
@@ -1121,7 +1172,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
           <h3 className="section-title">Monthly Net Position</h3>
           <p className="section-sub">Income received minus total expenses this month.</p>
           <div style={{ fontSize: 42, fontWeight: 700, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
-            {net >= 0 ? "+" : ""}{formatCurrency(net).replace("£", "£")}
+            {net >= 0 ? "+" : ""}{formatCurrency(net)}
           </div>
           <div className="muted" style={{ marginTop: 6 }}>
             {formatCurrency(realIncome)} in · {formatCurrency(realExpenses)} out
@@ -1163,18 +1214,26 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
   });
 
   const monthlyTotal = fixedExpenses
-    .filter((x) => x.status !== "Archived")
+    .filter((x) => x.status !== "Paid" && x.status !== "Archived")
     .reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
 
-  const pending = fixedExpenses.filter((x) => x.status === "Pending").length;
-  const overdue = fixedExpenses.filter((x) => x.status === "Overdue").length;
-  const scheduled = fixedExpenses.filter((x) => x.status === "Scheduled").length;
-  const paid = fixedExpenses.filter((x) => x.status === "Paid").length;
+  const weeklyEquiv = monthlyTotal / 4.333;
+  const pendingRows = fixedExpenses.filter((x) => x.status === "Pending");
+  const overdueRows = fixedExpenses.filter((x) => x.status === "Overdue");
+  const scheduledRows = fixedExpenses.filter((x) => x.status === "Scheduled");
+  const paidRows = fixedExpenses.filter((x) => x.status === "Paid");
+
+  const pendingValue = pendingRows.reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
+  const overdueValue = overdueRows.reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
 
   const visible = fixedExpenses.filter((x) => {
     if (tab === "All") return true;
     return x.status === tab;
   });
+
+  const activeMonthlyTotal = fixedExpenses
+    .filter((x) => x.status !== "Archived" && x.status !== "Paid")
+    .reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
 
   function addExpense() {
     if (!draft.name || !draft.amount) return;
@@ -1190,6 +1249,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         nextDueDate: "",
         status: "Scheduled",
         autoIncludeTarget: true,
+        notes: "",
       },
       ...fixedExpenses,
     ]);
@@ -1203,6 +1263,18 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
     });
   }
 
+  function cycleStatus(id) {
+    const order = ["Scheduled", "Pending", "Paid", "Overdue"];
+    setFixedExpenses((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        const currentIndex = order.indexOf(item.status);
+        const next = order[(currentIndex + 1) % order.length];
+        return { ...item, status: next };
+      })
+    );
+  }
+
   return (
     <>
       <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
@@ -1214,21 +1286,26 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
 
       <div className="grid-4">
         <MetricCard icon={CreditCard} label="Monthly Total" value={formatCurrency(monthlyTotal)} sub="Excl. paid" />
-        <MetricCard icon={CalendarDays} label="Weekly Equiv." value={formatCurrency(monthlyTotal / 4.333)} sub="Recurring load" />
-        <MetricCard icon={RefreshCw} label="Pending" value={formatCurrency(0)} sub={`${pending} items`} />
-        <MetricCard icon={Target} label="Overdue" value={formatCurrency(0)} sub={`${overdue} items`} />
+        <MetricCard icon={CalendarDays} label="Weekly Equiv." value={formatCurrency(weeklyEquiv)} sub="Recurring burden" />
+        <MetricCard icon={Clock3} label="Pending" value={formatCurrency(pendingValue)} sub={`${pendingRows.length} item${pendingRows.length === 1 ? "" : "s"}`} />
+        <MetricCard icon={Target} label="Overdue" value={formatCurrency(overdueValue)} sub={`${overdueRows.length} item${overdueRows.length === 1 ? "" : "s"}`} />
       </div>
 
       <div className="card" style={{ marginTop: 14 }}>
         <div className="mini-tabs">
-          {["All", "Pending", "Overdue", "Scheduled", "Paid"].map((t) => (
-            <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
-              {t}
-              {t === "All" ? ` (${fixedExpenses.length})` : ""}
-              {t === "Pending" ? ` (${pending})` : ""}
-              {t === "Overdue" ? ` (${overdue})` : ""}
-              {t === "Scheduled" ? ` (${scheduled})` : ""}
-              {t === "Paid" ? ` (${paid})` : ""}
+          {[
+            { label: "All", count: fixedExpenses.length },
+            { label: "Pending", count: pendingRows.length },
+            { label: "Overdue", count: overdueRows.length },
+            { label: "Scheduled", count: scheduledRows.length },
+            { label: "Paid", count: paidRows.length },
+          ].map((item) => (
+            <button
+              key={item.label}
+              className={tab === item.label ? "active" : ""}
+              onClick={() => setTab(item.label)}
+            >
+              {item.label} ({item.count})
             </button>
           ))}
         </div>
@@ -1251,41 +1328,93 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
               {visible.map((item) => (
                 <tr key={item.id}>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{item.name}</div>
-                    <div className="muted" style={{ fontSize: 12 }}>{item.subcategory}</div>
+                    <div className="fx-name">{item.name}</div>
+                    <div className="fx-sub">{item.subcategory}</div>
                   </td>
-                  <td><span className={`status-pill ${statusClass(item.status)}`}>{item.status}</span></td>
+                  <td>
+                    <span className={`status-pill ${statusClass(item.status)}`}>
+                      {item.status}
+                    </span>
+                  </td>
                   <td>{item.category}</td>
                   <td>{item.frequency}</td>
                   <td style={{ fontWeight: 700 }}>{formatCurrency(item.amount)}</td>
                   <td style={{ fontWeight: 700 }}>{formatCurrency(monthlyEquivalent(item.frequency, item.amount))}</td>
-                  <td>{item.nextDueDate || `Day ${item.dueDay}`}</td>
                   <td>
-                    <button
-                      className="btn"
-                      onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div>{item.nextDueDate || `Day ${item.dueDay}`}</div>
+                    <div className="fx-sub">{item.status === "Paid" ? "Completed" : "Upcoming"}</div>
+                  </td>
+                  <td>
+                    <div className="action-row">
+                      <button className="btn btn-icon" title="Cycle status" onClick={() => cycleStatus(item.id)}>
+                        {item.status === "Paid" ? <Check size={14} /> : <Clock3 size={14} />}
+                      </button>
+                      <button className="btn btn-icon" title="Edit">
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        className="btn btn-icon"
+                        title="Delete"
+                        onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
+              {visible.length === 0 && (
+                <tr>
+                  <td colSpan="8">
+                    <div className="empty-box" style={{ minHeight: 140 }}>
+                      No fixed expenses in this status.
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
-        <div style={{ marginTop: 12, fontWeight: 700, textAlign: "right" }}>
-          Active Total {formatCurrency(monthlyTotal)} / mo
+        <div className="table-footer-total">
+          <span>Active Total</span>
+          <span>{formatCurrency(activeMonthlyTotal)} / mo</span>
         </div>
       </div>
 
       <div className="card" style={{ marginTop: 14 }}>
-        <h3 className="section-title">New Fixed Expense</h3>
+        <div className="fx-kicker">Recurring obligations</div>
+        <h3 className="section-title">Add Fixed Expense</h3>
+        <p className="section-sub">
+          Add recurring rent, subscriptions, school costs, insurance, and other scheduled commitments.
+        </p>
+
         <div className="split-2">
-          <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
-          <input className="input" placeholder="Category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
-          <input className="input" placeholder="Sub-category" value={draft.subcategory} onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Name"
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+          />
+          <input
+            className="input"
+            placeholder="Amount"
+            type="number"
+            value={draft.amount}
+            onChange={(e) => setDraft({ ...draft, amount: e.target.value })}
+          />
+          <input
+            className="input"
+            placeholder="Category"
+            value={draft.category}
+            onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+          />
+          <input
+            className="input"
+            placeholder="Sub-category"
+            value={draft.subcategory}
+            onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })}
+          />
           <select value={draft.frequency} onChange={(e) => setDraft({ ...draft, frequency: e.target.value })}>
             <option>Weekly</option>
             <option>Monthly</option>
@@ -1293,7 +1422,20 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
             <option>Annual</option>
             <option>Custom</option>
           </select>
-          <input className="input" placeholder="Due day" type="number" value={draft.dueDay} onChange={(e) => setDraft({ ...draft, dueDay: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Due day"
+            type="number"
+            value={draft.dueDay}
+            onChange={(e) => setDraft({ ...draft, dueDay: e.target.value })}
+          />
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <button className="btn btn-primary" onClick={addExpense}>
+            <Plus size={15} />
+            Save Fixed Expense
+          </button>
         </div>
       </div>
     </>
@@ -1579,7 +1721,7 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
 
   const variableExpenses = getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "30d"));
   const variableAvg = sumAmounts(variableExpenses) / Number(settings.variableAverageDays || 30);
-  const autoTarget = (fixedMonthly / daysInMonth(new Date("2026-04-29"))) + variableAvg;
+  const autoTarget = fixedMonthly / daysInMonth(new Date("2026-04-29")) + variableAvg;
   const target = settings.customDailyTarget ? Number(settings.customDailyTarget) : autoTarget;
   const todaySpent = sumAmounts(
     getCountedRealExpenses(transactions).filter((t) => t.date === "2026-04-29")
@@ -1638,7 +1780,7 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
           </p>
 
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginTop: 12 }}>
-            <div className="muted" style={{ marginBottom: 8, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Target Composition
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
@@ -1681,7 +1823,7 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
     .reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
   const dailyTarget = settings.customDailyTarget
     ? Number(settings.customDailyTarget)
-    : (fixedMonthly / daysInMonth(new Date("2026-04-29"))) + dailyAvg;
+    : fixedMonthly / daysInMonth(new Date("2026-04-29")) + dailyAvg;
 
   return (
     <>
@@ -1723,7 +1865,8 @@ function OverallPage({ transactions, fixedExpenses }) {
   const thisMonthExpenses = sumAmounts(getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "month")));
   const previousMonthIncome = thisMonthIncome * 0.8;
   const previousMonthExpenses = thisMonthExpenses * 1.1;
-  const budgetMonth = fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0) + 1000;
+  const budgetMonth =
+    fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0) + 1000;
 
   return (
     <>
@@ -1799,7 +1942,7 @@ function OverallPage({ transactions, fixedExpenses }) {
   );
 }
 
-function CategoriesPage({ categories, categoryFilter, setCategories, activePage }) {
+function CategoriesPage({ categories, categoryFilter }) {
   const visible = categoryFilter ? categories.filter((c) => c.name === categoryFilter) : categories;
 
   return (
@@ -1881,7 +2024,7 @@ function CategoriesPage({ categories, categoryFilter, setCategories, activePage 
 
 function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses }) {
   const fixedMonthly = fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
-  const autoTarget = (fixedMonthly / 30) + 0;
+  const autoTarget = fixedMonthly / 30;
 
   return (
     <>
@@ -1959,7 +2102,7 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           <div className="grid-2">
             <div>
               <div className="muted">Version</div>
-              <div>2.0.0</div>
+              <div>2.1.0</div>
             </div>
             <div>
               <div className="muted">PWA</div>
@@ -2277,8 +2420,6 @@ export default function App() {
             <CategoriesPage
               categories={categories}
               categoryFilter={categoryFilter}
-              setCategories={setCategories}
-              activePage={activePage}
             />
           )}
 
