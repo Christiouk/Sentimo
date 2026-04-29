@@ -30,15 +30,15 @@ import {
   KeyRound,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v7";
-const USER_KEY = "sentimo_user_v7";
-const THEME_KEY = "sentimo_theme_v5";
-const FIXED_KEY = "sentimo_fixed_expenses_v6";
-const CATEGORIES_KEY = "sentimo_categories_v5";
-const SETTINGS_KEY = "sentimo_settings_v5";
-const SESSIONS_KEY = "sentimo_trading_sessions_v4";
-const PIN_KEY = "sentimo_pin_v3";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v3";
+const STORAGE_KEY = "sentimo_transactions_v8";
+const USER_KEY = "sentimo_user_v8";
+const THEME_KEY = "sentimo_theme_v6";
+const FIXED_KEY = "sentimo_fixed_expenses_v7";
+const CATEGORIES_KEY = "sentimo_categories_v6";
+const SETTINGS_KEY = "sentimo_settings_v6";
+const SESSIONS_KEY = "sentimo_trading_sessions_v5";
+const PIN_KEY = "sentimo_pin_v4";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v4";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -233,7 +233,7 @@ function appStyles() {
     .layout {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 194px 1fr;
+      grid-template-columns: 164px 1fr;
     }
 
     .sidebar {
@@ -250,13 +250,13 @@ function appStyles() {
     .brand {
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 16px 14px 10px;
+      gap: 8px;
+      padding: 14px 8px 8px;
     }
 
     .brand-badge {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       border-radius: 7px;
       display: grid;
       place-items: center;
@@ -268,12 +268,12 @@ function appStyles() {
     .brand-title {
       font-weight: 600;
       line-height: 1.05;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--nav-text);
     }
 
     .brand-sub {
-      font-size: 8px;
+      font-size: 7px;
       color: var(--nav-muted);
       letter-spacing: 0.09em;
       text-transform: uppercase;
@@ -289,8 +289,8 @@ function appStyles() {
     }
 
     .daily-card {
-      margin: 6px 8px 8px;
-      padding: 10px 12px;
+      margin: 6px 4px 8px;
+      padding: 10px 10px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.10);
       box-shadow: none;
@@ -315,7 +315,7 @@ function appStyles() {
       display: grid;
       align-content: start;
       gap: 1px;
-      padding: 0 6px;
+      padding: 0 3px;
     }
 
     .sidebar-nav button {
@@ -324,12 +324,12 @@ function appStyles() {
       background: transparent;
       color: var(--nav-muted);
       text-align: left;
-      padding: 11px 12px;
-      border-radius: 10px;
+      padding: 10px 10px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 12px;
+      gap: 8px;
+      font-size: 11px;
       font-weight: 500;
       position: relative;
       z-index: 2;
@@ -341,21 +341,21 @@ function appStyles() {
     }
 
     .sidebar-footer {
-      padding: 8px;
+      padding: 6px 4px 8px;
     }
 
     .sidebar-bottom-card {
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.03);
       border-radius: 10px;
-      padding: 8px;
+      padding: 7px;
     }
 
     .theme-single-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 8px;
+      gap: 5px;
+      margin-bottom: 7px;
     }
 
     .theme-chip {
@@ -363,13 +363,13 @@ function appStyles() {
       background: rgba(255,255,255,0.05);
       color: var(--nav-text);
       border-radius: 8px;
-      padding: 7px 8px;
+      padding: 7px 6px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
-      font-size: 11px;
-      min-height: 32px;
+      gap: 4px;
+      font-size: 10px;
+      min-height: 30px;
       font-weight: 500;
       position: relative;
       z-index: 2;
@@ -382,9 +382,9 @@ function appStyles() {
 
     .sidebar-userrow {
       display: flex;
-      gap: 8px;
+      gap: 7px;
       align-items: center;
-      padding-top: 4px;
+      padding-top: 3px;
       position: relative;
       z-index: 2;
     }
@@ -1128,8 +1128,8 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
           <div className="sidebar-userrow">
             <UserCircle2 size={17} />
             <div>
-              <div style={{ fontWeight: 600, fontSize: 12 }}>{user.name}</div>
-              <div style={{ fontSize: 9, color: "var(--nav-muted)" }}>{user.email}</div>
+              <div style={{ fontWeight: 600, fontSize: 11 }}>{user.name}</div>
+              <div style={{ fontSize: 8.5, color: "var(--nav-muted)" }}>{user.email}</div>
             </div>
           </div>
         </div>
