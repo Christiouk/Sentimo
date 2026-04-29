@@ -14,7 +14,6 @@ import {
   LineChart,
   Moon,
   Pencil,
-  PiggyBank,
   Plus,
   RefreshCw,
   Save,
@@ -29,15 +28,19 @@ import {
   UserCircle2,
   Wallet,
   X,
+  KeyRound,
+  PanelRightOpen,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v4";
-const USER_KEY = "sentimo_user_v4";
-const THEME_KEY = "sentimo_theme_v2";
-const FIXED_KEY = "sentimo_fixed_expenses_v3";
-const CATEGORIES_KEY = "sentimo_categories_v2";
-const SETTINGS_KEY = "sentimo_settings_v2";
-const SESSIONS_KEY = "sentimo_trading_sessions_v1";
+const STORAGE_KEY = "sentimo_transactions_v5";
+const USER_KEY = "sentimo_user_v5";
+const THEME_KEY = "sentimo_theme_v3";
+const FIXED_KEY = "sentimo_fixed_expenses_v4";
+const CATEGORIES_KEY = "sentimo_categories_v3";
+const SETTINGS_KEY = "sentimo_settings_v3";
+const SESSIONS_KEY = "sentimo_trading_sessions_v2";
+const PIN_KEY = "sentimo_pin_v1";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v1";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -313,22 +316,24 @@ function monthlyEquivalent(frequency, amount) {
 function getThemeVars(theme) {
   if (theme === "light") {
     return {
-      "--bg": "#f4f7fb",
+      "--bg": "#f2f5fa",
       "--bg-secondary": "#ffffff",
       "--panel": "#ffffff",
-      "--panel-2": "#f8fafc",
-      "--border": "#d9e2ef",
-      "--text": "#0f172a",
-      "--muted": "#64748b",
-      "--accent": "#0f766e",
-      "--accent-soft": "rgba(15,118,110,0.10)",
+      "--panel-2": "#f7f9fc",
+      "--border": "#d8e0eb",
+      "--text": "#1b2432",
+      "--muted": "#6e7b91",
+      "--accent": "#2f6aa3",
+      "--accent-soft": "rgba(47,106,163,0.08)",
       "--success": "#10b981",
       "--danger": "#ef4444",
-      "--warning": "#f59e0b",
-      "--nav": "#eef3f8",
-      "--nav-active": "#dde7f3",
-      "--shadow": "0 8px 24px rgba(15, 23, 42, 0.06)",
-      "--hero-glow": "rgba(32, 201, 151, 0.08)",
+      "--warning": "#eab308",
+      "--nav": "#2f527f",
+      "--nav-active": "#446895",
+      "--nav-text": "#eff4fb",
+      "--nav-muted": "rgba(239,244,251,0.78)",
+      "--shadow": "0 8px 22px rgba(15, 23, 42, 0.05)",
+      "--hero-glow": "rgba(65, 105, 165, 0.08)",
     };
   }
 
@@ -347,6 +352,8 @@ function getThemeVars(theme) {
     "--warning": "#f59e0b",
     "--nav": "#0f182b",
     "--nav-active": "#23324a",
+    "--nav-text": "#eef3fa",
+    "--nav-muted": "rgba(238,243,250,0.74)",
     "--shadow": "0 10px 28px rgba(0,0,0,0.20)",
     "--hero-glow": "rgba(32, 201, 151, 0.10)",
   };
@@ -438,13 +445,15 @@ function appStyles() {
     .layout {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 252px 1fr;
+      grid-template-columns: 244px 1fr;
     }
 
     .sidebar {
       background: var(--nav);
-      border-right: 1px solid var(--border);
-      padding: 10px 8px 16px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      padding: 10px 8px 14px;
+      color: var(--nav-text);
+      position: relative;
     }
 
     .brand {
@@ -456,47 +465,49 @@ function appStyles() {
     }
 
     .brand-badge {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
       display: grid;
       place-items: center;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
     }
 
     .brand-title {
       font-weight: 700;
       line-height: 1.05;
       font-size: 15px;
+      color: var(--nav-text);
     }
 
     .brand-sub {
       font-size: 10px;
-      color: var(--muted);
+      color: var(--nav-muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     .daily-card,
-    .card,
-    .panel-card {
+    .card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 15px;
+      border-radius: 14px;
       box-shadow: var(--shadow);
     }
 
     .daily-card {
       margin: 8px 8px 14px;
       padding: 13px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: none;
     }
 
     .daily-line {
-      height: 7px;
+      height: 6px;
       border-radius: 999px;
-      background: var(--panel-2);
+      background: rgba(255,255,255,0.08);
       overflow: hidden;
       margin: 10px 0 8px;
     }
@@ -518,7 +529,7 @@ function appStyles() {
       width: 100%;
       border: 0;
       background: transparent;
-      color: var(--muted);
+      color: var(--nav-muted);
       text-align: left;
       padding: 11px 13px;
       border-radius: 11px;
@@ -530,28 +541,7 @@ function appStyles() {
 
     .sidebar-nav button.active {
       background: var(--nav-active);
-      color: var(--text);
-    }
-
-    .sidebar-sub {
-      margin: 6px 0 8px 40px;
-      display: grid;
-      gap: 4px;
-    }
-
-    .sidebar-sub button {
-      font-size: 12px;
-      padding: 7px 10px;
-      border-radius: 9px;
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      text-align: left;
-    }
-
-    .sidebar-sub button.active {
-      background: var(--accent-soft);
-      color: var(--text);
+      color: var(--nav-text);
     }
 
     .sidebar-footer {
@@ -559,33 +549,44 @@ function appStyles() {
       padding: 0 8px;
     }
 
-    .theme-row {
-      display: flex;
+    .theme-compact {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-top: 10px;
     }
 
-    .theme-btn {
-      flex: 1;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      color: var(--text);
-      border-radius: 12px;
-      padding: 10px 10px;
+    .theme-chip {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--nav-text);
+      border-radius: 10px;
+      padding: 8px 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      font-size: 14px;
+      gap: 6px;
+      font-size: 13px;
+      min-height: 36px;
     }
 
-    .theme-btn.active {
-      outline: 2px solid var(--accent);
+    .theme-chip.active {
+      outline: 1px solid var(--accent);
+      background: rgba(255,255,255,0.09);
     }
 
-    .profile-card {
-      margin-top: 12px;
-      padding: 12px;
+    .sidebar-userbox {
+      margin-top: 10px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 11px 12px;
+    }
+
+    .sidebar-userrow {
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
     .main {
@@ -640,15 +641,9 @@ function appStyles() {
     }
 
     .btn-primary {
-      background: #e9eef7;
+      background: #eef2f7;
       color: #111827;
-      border-color: #d8e0ec;
-    }
-
-    [data-theme="dark"] .btn-primary {
-      background: #eff3f8;
-      color: #111827;
-      border-color: #eff3f8;
+      border-color: #eef2f7;
     }
 
     .btn-soft {
@@ -733,7 +728,7 @@ function appStyles() {
     }
 
     .mini-tabs button.active {
-      background: var(--nav-active);
+      background: var(--accent-soft);
       color: var(--text);
     }
 
@@ -842,12 +837,6 @@ function appStyles() {
       gap: 10px;
     }
 
-    .split-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-
     .empty-box {
       min-height: 180px;
       display: grid;
@@ -862,7 +851,7 @@ function appStyles() {
 
     .category-list {
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
 
     .category-item {
@@ -870,21 +859,21 @@ function appStyles() {
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 13px;
+      padding: 12px;
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.02);
     }
 
     .category-left {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
     }
 
     .category-dot {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       border-radius: 999px;
       flex: 0 0 auto;
     }
@@ -964,12 +953,12 @@ function appStyles() {
       display: grid;
       place-items: center;
       padding: 20px;
-      z-index: 50;
+      z-index: 60;
     }
 
     .modal-card {
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 18px;
@@ -995,6 +984,120 @@ function appStyles() {
       font-weight: 700;
     }
 
+    .auth-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top right, var(--hero-glow), transparent 30%),
+        linear-gradient(180deg, var(--bg), var(--bg-secondary));
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 410px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .auth-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .auth-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+    }
+
+    .auth-title {
+      font-size: 19px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin: 0;
+    }
+
+    .auth-sub {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .pin-dots {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 10px 0 18px;
+    }
+
+    .pin-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+    }
+
+    .pin-dot.filled {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .pin-key {
+      min-height: 46px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 8, 18, 0.32);
+      z-index: 40;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: 244px;
+      height: 100vh;
+      width: 320px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      box-shadow: 12px 0 28px rgba(0,0,0,0.15);
+      padding: 16px;
+      z-index: 50;
+      overflow: auto;
+    }
+
+    .drawer.mobile {
+      left: 0;
+      width: min(90vw, 320px);
+    }
+
     @media (max-width: 1200px) {
       .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1003,10 +1106,11 @@ function appStyles() {
     @media (max-width: 960px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { display: none; }
-      .grid-4, .grid-3, .grid-2, .split-2, .split-3 { grid-template-columns: 1fr; }
+      .grid-4, .grid-3, .grid-2, .split-2 { grid-template-columns: 1fr; }
       .header { flex-direction: column; }
       .header h1 { font-size: 26px; }
       .main { padding: 14px; }
+      .drawer { left: 0; width: min(90vw, 320px); }
     }
   `;
 }
@@ -1024,35 +1128,26 @@ function MetricCard({ icon: Icon, label, value, sub }) {
   );
 }
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, theme }) {
   const [email, setEmail] = useState("c.mail@me.com");
   const [password, setPassword] = useState("founder-demo");
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        padding: 24,
-        background:
-          "radial-gradient(circle at top right, rgba(32,201,151,0.12), transparent 30%), linear-gradient(180deg, var(--bg), var(--bg-secondary))",
-      }}
-    >
-      <div className="card" style={{ width: "100%", maxWidth: 430, padding: 24 }}>
-        <div className="brand" style={{ padding: 0, marginBottom: 16 }}>
-          <div className="brand-badge">
+    <div className="auth-wrap">
+      <div className="auth-card">
+        <div className="auth-head">
+          <div className="auth-logo">
             <LineChart size={18} />
           </div>
           <div>
-            <div className="brand-title" style={{ fontSize: 23 }}>Sentimo</div>
-            <div className="brand-sub">Financial Control</div>
+            <div className="auth-title">Sentimo</div>
+            <div className="auth-sub">Financial Control</div>
           </div>
         </div>
 
-        <h2 style={{ margin: "0 0 8px", fontSize: 24 }}>Sign in</h2>
-        <p className="muted" style={{ marginTop: 0, fontSize: 14 }}>
-          Prototype login for the live build. Supabase auth wiring comes next.
+        <h2 style={{ margin: "0 0 8px", fontSize: 22, letterSpacing: "-0.02em" }}>Sign in</h2>
+        <p className="muted" style={{ marginTop: 0, fontSize: 14, lineHeight: 1.45 }}>
+          Enter your email and password. After sign-in, you’ll create a PIN for faster access next time.
         </p>
 
         <div className="form-grid" style={{ marginTop: 14 }}>
@@ -1070,7 +1165,109 @@ function LoginScreen({ onLogin }) {
             type="password"
           />
           <button className="btn btn-primary" onClick={() => onLogin({ ...demoUser, email })}>
-            Enter Dashboard
+            Sign in
+          </button>
+        </div>
+
+        <div style={{ marginTop: 14, fontSize: 12 }} className="muted">
+          Theme: {theme === "dark" ? "Dark Navy" : "Light"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PinSetupModal({ open, onSave }) {
+  const [pin, setPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (open) {
+      setPin("");
+      setConfirmPin("");
+      setStep(1);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  function press(n) {
+    if (step === 1) {
+      if (pin.length >= 4) return;
+      const next = pin + n;
+      setPin(next);
+      if (next.length === 4) setStep(2);
+      return;
+    }
+    if (confirmPin.length >= 4) return;
+    setConfirmPin(confirmPin + n);
+  }
+
+  function backspace() {
+    if (step === 1) {
+      setPin((s) => s.slice(0, -1));
+    } else {
+      setConfirmPin((s) => s.slice(0, -1));
+    }
+  }
+
+  const ready = pin.length === 4 && confirmPin.length === 4;
+  const match = ready && pin === confirmPin;
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-card" style={{ maxWidth: 420 }}>
+        <div className="modal-head">
+          <div>
+            <div className="fx-kicker">Quick access</div>
+            <h3 className="section-title" style={{ fontSize: 20, marginBottom: 4 }}>Create PIN</h3>
+            <div className="section-sub" style={{ marginBottom: 0 }}>
+              Use a 4-digit PIN for faster future access.
+            </div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center", fontSize: 14, marginBottom: 4 }}>
+          {step === 1 ? "Enter new PIN" : "Confirm PIN"}
+        </div>
+
+        <div className="pin-dots">
+          {[0, 1, 2, 3].map((i) => {
+            const active = step === 1 ? pin.length > i : confirmPin.length > i;
+            return <div key={i} className={`pin-dot ${active ? "filled" : ""}`} />;
+          })}
+        </div>
+
+        {ready && !match && (
+          <div style={{ color: "var(--danger)", textAlign: "center", fontSize: 13, marginBottom: 10 }}>
+            PINs do not match. Press clear and try again.
+          </div>
+        )}
+
+        <div className="pin-keypad">
+          {["1","2","3","4","5","6","7","8","9"].map((n) => (
+            <button key={n} className="pin-key" onClick={() => press(n)}>{n}</button>
+          ))}
+          <button className="pin-key" onClick={() => {
+            setPin("");
+            setConfirmPin("");
+            setStep(1);
+          }}>
+            Clear
+          </button>
+          <button className="pin-key" onClick={() => press("0")}>0</button>
+          <button className="pin-key" onClick={backspace}>⌫</button>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
+          <button
+            className="btn btn-primary"
+            disabled={!match}
+            style={{ opacity: match ? 1 : 0.45 }}
+            onClick={() => match && onSave(pin)}
+          >
+            Save PIN
           </button>
         </div>
       </div>
@@ -1078,17 +1275,131 @@ function LoginScreen({ onLogin }) {
   );
 }
 
+function PinUnlockScreen({ onUnlock, onUsePassword }) {
+  const [pin, setPin] = useState("");
+  const savedPin = localStorage.getItem(PIN_KEY) || "";
+
+  function press(n) {
+    if (pin.length >= 4) return;
+    const next = pin + n;
+    setPin(next);
+    if (next.length === 4) {
+      if (next === savedPin) {
+        setTimeout(() => onUnlock(), 120);
+      } else {
+        setTimeout(() => setPin(""), 200);
+      }
+    }
+  }
+
+  return (
+    <div className="auth-wrap">
+      <div className="auth-card" style={{ maxWidth: 360 }}>
+        <div className="auth-head">
+          <div className="auth-logo">
+            <KeyRound size={18} />
+          </div>
+          <div>
+            <div className="auth-title">Quick PIN Access</div>
+            <div className="auth-sub">Sentimo</div>
+          </div>
+        </div>
+
+        <p className="muted" style={{ marginTop: 0, fontSize: 14, lineHeight: 1.45 }}>
+          Enter your PIN to unlock quickly.
+        </p>
+
+        <div className="pin-dots">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={`pin-dot ${pin.length > i ? "filled" : ""}`} />
+          ))}
+        </div>
+
+        <div className="pin-keypad">
+          {["1","2","3","4","5","6","7","8","9"].map((n) => (
+            <button key={n} className="pin-key" onClick={() => press(n)}>{n}</button>
+          ))}
+          <button className="pin-key" onClick={() => setPin("")}>Clear</button>
+          <button className="pin-key" onClick={() => press("0")}>0</button>
+          <button className="pin-key" onClick={() => setPin((s) => s.slice(0, -1))}>⌫</button>
+        </div>
+
+        <button className="btn" style={{ width: "100%", justifyContent: "center", marginTop: 14 }} onClick={onUsePassword}>
+          Sign in with email instead
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CategoriesDrawer({ open, onClose, categories, categoryFilter, setCategoryFilter, mobile = false }) {
+  if (!open) return null;
+
+  return (
+    <>
+      <div className="drawer-backdrop" onClick={onClose} />
+      <aside className={`drawer ${mobile ? "mobile" : ""}`}>
+        <div className="modal-head" style={{ marginBottom: 12 }}>
+          <div>
+            <div className="fx-kicker">Categories</div>
+            <h3 className="section-title" style={{ fontSize: 18, marginBottom: 0 }}>Browse</h3>
+          </div>
+          <button className="btn btn-icon" onClick={onClose}>
+            <X size={14} />
+          </button>
+        </div>
+
+        <div className="category-list">
+          <button
+            className="btn"
+            style={{
+              justifyContent: "flex-start",
+              background: !categoryFilter ? "var(--accent-soft)" : "var(--panel-2)",
+            }}
+            onClick={() => {
+              setCategoryFilter("");
+              onClose();
+            }}
+          >
+            All
+          </button>
+
+          {categories.map((category) => (
+            <div className="category-item" key={category.id}>
+              <div className="category-left">
+                <span className="category-dot" style={{ background: category.color }} />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{category.name}</div>
+                  <div className="muted" style={{ fontSize: 11 }}>
+                    {category.subcategories.join(" · ")}
+                  </div>
+                </div>
+              </div>
+              <button
+                className="btn btn-icon"
+                onClick={() => {
+                  setCategoryFilter(category.name);
+                  onClose();
+                }}
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </>
+  );
+}
+
 function Sidebar({
   activePage,
   setActivePage,
-  categoriesOpen,
-  setCategoriesOpen,
-  categoryFilter,
-  setCategoryFilter,
   categories,
   user,
   theme,
   setTheme,
+  onOpenCategories,
 }) {
   const nav = [
     [LayoutDashboard, "Dashboard"],
@@ -1110,7 +1421,7 @@ function Sidebar({
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-badge">
-          <LineChart size={17} />
+          <LineChart size={16} />
         </div>
         <div>
           <div className="brand-title">Sentimo</div>
@@ -1120,9 +1431,9 @@ function Sidebar({
 
       <div className="daily-card">
         <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target</div>
-        <div style={{ fontSize: 18, fontWeight: 700 }}>0%</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--nav-text)" }}>0%</div>
         <div className="daily-line"><span /></div>
-        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: 11 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--nav-muted)", fontSize: 11 }}>
           <span>Spent £0</span>
           <span>£151 left</span>
         </div>
@@ -1132,79 +1443,51 @@ function Sidebar({
         {nav.map(([Icon, label]) => {
           const active = activePage === label;
           return (
-            <React.Fragment key={label}>
-              <button
-                className={active ? "active" : ""}
-                onClick={() => {
+            <button
+              key={label}
+              className={active ? "active" : ""}
+              onClick={() => {
+                if (label === "Categories") {
+                  setActivePage("Categories");
+                  onOpenCategories();
+                } else {
                   setActivePage(label);
-                  if (label === "Categories") setCategoriesOpen(!categoriesOpen);
-                }}
-              >
-                <Icon size={15} />
-                <span style={{ flex: 1 }}>{label}</span>
-                {label === "Categories" && (
-                  <ChevronRight
-                    size={14}
-                    style={{ transform: categoriesOpen ? "rotate(90deg)" : "none", transition: "0.2s" }}
-                  />
-                )}
-              </button>
-
-              {label === "Categories" && categoriesOpen && (
-                <div className="sidebar-sub">
-                  <button
-                    className={!categoryFilter ? "active" : ""}
-                    onClick={() => {
-                      setActivePage("Categories");
-                      setCategoryFilter("");
-                    }}
-                  >
-                    All
-                  </button>
-                  {categories.map((c) => (
-                    <button
-                      key={c.id}
-                      className={categoryFilter === c.name ? "active" : ""}
-                      onClick={() => {
-                        setActivePage("Categories");
-                        setCategoryFilter(c.name);
-                      }}
-                    >
-                      {c.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </React.Fragment>
+                }
+              }}
+            >
+              <Icon size={15} />
+              <span style={{ flex: 1 }}>{label}</span>
+              {label === "Categories" && <PanelRightOpen size={14} />}
+            </button>
           );
         })}
       </div>
 
       <div className="sidebar-footer">
-        <div className="theme-row">
-          <button
-            className={`theme-btn ${theme === "dark" ? "active" : ""}`}
-            onClick={() => setTheme("dark")}
-          >
-            <Moon size={13} />
-            Dark Navy
-          </button>
-          <button
-            className={`theme-btn ${theme === "light" ? "active" : ""}`}
-            onClick={() => setTheme("light")}
-          >
-            <Sun size={13} />
-            Light
-          </button>
-        </div>
-
-        <div className="card profile-card">
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <UserCircle2 size={22} />
+        <div className="sidebar-userbox">
+          <div className="sidebar-userrow">
+            <UserCircle2 size={20} />
             <div>
               <div style={{ fontWeight: 600, fontSize: 14 }}>{user.name}</div>
-              <div className="muted" style={{ fontSize: 11 }}>{user.email}</div>
+              <div style={{ fontSize: 11, color: "var(--nav-muted)" }}>{user.email}</div>
             </div>
+          </div>
+
+          <div className="theme-compact">
+            <button
+              className={`theme-chip ${theme === "dark" ? "active" : ""}`}
+              onClick={() => setTheme("dark")}
+            >
+              <Moon size={12} />
+              Dark
+            </button>
+            <button
+              className={`theme-chip ${theme === "light" ? "active" : ""}`}
+              onClick={() => setTheme("light")}
+            >
+              <Sun size={12} />
+              Light
+            </button>
           </div>
         </div>
       </div>
@@ -2074,7 +2357,7 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
                 width: 158,
                 height: 158,
                 borderRadius: "50%",
-                border: "10px solid var(--nav-active)",
+                border: "10px solid var(--panel-2)",
                 display: "grid",
                 placeItems: "center",
               }}
@@ -2274,12 +2557,16 @@ function OverallPage({ transactions, fixedExpenses }) {
   );
 }
 
-function CategoriesPage({ categories, categoryFilter }) {
+function CategoriesPage({ categories, categoryFilter, onOpenCategories }) {
   const visible = categoryFilter ? categories.filter((c) => c.name === categoryFilter) : categories;
 
   return (
     <>
       <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+        <button className="btn" onClick={onOpenCategories}>
+          <PanelRightOpen size={14} />
+          Browse Panel
+        </button>
         <button className="btn">
           <Plus size={14} />
           Seed Keywords
@@ -2290,22 +2577,34 @@ function CategoriesPage({ categories, categoryFilter }) {
         </button>
       </div>
 
-      <div className="grid-3">
+      <div className="grid-2">
         <div className="card">
-          <div className="brand-sub" style={{ marginBottom: 12 }}>Categories</div>
+          <h3 className="section-title">Selected View</h3>
+          <p className="section-sub">
+            {categoryFilter ? `Filtered by ${categoryFilter}` : "Showing all categories"}
+          </p>
+
           <div className="category-list">
-            {categories.map((c) => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
-                <span className="category-dot" style={{ background: c.color }} />
-                <span>{c.name}</span>
+            {visible.map((category) => (
+              <div className="category-item" key={category.id}>
+                <div className="category-left">
+                  <span className="category-dot" style={{ background: category.color }} />
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{category.name}</div>
+                    <div className="muted" style={{ fontSize: 11 }}>
+                      {category.subcategories.join(" · ")}
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight size={14} className="muted" />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="card" style={{ gridColumn: "span 2" }}>
+        <div className="card">
           <h3 className="section-title">Expense Classification</h3>
-          <p className="section-sub">Click any category to manage sub-categories and future auto-categorisation keywords.</p>
+          <p className="section-sub">Click Categories to manage sub-categories and future auto-categorisation keywords.</p>
 
           <div className="card" style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
@@ -2319,36 +2618,10 @@ function CategoriesPage({ categories, categoryFilter }) {
             </div>
           </div>
 
-          <div className="category-list">
-            {visible.map((category) => (
-              <div className="category-item" key={category.id}>
-                <div className="category-left">
-                  <div
-                    style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: 12,
-                      background: category.color,
-                      display: "grid",
-                      placeItems: "center",
-                      color: "white",
-                      fontWeight: 700,
-                      fontSize: 14,
-                    }}
-                  >
-                    {category.name[0]}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{category.name}</div>
-                    <div className="muted" style={{ fontSize: 12 }}>
-                      {category.subcategories.join(" · ")}
-                    </div>
-                  </div>
-                </div>
-                <ChevronRight size={17} className="muted" />
-              </div>
-            ))}
-          </div>
+          <button className="btn" onClick={onOpenCategories}>
+            <PanelRightOpen size={14} />
+            Open Categories Panel
+          </button>
         </div>
       </div>
     </>
@@ -2379,13 +2652,13 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
         </div>
 
         <div className="card" style={{ marginTop: 12 }}>
-          <div className="brand-sub" style={{ marginBottom: 8 }}>Portal Theme</div>
-          <div className="theme-row">
-            <button className={`theme-btn ${theme === "dark" ? "active" : ""}`} onClick={() => setTheme("dark")}>
+          <div className="brand-sub" style={{ marginBottom: 8 }}>Theme</div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className={`btn ${theme === "dark" ? "btn-soft" : ""}`} onClick={() => setTheme("dark")}>
               <Moon size={13} />
-              Dark Navy
+              Dark
             </button>
-            <button className={`theme-btn ${theme === "light" ? "active" : ""}`} onClick={() => setTheme("light")}>
+            <button className={`btn ${theme === "light" ? "btn-soft" : ""}`} onClick={() => setTheme("light")}>
               <Sun size={13} />
               Light
             </button>
@@ -2426,28 +2699,6 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
                 value={settings.variableAverageDays}
                 onChange={(e) => setSettings({ ...settings, variableAverageDays: e.target.value })}
               />
-            </div>
-          </div>
-        </div>
-
-        <div className="card" style={{ marginTop: 12 }}>
-          <div className="brand-sub" style={{ marginBottom: 8 }}>About Sentimo</div>
-          <div className="grid-2">
-            <div>
-              <div className="muted" style={{ fontSize: 12 }}>Version</div>
-              <div style={{ fontSize: 14 }}>3.0.0</div>
-            </div>
-            <div>
-              <div className="muted" style={{ fontSize: 12 }}>PWA</div>
-              <div style={{ fontSize: 14 }}>Enabled</div>
-            </div>
-            <div>
-              <div className="muted" style={{ fontSize: 12 }}>Target users</div>
-              <div style={{ fontSize: 14 }}>Traders · Self-employed · Investors</div>
-            </div>
-            <div>
-              <div className="muted" style={{ fontSize: 12 }}>Theme</div>
-              <div style={{ fontSize: 14 }}>{theme === "dark" ? "Dark Navy" : "Light"}</div>
             </div>
           </div>
         </div>
@@ -2550,13 +2801,15 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("dark");
   const [activePage, setActivePage] = useState("Dashboard");
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [transactions, setTransactions] = useState(seedTransactions);
   const [fixedExpenses, setFixedExpenses] = useState(seedFixedExpenses);
   const [categories, setCategories] = useState(seedCategories);
   const [settings, setSettings] = useState(defaultSettings);
   const [sessions, setSessions] = useState(seedTradingSessions);
+  const [needsPinSetup, setNeedsPinSetup] = useState(false);
+  const [authView, setAuthView] = useState("pin_or_password");
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   useEffect(() => {
     const styleTag = document.createElement("style");
@@ -2577,16 +2830,28 @@ export default function App() {
       const savedCategories = localStorage.getItem(CATEGORIES_KEY);
       const savedSettings = localStorage.getItem(SETTINGS_KEY);
       const savedSessions = localStorage.getItem(SESSIONS_KEY);
+      const pin = localStorage.getItem(PIN_KEY);
+      const authMode = localStorage.getItem(AUTH_MODE_KEY);
 
-      if (savedUser) setUser(JSON.parse(savedUser));
       if (savedTheme) setTheme(savedTheme);
       if (savedTransactions) setTransactions(JSON.parse(savedTransactions));
       if (savedFixed) setFixedExpenses(JSON.parse(savedFixed));
       if (savedCategories) setCategories(JSON.parse(savedCategories));
       if (savedSettings) setSettings(JSON.parse(savedSettings));
       if (savedSessions) setSessions(JSON.parse(savedSessions));
+
+      if (savedUser) {
+        if (pin && authMode !== "password") {
+          setAuthView("pin");
+        } else {
+          setAuthView("password");
+        }
+        setUser(JSON.parse(savedUser));
+      } else {
+        setAuthView("password");
+      }
     } catch {
-      // ignore
+      setAuthView("password");
     }
   }, []);
 
@@ -2615,13 +2880,53 @@ export default function App() {
     localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
   }, [sessions]);
 
-  function handleLogin(nextUser) {
+  function handlePasswordLogin(nextUser) {
     setUser(nextUser);
     localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+
+    const existingPin = localStorage.getItem(PIN_KEY);
+    if (!existingPin) {
+      setNeedsPinSetup(true);
+    } else {
+      localStorage.setItem(AUTH_MODE_KEY, "pin");
+    }
+  }
+
+  function handlePinSaved(pin) {
+    localStorage.setItem(PIN_KEY, pin);
+    localStorage.setItem(AUTH_MODE_KEY, "pin");
+    setNeedsPinSetup(false);
+  }
+
+  function handlePinUnlock() {
+    if (!user) {
+      const savedUser = localStorage.getItem(USER_KEY);
+      if (savedUser) setUser(JSON.parse(savedUser));
+    }
+  }
+
+  function usePasswordInstead() {
+    setUser(null);
+    setAuthView("password");
+    localStorage.setItem(AUTH_MODE_KEY, "password");
+  }
+
+  const storedPin = typeof window !== "undefined" ? localStorage.getItem(PIN_KEY) : null;
+  const isAuthenticated = !!user && authView !== "pin";
+
+  if (authView === "pin" && storedPin) {
+    return (
+      <>
+        <PinUnlockScreen
+          onUnlock={() => setAuthView("app")}
+          onUsePassword={usePasswordInstead}
+        />
+      </>
+    );
   }
 
   if (!user) {
-    return <LoginScreen onLogin={handleLogin} />;
+    return <LoginScreen onLogin={handlePasswordLogin} theme={theme} />;
   }
 
   return (
@@ -2630,14 +2935,11 @@ export default function App() {
         <Sidebar
           activePage={activePage}
           setActivePage={setActivePage}
-          categoriesOpen={categoriesOpen}
-          setCategoriesOpen={setCategoriesOpen}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
           categories={categories}
           user={user}
           theme={theme}
           setTheme={setTheme}
+          onOpenCategories={() => setCategoriesOpen(true)}
         />
 
         <main className="main">
@@ -2673,6 +2975,12 @@ export default function App() {
             </div>
 
             <div className="header-actions">
+              {activePage === "Categories" && (
+                <button className="btn" onClick={() => setCategoriesOpen(true)}>
+                  <PanelRightOpen size={14} />
+                  Categories Panel
+                </button>
+              )}
               <button className="btn">
                 <Cloud size={14} />
                 Cloud Connected
@@ -2738,6 +3046,7 @@ export default function App() {
             <CategoriesPage
               categories={categories}
               categoryFilter={categoryFilter}
+              onOpenCategories={() => setCategoriesOpen(true)}
             />
           )}
 
@@ -2757,6 +3066,16 @@ export default function App() {
           {activePage === "Admin Panel" && <AdminPanelPage user={user} />}
         </main>
       </div>
+
+      <CategoriesDrawer
+        open={categoriesOpen}
+        onClose={() => setCategoriesOpen(false)}
+        categories={categories}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+      />
+
+      <PinSetupModal open={needsPinSetup} onSave={handlePinSaved} />
     </div>
   );
 }
