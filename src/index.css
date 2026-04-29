@@ -1,0 +1,305 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #e5e7eb;
+  background: #020617;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  background: #020617;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 28%),
+    linear-gradient(180deg, #111827, #0f172a);
+  color: #e5e7eb;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid #1f2937;
+  background: rgba(2, 6, 23, 0.92);
+  padding: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.brand-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #1f2937;
+}
+
+.sidebar-card,
+.card {
+  border: 1px solid #1f2937;
+  background: rgba(15, 23, 42, 0.75);
+  border-radius: 24px;
+}
+
+.sidebar-card {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 8px;
+}
+
+.sidebar-nav button {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.sidebar-nav button.active {
+  background: #1f2937;
+  color: #fff;
+}
+
+.main {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 1px solid #334155;
+  background: #1f2937;
+  color: #e5e7eb;
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: #10b981;
+  color: #020617;
+  border-color: #10b981;
+  font-weight: 700;
+}
+
+.grid-5,
+.grid-4,
+.grid-3,
+.grid-2 {
+  display: grid;
+  gap: 16px;
+}
+
+.grid-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card {
+  padding: 18px;
+}
+
+.metric-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.muted {
+  color: #94a3b8;
+}
+
+.small {
+  font-size: 0.82rem;
+}
+
+.section-title {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.progress {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #1f2937;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  background: #10b981;
+  border-radius: 999px;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px 14px;
+  border-top: 1px solid #1f2937;
+  text-align: left;
+}
+
+th {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(2, 6, 23, 0.7);
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.status-counted {
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+}
+
+.status-excluded {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fcd34d;
+}
+
+.status-watch {
+  background: rgba(56, 189, 248, 0.1);
+  color: #7dd3fc;
+}
+
+.login-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.16), transparent 35%),
+    linear-gradient(180deg, #111827, #020617);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 28px;
+}
+
+.code-block {
+  white-space: pre-wrap;
+  overflow: auto;
+  max-height: 420px;
+  border-radius: 20px;
+  border: 1px solid #1f2937;
+  background: #020617;
+  padding: 16px;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .grid-5,
+  .grid-4,
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+  }
+}
