@@ -2,16 +2,24 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
+  BarChart3,
+  CalendarDays,
   CheckCircle2,
+  ChevronRight,
   Cloud,
-  CloudOff,
   CreditCard,
   LayoutDashboard,
   LineChart,
+  Moon,
   PiggyBank,
+  Plus,
+  RefreshCw,
   Save,
   Settings,
   Shield,
+  Sun,
+  Tags,
+  Target,
   Trash2,
   TrendingUp,
   Upload,
@@ -19,9 +27,12 @@ import {
   Wallet,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v2";
-const USER_KEY = "sentimo_user_v2";
-const CLOUD_KEY = "sentimo_cloud_settings_v1";
+const STORAGE_KEY = "sentimo_transactions_v3";
+const USER_KEY = "sentimo_user_v3";
+const THEME_KEY = "sentimo_theme_v1";
+const FIXED_KEY = "sentimo_fixed_expenses_v2";
+const CATEGORIES_KEY = "sentimo_categories_v1";
+const SETTINGS_KEY = "sentimo_settings_v1";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -31,793 +42,2260 @@ const gbp = new Intl.NumberFormat("en-GB", {
 const demoUser = {
   id: "demo-founder-user",
   name: "Chris Holanda",
-  email: "chris@sentimo.cloud",
+  email: "c.mail@me.com",
   plan: "Founder Build",
 };
 
-const startingTransactions = [
-  { id: "1", date: "2026-04-29", name: "Monthly rent income", type: "income", category: "Property Income", entityType: "Company", entity: "Tenant / Rent", amount: 500, status: "counted", source: "manual", synced: false },
-  { id: "2", date: "2026-04-28", name: "Groceries", type: "expense", category: "Food & Groceries", entityType: "Company", entity: "Tesco", amount: 86.42, status: "counted", source: "manual", synced: false },
-  { id: "3", date: "2026-04-27", name: "Fuel", type: "expense", category: "Transport", entityType: "Company", entity: "Shell", amount: 72.31, status: "counted", source: "manual", synced: false },
-  { id: "4", date: "2026-04-26", name: "School fees payment", type: "expense", category: "Education", entityType: "Company", entity: "School", amount: 1250, status: "counted", source: "manual", synced: false },
-  { id: "5", date: "2026-04-25", name: "Transfer from Savings", type: "internal_in", category: "Internal Savings", entityType: "Internal", entity: "Savings", amount: 2000, status: "excluded", source: "manual", synced: false },
-  { id: "6", date: "2026-04-25", name: "Transfer to Savings", type: "internal_out", category: "Internal Savings", entityType: "Internal", entity: "Savings", amount: 1500, status: "excluded", source: "manual", synced: false },
-  { id: "7", date: "2026-04-24", name: "Trading 212 withdrawal", type: "investment_in", category: "Investments", entityType: "Broker", entity: "Trading 212", amount: 1200, status: "watch", source: "manual", synced: false },
-  { id: "8", date: "2026-04-23", name: "Restaurant", type: "expense", category: "Restaurants", entityType: "Company", entity: "Local Restaurant", amount: 64.9, status: "counted", source: "manual", synced: false },
+const seedCategories = [
+  {
+    id: "cat-housing",
+    name: "Housing",
+    color: "#64748b",
+    subcategories: ["Rent", "Council Tax", "Repairs"],
+  },
+  {
+    id: "cat-food",
+    name: "Food",
+    color: "#22c55e",
+    subcategories: ["Groceries", "Restaurants", "Coffee"],
+  },
+  {
+    id: "cat-utilities",
+    name: "Utilities",
+    color: "#14b8a6",
+    subcategories: ["Phones", "Electricity", "Internet", "Water"],
+  },
+  {
+    id: "cat-transport",
+    name: "Transport",
+    color: "#f97316",
+    subcategories: ["Fuel", "Parking", "Train", "Taxi"],
+  },
+  {
+    id: "cat-education",
+    name: "Education",
+    color: "#8b5cf6",
+    subcategories: ["School Fees", "Activities", "Ballet"],
+  },
+  {
+    id: "cat-business",
+    name: "Business",
+    color: "#3b82f6",
+    subcategories: ["Software", "Services", "Contractors"],
+  },
+  {
+    id: "cat-trading",
+    name: "Trading",
+    color: "#ec4899",
+    subcategories: ["Deposits", "Withdrawals", "Broker Fees"],
+  },
+  {
+    id: "cat-savings",
+    name: "Savings / Internal",
+    color: "#94a3b8",
+    subcategories: ["To Savings", "From Savings"],
+  },
 ];
 
-const fixedObligationsSeed = [
-  { id: 1, name: "Rent", monthly: 4500, due: "01", status: "scheduled" },
-  { id: 2, name: "Car / Insurance", monthly: 425, due: "12", status: "active" },
-  { id: 3, name: "Subscriptions", monthly: 98, due: "Various", status: "active" },
-  { id: 4, name: "School / Activities", monthly: 1250, due: "Term", status: "active" },
+const seedFixedExpenses = [
+  {
+    id: "fx-1",
+    name: "Rent",
+    category: "Housing",
+    subcategory: "Rent",
+    frequency: "Monthly",
+    amount: 4500,
+    dueDay: 1,
+    nextDueDate: "2026-05-01",
+    status: "Scheduled",
+    autoIncludeTarget: true,
+  },
+  {
+    id: "fx-2",
+    name: "Car / Insurance",
+    category: "Transport",
+    subcategory: "Fuel",
+    frequency: "Monthly",
+    amount: 425,
+    dueDay: 12,
+    nextDueDate: "2026-05-12",
+    status: "Scheduled",
+    autoIncludeTarget: true,
+  },
+  {
+    id: "fx-3",
+    name: "School / Activities",
+    category: "Education",
+    subcategory: "School Fees",
+    frequency: "Monthly",
+    amount: 1250,
+    dueDay: 15,
+    nextDueDate: "2026-05-15",
+    status: "Scheduled",
+    autoIncludeTarget: true,
+  },
+  {
+    id: "fx-4",
+    name: "Subscriptions",
+    category: "Business",
+    subcategory: "Software",
+    frequency: "Monthly",
+    amount: 98,
+    dueDay: 20,
+    nextDueDate: "2026-05-20",
+    status: "Scheduled",
+    autoIncludeTarget: true,
+  },
 ];
 
-const budgetTargetsSeed = [
-  { category: "Food & Groceries", budget: 900 },
-  { category: "Transport", budget: 650 },
-  { category: "Restaurants", budget: 450 },
-  { category: "Education", budget: 1600 },
-  { category: "Business", budget: 1200 },
-  { category: "Shopping", budget: 700 },
-  { category: "Property Income", budget: 0 },
-  { category: "Internal Savings", budget: 0 },
-  { category: "Investments", budget: 0 },
-  { category: "Uncategorised", budget: 500 },
+const seedTransactions = [
+  {
+    id: "tx-1",
+    date: "2026-04-01",
+    description: "Monthly rent income",
+    merchant: "Rental Income",
+    category: "Income",
+    subcategory: "Rental Income",
+    direction: "income",
+    nature: "real",
+    status: "counted",
+    amount: 500,
+    source: "manual",
+  },
+  {
+    id: "tx-2",
+    date: "2026-04-23",
+    description: "Restaurant",
+    merchant: "Local Restaurant",
+    category: "Food",
+    subcategory: "Restaurants",
+    direction: "expense",
+    nature: "real",
+    status: "counted",
+    amount: 64.9,
+    source: "manual",
+  },
+  {
+    id: "tx-3",
+    date: "2026-04-24",
+    description: "Trading withdrawal",
+    merchant: "Trading 212",
+    category: "Trading",
+    subcategory: "Withdrawals",
+    direction: "income",
+    nature: "broker_transfer",
+    status: "watch",
+    amount: 1200,
+    source: "manual",
+  },
+  {
+    id: "tx-4",
+    date: "2026-04-25",
+    description: "Transfer to Savings",
+    merchant: "Savings",
+    category: "Savings / Internal",
+    subcategory: "To Savings",
+    direction: "expense",
+    nature: "savings_transfer",
+    status: "excluded",
+    amount: 1500,
+    source: "manual",
+  },
+  {
+    id: "tx-5",
+    date: "2026-04-25",
+    description: "Transfer from Savings",
+    merchant: "Savings",
+    category: "Savings / Internal",
+    subcategory: "From Savings",
+    direction: "income",
+    nature: "savings_transfer",
+    status: "excluded",
+    amount: 2000,
+    source: "manual",
+  },
+  {
+    id: "tx-6",
+    date: "2026-04-28",
+    description: "Groceries",
+    merchant: "Tesco",
+    category: "Food",
+    subcategory: "Groceries",
+    direction: "expense",
+    nature: "real",
+    status: "counted",
+    amount: 86.42,
+    source: "manual",
+  },
+  {
+    id: "tx-7",
+    date: "2026-04-27",
+    description: "Fuel",
+    merchant: "Shell",
+    category: "Transport",
+    subcategory: "Fuel",
+    direction: "expense",
+    nature: "real",
+    status: "counted",
+    amount: 72.31,
+    source: "manual",
+  },
+  {
+    id: "tx-8",
+    date: "2026-04-26",
+    description: "School fees payment",
+    merchant: "School",
+    category: "Education",
+    subcategory: "School Fees",
+    direction: "expense",
+    nature: "real",
+    status: "counted",
+    amount: 1250,
+    source: "manual",
+  },
 ];
 
-const rulesSeed = [
-  { id: 1, contains: ["savings", "vault", "pocket", "revpoints spare change"], type: "internal_out", category: "Internal Savings", entityType: "Internal", entity: "Savings", status: "excluded" },
-  { id: 2, contains: ["withdrawing savings", "from savings", "withdraw from savings"], type: "internal_in", category: "Internal Savings", entityType: "Internal", entity: "Savings", status: "excluded" },
-  { id: 3, contains: ["trading 212", "interactive brokers", "etoro", "coinbase", "kraken", "binance"], type: "investment_in", category: "Investments", entityType: "Broker", entity: "Broker / Investment", status: "watch" },
-  { id: 4, contains: ["tesco", "sainsbury", "waitrose", "aldi", "lidl", "asda"], type: "expense", category: "Food & Groceries", entityType: "Company", entity: "Supermarket", status: "counted" },
-  { id: 5, contains: ["shell", "bp", "esso", "fuel", "uber", "trainline", "parking"], type: "expense", category: "Transport", entityType: "Company", entity: "Transport", status: "counted" },
-  { id: 6, contains: ["school", "stowe", "swanbourne", "ballet", "club"], type: "expense", category: "Education", entityType: "Company", entity: "Education", status: "counted" },
-  { id: 7, contains: ["restaurant", "cafe", "deliveroo", "ubereats", "just eat"], type: "expense", category: "Restaurants", entityType: "Company", entity: "Restaurant / Food Out", status: "counted" },
-  { id: 8, contains: ["amazon", "apple", "netflix", "spotify", "openai", "google"], type: "expense", category: "Shopping", entityType: "Company", entity: "Online / Subscription", status: "counted" },
-];
+const defaultSettings = {
+  currency: "GBP",
+  variableAverageDays: 30,
+  customDailyTarget: "",
+};
 
-function calcTotals(transactions) {
-  const counted = transactions.filter((t) => t.status === "counted");
-  const income = counted.filter((t) => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
-  const expenses = counted.filter((t) => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
-  const internalIn = transactions.filter((t) => t.type === "internal_in").reduce((s, t) => s + Number(t.amount), 0);
-  const internalOut = transactions.filter((t) => t.type === "internal_out").reduce((s, t) => s + Number(t.amount), 0);
-  const unsynced = transactions.filter((t) => !t.synced).length;
-  return { income, expenses, net: income - expenses, internalIn, internalOut, unsynced };
+function formatCurrency(value) {
+  return gbp.format(Number(value || 0));
 }
 
-function splitCsvLine(line) {
-  const result = [];
-  let current = "";
-  let insideQuotes = false;
-  for (let i = 0; i < line.length; i += 1) {
-    const char = line[i];
-    const next = line[i + 1];
-    if (char === '"' && next === '"') {
-      current += '"';
-      i += 1;
-    } else if (char === '"') {
-      insideQuotes = !insideQuotes;
-    } else if (char === "," && !insideQuotes) {
-      result.push(current.trim());
-      current = "";
-    } else {
-      current += char;
-    }
-  }
-  result.push(current.trim());
-  return result;
+function daysInMonth(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 }
 
-function parseAmount(value) {
-  if (value === undefined || value === null) return 0;
-  const text = String(value).trim();
-  const negativeFromParentheses = /^\(.*\)$/.test(text);
-  const clean = text.replace(/£/g, "").replace(/,/g, "").replace(/\s/g, "").replace(/[()]/g, "");
-  const num = Number(clean);
-  if (!Number.isFinite(num)) return 0;
-  return negativeFromParentheses ? -Math.abs(num) : num;
+function toDateInput(date = new Date()) {
+  return date.toISOString().slice(0, 10);
 }
 
-function autoCategorise(row, rules) {
-  const raw = Object.values(row).join(" ").toLowerCase();
-  const amount = parseAmount(
-    row.Amount ||
-    row.amount ||
-    row.Value ||
-    row.value ||
-    row.Paid ||
-    row.paid ||
-    row.Money ||
-    row.money ||
-    row["Amount (GBP)"] ||
-    row["Amount GBP"] ||
-    row.Total ||
-    row.total ||
-    row["Paid Out"] ||
-    row["Paid In"]
-  );
-  const direction = String(row.Type || row.type || row.Direction || row.direction || "").toLowerCase();
-  const description = row.Description || row.description || row.Reference || row.reference || row.Name || row.name || row.Merchant || row.merchant || "Imported transaction";
-  const date = row.Date || row.date || row.Started || row.started || row["Completed Date"] || new Date().toISOString().slice(0, 10);
+function monthlyEquivalent(frequency, amount) {
+  const value = Number(amount || 0);
+  if (frequency === "Weekly") return value * 52 / 12;
+  if (frequency === "Monthly") return value;
+  if (frequency === "Quarterly") return value / 3;
+  if (frequency === "Annual") return value / 12;
+  return value;
+}
 
-  const matched = rules.find((rule) => rule.contains.some((term) => raw.includes(term.toLowerCase())));
-  let base = matched
-    ? { ...matched }
-    : {
-        type: amount >= 0 || direction.includes("credit") ? "income" : "expense",
-        category: "Uncategorised",
-        entityType: "Company",
-        entity: description,
-        status: "counted",
-      };
-
-  if (base.category === "Internal Savings" && raw.includes("withdrawing")) base.type = "internal_in";
-  if (base.category === "Internal Savings" && (raw.includes("depositing") || raw.includes("spare change") || raw.includes("to savings"))) base.type = "internal_out";
-
-  let finalAmount = Math.abs(amount);
-  if (finalAmount === 0) {
-    finalAmount = Math.abs(
-      parseAmount(
-        row["Amount (GBP)"] ||
-        row["Amount GBP"] ||
-        row.Total ||
-        row.total ||
-        row["Paid Out"] ||
-        row["Paid In"]
-      )
-    );
-  }
-
-  if (!matched && finalAmount > 0) {
-    const looksIncome =
-      amount > 0 ||
-      direction.includes("credit") ||
-      raw.includes("cashback") ||
-      raw.includes("salary") ||
-      raw.includes("income") ||
-      row["Paid In"];
-    base.type = looksIncome ? "income" : "expense";
+function getThemeVars(theme) {
+  if (theme === "light") {
+    return {
+      "--bg": "#f5f7fb",
+      "--bg-secondary": "#ffffff",
+      "--panel": "#ffffff",
+      "--panel-2": "#f8fafc",
+      "--border": "#dbe3ef",
+      "--text": "#0f172a",
+      "--muted": "#64748b",
+      "--accent": "#0f766e",
+      "--accent-soft": "rgba(15,118,110,0.10)",
+      "--success": "#10b981",
+      "--danger": "#ef4444",
+      "--warning": "#f59e0b",
+      "--nav": "#eef2f7",
+      "--nav-active": "#dbe7f7",
+      "--shadow": "0 10px 28px rgba(15, 23, 42, 0.06)",
+    };
   }
 
   return {
-    id: `local-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    date: String(date).slice(0, 10),
-    name: String(description).replace(/^Card Payment to\s*/i, "").slice(0, 70),
-    type: base.type,
-    category: base.category,
-    entityType: base.entityType,
-    entity: base.entity || String(description).slice(0, 40),
-    amount: finalAmount,
-    status: base.status,
-    source: "csv",
-    synced: false,
+    "--bg": "#162033",
+    "--bg-secondary": "#1b2538",
+    "--panel": "#2a3446",
+    "--panel-2": "#263246",
+    "--border": "#38465f",
+    "--text": "#e5e7eb",
+    "--muted": "#9aa7bd",
+    "--accent": "#20c997",
+    "--accent-soft": "rgba(32,201,151,0.12)",
+    "--success": "#20c997",
+    "--danger": "#ef4444",
+    "--warning": "#f59e0b",
+    "--nav": "#10192a",
+    "--nav-active": "#253149",
+    "--shadow": "0 12px 32px rgba(0, 0, 0, 0.22)",
   };
 }
 
-function downloadFile(filename, content, mime = "text/plain") {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+function injectTheme(theme) {
+  const vars = getThemeVars(theme);
+  Object.entries(vars).forEach(([k, v]) => {
+    document.documentElement.style.setProperty(k, v);
+  });
+  document.documentElement.setAttribute("data-theme", theme);
+}
+
+function getCountedRealExpenses(transactions) {
+  return transactions.filter(
+    (t) =>
+      t.direction === "expense" &&
+      t.status === "counted" &&
+      t.nature === "real"
+  );
+}
+
+function getCountedRealIncome(transactions) {
+  return transactions.filter(
+    (t) =>
+      t.direction === "income" &&
+      t.status === "counted" &&
+      t.nature === "real"
+  );
+}
+
+function sumAmounts(rows) {
+  return rows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+}
+
+function statusClass(status) {
+  const value = String(status || "").toLowerCase();
+  if (value === "counted" || value === "paid") return "status-green";
+  if (value === "excluded" || value === "scheduled") return "status-blue";
+  if (value === "watch" || value === "pending") return "status-amber";
+  if (value === "overdue") return "status-red";
+  return "status-gray";
+}
+
+function matchPeriod(dateStr, mode) {
+  const d = new Date(dateStr);
+  const now = new Date("2026-04-29T12:00:00");
+  const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  if (mode === "7d") return diffDays <= 7;
+  if (mode === "30d") return diffDays <= 30;
+  if (mode === "month") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  if (mode === "year") return d.getFullYear() === now.getFullYear();
+  return true;
+}
+
+function appStyles() {
+  return `
+    :root {
+      color-scheme: light dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body, #root { margin: 0; min-height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app-shell {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(32, 201, 151, 0.08), transparent 24%),
+        linear-gradient(180deg, var(--bg), var(--bg-secondary));
+      color: var(--text);
+    }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+    }
+
+    .sidebar {
+      background: var(--nav);
+      border-right: 1px solid var(--border);
+      padding: 10px 8px 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .brand-title {
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .daily-card,
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .daily-card {
+      margin: 8px 8px 14px;
+      padding: 14px;
+    }
+
+    .daily-line {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      overflow: hidden;
+      margin: 10px 0 8px;
+    }
+
+    .daily-line span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .sidebar-nav {
+      display: grid;
+      gap: 4px;
+      padding: 0 6px;
+    }
+
+    .sidebar-nav button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-nav button.active {
+      background: var(--nav-active);
+      color: var(--text);
+    }
+
+    .sidebar-sub {
+      margin: 6px 0 8px 40px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .sidebar-sub button {
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+    }
+
+    .sidebar-sub button.active {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .sidebar-footer {
+      margin-top: 20px;
+      padding: 0 8px;
+    }
+
+    .theme-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .theme-btn {
+      flex: 1;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .theme-btn.active {
+      outline: 2px solid var(--accent);
+    }
+
+    .profile-card {
+      margin-top: 12px;
+      padding: 12px;
+    }
+
+    .main {
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .header .eyebrow {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 38px;
+      line-height: 1.05;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #e9eef7;
+      color: #111827;
+      border-color: #d8e0ec;
+    }
+
+    [data-theme="dark"] .btn-primary {
+      background: #eef2f7;
+      color: #111827;
+      border-color: #eef2f7;
+    }
+
+    .btn-soft {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .grid-4, .grid-3, .grid-2 {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .card {
+      padding: 16px;
+    }
+
+    .metric-card .label {
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metric-card .value {
+      margin-top: 10px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .metric-card .sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section-title {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .section-sub {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .mini-tabs {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .mini-tabs button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+
+    .mini-tabs button.active {
+      background: var(--nav-active);
+      color: var(--text);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 14px;
+      border-top: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: transparent;
+      border-top: 0;
+      font-weight: 600;
+    }
+
+    .status-pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      border: 1px solid transparent;
+    }
+
+    .status-green {
+      background: rgba(16,185,129,0.12);
+      color: #10b981;
+      border-color: rgba(16,185,129,0.25);
+    }
+
+    .status-blue {
+      background: rgba(59,130,246,0.12);
+      color: #60a5fa;
+      border-color: rgba(59,130,246,0.25);
+    }
+
+    .status-amber {
+      background: rgba(245,158,11,0.12);
+      color: #f59e0b;
+      border-color: rgba(245,158,11,0.25);
+    }
+
+    .status-red {
+      background: rgba(239,68,68,0.12);
+      color: #ef4444;
+      border-color: rgba(239,68,68,0.25);
+    }
+
+    .status-gray {
+      background: rgba(148,163,184,0.12);
+      color: #94a3b8;
+      border-color: rgba(148,163,184,0.25);
+    }
+
+    .progress {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--panel-2);
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .input, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .split-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .empty-box {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .category-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .category-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .category-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .category-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .hero-panel {
+      min-height: 250px;
+    }
+
+    @media (max-width: 1200px) {
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .grid-4, .grid-3, .grid-2, .split-2 { grid-template-columns: 1fr; }
+      .header { flex-direction: column; }
+      .header h1 { font-size: 30px; }
+      .main { padding: 14px; }
+    }
+  `;
+}
+
+function MetricCard({ icon: Icon, label, value, sub }) {
+  return (
+    <div className="card metric-card">
+      <div className="label">
+        <Icon size={15} />
+        {label}
+      </div>
+      <div className="value">{value}</div>
+      <div className="sub">{sub}</div>
+    </div>
+  );
 }
 
 function LoginScreen({ onLogin }) {
-  const [email, setEmail] = useState("chris@sentimo.cloud");
+  const [email, setEmail] = useState("c.mail@me.com");
   const [password, setPassword] = useState("founder-demo");
 
   return (
-    <div className="login-wrap app-shell">
-      <div className="card login-card">
-        <div className="brand">
-          <div className="brand-badge"><LineChart size={20} /></div>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        background:
+          "radial-gradient(circle at top right, rgba(32,201,151,0.12), transparent 30%), linear-gradient(180deg, var(--bg), var(--bg-secondary))",
+      }}
+    >
+      <div className="card" style={{ width: "100%", maxWidth: 440, padding: 28 }}>
+        <div className="brand" style={{ padding: 0, marginBottom: 18 }}>
+          <div className="brand-badge">
+            <LineChart size={18} />
+          </div>
           <div>
-            <div style={{ fontSize: 22, fontWeight: 700 }}>Sentimo</div>
-            <div className="muted small">Financial Control</div>
+            <div className="brand-title" style={{ fontSize: 24 }}>Sentimo</div>
+            <div className="brand-sub">Financial Control</div>
           </div>
         </div>
-        <h1 style={{ marginBottom: 8 }}>Sign in</h1>
-        <p className="muted">Prototype login now. Supabase Auth can replace this later.</p>
+
+        <h2 style={{ margin: "0 0 8px" }}>Sign in</h2>
+        <p className="muted" style={{ marginTop: 0 }}>
+          Prototype login for the live build. Supabase auth wiring comes next.
+        </p>
+
         <div className="form-grid" style={{ marginTop: 16 }}>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-          <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
-          <button className="btn btn-primary" onClick={() => onLogin({ ...demoUser, email })}>Enter Dashboard</button>
+          <input
+            className="input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+          />
+          <input
+            className="input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            type="password"
+          />
+          <button className="btn btn-primary" onClick={() => onLogin({ ...demoUser, email })}>
+            Enter Dashboard
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function Sidebar({ activePage, setActivePage, user, cloudSettings }) {
+function Sidebar({
+  activePage,
+  setActivePage,
+  categoriesOpen,
+  setCategoriesOpen,
+  categoryFilter,
+  setCategoryFilter,
+  categories,
+  user,
+  theme,
+  setTheme,
+}) {
   const nav = [
     [LayoutDashboard, "Dashboard"],
-    [Upload, "Import CSV"],
-    [Shield, "Rules"],
+    [LineChart, "Trading P&L"],
     [CreditCard, "Fixed Expenses"],
     [Wallet, "Daily Expenses"],
     [ArrowDownToLine, "Income & Deposits"],
-    [LineChart, "Trading P&L"],
-    [TrendingUp, "Analytics"],
-    [Cloud, "Cloud Sync"],
+    [Target, "Daily Target"],
+    [BarChart3, "Analytics"],
+    [CalendarDays, "Overall"],
+    [Tags, "Categories"],
+    [Shield, "Rules"],
+    [Upload, "Import CSV"],
     [Settings, "Settings"],
+    [Shield, "Admin Panel"],
   ];
 
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-badge"><LineChart size={18} /></div>
+        <div className="brand-badge">
+          <LineChart size={18} />
+        </div>
         <div>
-          <div style={{ fontWeight: 700 }}>Sentimo</div>
-          <div className="muted small">Financial Control</div>
+          <div className="brand-title">Sentimo</div>
+          <div className="brand-sub">Expense Tracker</div>
         </div>
       </div>
 
-      <div className="sidebar-card">
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <UserCircle2 size={28} />
-          <div>
-            <div>{user.name}</div>
-            <div className="muted small">{user.email}</div>
-          </div>
+      <div className="daily-card">
+        <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target</div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 22, fontWeight: 700 }}>
+          <span>0%</span>
         </div>
-        <div style={{ marginTop: 12 }} className="small muted">
-          {cloudSettings.connected ? "Cloud connected" : "Local mode"}
+        <div className="daily-line"><span /></div>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: 12 }}>
+          <span>Spent £0</span>
+          <span>£151 left</span>
         </div>
       </div>
 
       <div className="sidebar-nav">
-        {nav.map(([Icon, label]) => (
-          <button key={label} className={activePage === label ? "active" : ""} onClick={() => setActivePage(label)}>
-            <span style={{ display: "inline-flex", gap: 10, alignItems: "center" }}>
-              <Icon size={16} /> {label}
-            </span>
+        {nav.map(([Icon, label]) => {
+          const active = activePage === label;
+          return (
+            <React.Fragment key={label}>
+              <button
+                className={active ? "active" : ""}
+                onClick={() => {
+                  setActivePage(label);
+                  if (label === "Categories") setCategoriesOpen(!categoriesOpen);
+                }}
+              >
+                <Icon size={16} />
+                <span style={{ flex: 1 }}>{label}</span>
+                {label === "Categories" && <ChevronRight size={14} style={{ transform: categoriesOpen ? "rotate(90deg)" : "none", transition: "0.2s" }} />}
+              </button>
+
+              {label === "Categories" && categoriesOpen && (
+                <div className="sidebar-sub">
+                  <button
+                    className={!categoryFilter ? "active" : ""}
+                    onClick={() => {
+                      setActivePage("Categories");
+                      setCategoryFilter("");
+                    }}
+                  >
+                    All
+                  </button>
+                  {categories.map((c) => (
+                    <button
+                      key={c.id}
+                      className={categoryFilter === c.name ? "active" : ""}
+                      onClick={() => {
+                        setActivePage("Categories");
+                        setCategoryFilter(c.name);
+                      }}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      <div className="sidebar-footer">
+        <div className="theme-row">
+          <button
+            className={`theme-btn ${theme === "dark" ? "active" : ""}`}
+            onClick={() => setTheme("dark")}
+          >
+            <Moon size={14} />
+            Dark Navy
           </button>
-        ))}
+          <button
+            className={`theme-btn ${theme === "light" ? "active" : ""}`}
+            onClick={() => setTheme("light")}
+          >
+            <Sun size={14} />
+            Light
+          </button>
+        </div>
+
+        <div className="card profile-card">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <UserCircle2 size={24} />
+            <div>
+              <div style={{ fontWeight: 600 }}>{user.name}</div>
+              <div className="muted" style={{ fontSize: 12 }}>{user.email}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   );
 }
 
-function MetricCard({ title, value, subtitle, icon: Icon }) {
-  return (
-    <div className="card">
-      <div className="small muted" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <Icon size={14} /> {title}
-      </div>
-      <div className="metric-value">{value}</div>
-      <div className="small muted">{subtitle}</div>
-    </div>
+function DashboardPage({ transactions, fixedExpenses }) {
+  const realIncome = sumAmounts(getCountedRealIncome(transactions));
+  const realExpenses = sumAmounts(getCountedRealExpenses(transactions));
+  const net = realIncome - realExpenses;
+  const internalTotal = sumAmounts(
+    transactions.filter((t) => t.nature === "internal_transfer" || t.nature === "savings_transfer")
   );
-}
+  const fixedMonthly = fixedExpenses
+    .filter((f) => f.status !== "Archived")
+    .reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
 
-function DashboardPage({ transactions, setTransactions, budgetTargets, fixedObligations }) {
-  const [query, setQuery] = useState("");
-  const [form, setForm] = useState({ date: "2026-04-29", name: "", entity: "", amount: "", type: "expense", category: "Food & Groceries" });
-  const totals = useMemo(() => calcTotals(transactions), [transactions]);
-
-  const categorySpend = useMemo(() => {
+  const categoryRows = useMemo(() => {
     const map = new Map();
-    transactions
-      .filter((t) => t.status === "counted" && t.type === "expense")
-      .forEach((t) => map.set(t.category, (map.get(t.category) || 0) + Number(t.amount)));
-    return Array.from(map.entries())
-      .map(([category, spent]) => ({ category, spent, budget: budgetTargets.find((b) => b.category === category)?.budget || 500 }))
-      .sort((a, b) => b.spent - a.spent);
-  }, [transactions, budgetTargets]);
-
-  const entities = useMemo(() => {
-    const map = new Map();
-    transactions.filter((t) => t.status === "counted").forEach((t) => {
-      const key = t.entity || t.name;
-      const current = map.get(key) || { entity: key, type: t.entityType, income: 0, expense: 0, count: 0 };
-      if (t.type === "income") current.income += Number(t.amount);
-      if (t.type === "expense") current.expense += Number(t.amount);
-      current.count += 1;
-      map.set(key, current);
+    getCountedRealExpenses(transactions).forEach((t) => {
+      map.set(t.category, (map.get(t.category) || 0) + Number(t.amount));
     });
-    return Array.from(map.values()).sort((a, b) => b.expense - a.expense).slice(0, 8);
+    return Array.from(map.entries()).map(([name, amount]) => ({ name, amount }));
   }, [transactions]);
-
-  const visibleTransactions = transactions.filter((t) => `${t.name} ${t.entity} ${t.category}`.toLowerCase().includes(query.toLowerCase()));
-
-  function addTransaction() {
-    if (!form.name || !form.amount) return;
-    const type = form.type;
-    const status = type === "internal_in" || type === "internal_out" ? "excluded" : type === "investment_in" || type === "investment_out" ? "watch" : "counted";
-    setTransactions([
-      {
-        id: `local-${Date.now()}`,
-        date: form.date,
-        name: form.name,
-        entity: form.entity,
-        entityType: "Company",
-        amount: Number(form.amount),
-        type,
-        category: form.category,
-        status,
-        source: "manual",
-        synced: false,
-      },
-      ...transactions,
-    ]);
-    setForm({ ...form, name: "", entity: "", amount: "" });
-  }
-
-  const fixedMonthly = fixedObligations.reduce((s, x) => s + x.monthly, 0);
 
   return (
     <>
-      <div className="grid-5">
-        <MetricCard title="Real Income" value={gbp.format(totals.income)} subtitle="Excludes savings transfers" icon={ArrowDownToLine} />
-        <MetricCard title="Real Expenses" value={gbp.format(totals.expenses)} subtitle="Money paid to third parties" icon={ArrowUpFromLine} />
-        <MetricCard title="Net Position" value={gbp.format(totals.net)} subtitle="Income minus expenses" icon={LineChart} />
-        <MetricCard title="Internal Savings" value={gbp.format(totals.internalIn + totals.internalOut)} subtitle="Tracked but excluded" icon={PiggyBank} />
-        <MetricCard title="Unsynced" value={String(totals.unsynced)} subtitle="Waiting for sync" icon={CloudOff} />
+      <div className="grid-4">
+        <MetricCard icon={ArrowDownToLine} label="This Month" value={formatCurrency(realIncome)} sub="Real income" />
+        <MetricCard icon={ArrowUpFromLine} label="This Month" value={formatCurrency(realExpenses)} sub="Real expenses" />
+        <MetricCard icon={LineChart} label="This Year" value={formatCurrency(net)} sub="Net position" />
+        <MetricCard icon={Target} label="30D Var Avg" value={formatCurrency(realExpenses / 30 || 0)} sub="Rolling average" />
       </div>
 
-      <div className="grid-3" style={{ marginTop: 16 }}>
-        <div className="card" style={{ gridColumn: "span 2" }}>
-          <h2 className="section-title">Where the money is going</h2>
-          <div className="muted small" style={{ marginBottom: 14 }}>Category control</div>
-          {categorySpend.map((row) => {
-            const pct = row.budget ? Math.min(100, Math.round((row.spent / row.budget) * 100)) : 0;
-            return (
-              <div key={row.category} style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 6 }}>
-                  <div>
-                    <div>{row.category}</div>
-                    <div className="small muted">Budget {gbp.format(row.budget)}</div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div>{gbp.format(row.spent)}</div>
-                    <div className="small muted">{pct}% used</div>
-                  </div>
-                </div>
-                <div className="progress"><span style={{ width: `${pct}%` }} /></div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="grid-3" style={{ marginTop: 14 }}>
+        <div className="card hero-panel" style={{ gridColumn: "span 2" }}>
+          <h3 className="section-title">Category Budget Tracker</h3>
+          <p className="section-sub">Past month vs current budget performance.</p>
 
-        <div className="card">
-          <h2 className="section-title">Fixed obligations</h2>
-          <div className="metric-value">{gbp.format(fixedMonthly)}</div>
-          <div className="small muted" style={{ marginBottom: 12 }}>/ month</div>
-          {fixedObligations.map((x) => (
-            <div key={x.id} style={{ marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #1f2937" }}>
-              <div>{x.name}</div>
-              <div className="small muted">Due: {x.due}</div>
-              <div style={{ marginTop: 4 }}>{gbp.format(x.monthly)}</div>
+          {categoryRows.length === 0 ? (
+            <div className="empty-box">No spending data yet.</div>
+          ) : (
+            <div className="form-grid">
+              {categoryRows.map((row) => {
+                const budget = Math.max(row.amount * 1.25, row.amount);
+                const pct = Math.min(100, Math.round((row.amount / budget) * 100));
+                return (
+                  <div key={row.name}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{row.name}</div>
+                        <div className="muted" style={{ fontSize: 12 }}>Budget {formatCurrency(budget)}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontWeight: 600 }}>{formatCurrency(row.amount)}</div>
+                        <div className="muted" style={{ fontSize: 12 }}>{pct}% used</div>
+                      </div>
+                    </div>
+                    <div className="progress"><span style={{ width: `${pct}%` }} /></div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          )}
         </div>
-      </div>
 
-      <div className="grid-3" style={{ marginTop: 16 }}>
         <div className="card">
-          <h2 className="section-title">Add transaction</h2>
-          <div className="form-grid">
-            <input value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} placeholder="Date" />
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Description" />
-            <input value={form.entity} onChange={(e) => setForm({ ...form, entity: e.target.value })} placeholder="Company / person" />
-            <input value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="Amount" type="number" />
-            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
-              <option value="internal_in">From Savings</option>
-              <option value="internal_out">To Savings</option>
-              <option value="investment_in">Investment In</option>
-              <option value="investment_out">Investment Out</option>
-            </select>
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-              {budgetTargets.map((b) => <option key={b.category}>{b.category}</option>)}
-            </select>
-            <button className="btn btn-primary" onClick={addTransaction}>Log Entry</button>
-          </div>
-        </div>
+          <h3 className="section-title">Fixed Obligations</h3>
+          <p className="section-sub">Current recurring burden.</p>
+          <div style={{ fontSize: 36, fontWeight: 700 }}>{formatCurrency(fixedMonthly)}</div>
+          <div className="muted">/ month</div>
 
-        <div className="card" style={{ gridColumn: "span 2" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
+          <div className="grid-2" style={{ marginTop: 16 }}>
             <div>
-              <h2 className="section-title">Who receives your money</h2>
-              <div className="small muted">Companies & persons</div>
+              <div className="muted" style={{ fontSize: 12 }}>Weekly</div>
+              <div style={{ fontWeight: 700 }}>{formatCurrency(fixedMonthly / 4.333)}</div>
             </div>
-            <div style={{ width: 260 }}>
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" />
+            <div>
+              <div className="muted" style={{ fontSize: 12 }}>Daily</div>
+              <div style={{ fontWeight: 700 }}>{formatCurrency(fixedMonthly / 30)}</div>
             </div>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Income</th>
-                  <th>Expense</th>
-                  <th>Count</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entities.map((x) => (
-                  <tr key={x.entity}>
-                    <td style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <BuildingIcon type={x.type} />
-                      {x.entity}
-                    </td>
-                    <td>{x.type}</td>
-                    <td>{x.income ? gbp.format(x.income) : "—"}</td>
-                    <td>{x.expense ? gbp.format(x.expense) : "—"}</td>
-                    <td>{x.count}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
 
-      <TransactionsPage transactions={visibleTransactions} setTransactions={setTransactions} title="Recent Transactions" compact />
+      <div className="grid-3" style={{ marginTop: 14 }}>
+        <div className="card">
+          <h3 className="section-title">Monthly Net Position</h3>
+          <p className="section-sub">Income received minus total expenses this month.</p>
+          <div style={{ fontSize: 42, fontWeight: 700, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
+            {net >= 0 ? "+" : ""}{formatCurrency(net).replace("£", "£")}
+          </div>
+          <div className="muted" style={{ marginTop: 6 }}>
+            {formatCurrency(realIncome)} in · {formatCurrency(realExpenses)} out
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="section-title">Savings / Internal</h3>
+          <p className="section-sub">Tracked but excluded from real totals.</p>
+          <div style={{ fontSize: 32, fontWeight: 700 }}>{formatCurrency(internalTotal)}</div>
+        </div>
+
+        <div className="card">
+          <h3 className="section-title">Recent Income</h3>
+          <p className="section-sub">Latest counted inflows.</p>
+          <div className="form-grid">
+            {getCountedRealIncome(transactions).slice(0, 3).map((t) => (
+              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                <span>{t.description}</span>
+                <strong>{formatCurrency(t.amount)}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </>
   );
 }
 
-function ImportCsvPage({ transactions, setTransactions, rules }) {
-  const inputRef = useRef(null);
-  const [lastImport, setLastImport] = useState(null);
+function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
+  const [tab, setTab] = useState("All");
+  const [draft, setDraft] = useState({
+    name: "",
+    category: "Housing",
+    subcategory: "Rent",
+    frequency: "Monthly",
+    amount: "",
+    dueDay: "",
+  });
 
-  function handleFile(file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = String(event.target?.result || "");
-      const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
-      if (lines.length < 2) return;
-      const headers = splitCsvLine(lines[0]).map((h) => h.replace(/^"|"$/g, ""));
-      const imported = lines.slice(1).map((line) => {
-        const values = splitCsvLine(line);
-        const row = {};
-        headers.forEach((h, index) => {
-          row[h] = values[index] || "";
-        });
-        return autoCategorise(row, rules);
-      }).filter((t) => t.amount > 0);
-      setTransactions([...imported, ...transactions]);
-      setLastImport({
-        fileName: file.name,
-        rows: imported.length,
-        counted: imported.filter((t) => t.status === "counted").length,
-        excluded: imported.filter((t) => t.status === "excluded").length,
-        watch: imported.filter((t) => t.status === "watch").length,
-      });
-    };
-    reader.readAsText(file);
+  const monthlyTotal = fixedExpenses
+    .filter((x) => x.status !== "Archived")
+    .reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
+
+  const pending = fixedExpenses.filter((x) => x.status === "Pending").length;
+  const overdue = fixedExpenses.filter((x) => x.status === "Overdue").length;
+  const scheduled = fixedExpenses.filter((x) => x.status === "Scheduled").length;
+  const paid = fixedExpenses.filter((x) => x.status === "Paid").length;
+
+  const visible = fixedExpenses.filter((x) => {
+    if (tab === "All") return true;
+    return x.status === tab;
+  });
+
+  function addExpense() {
+    if (!draft.name || !draft.amount) return;
+    setFixedExpenses([
+      {
+        id: `fx-${Date.now()}`,
+        name: draft.name,
+        category: draft.category,
+        subcategory: draft.subcategory,
+        frequency: draft.frequency,
+        amount: Number(draft.amount),
+        dueDay: Number(draft.dueDay || 1),
+        nextDueDate: "",
+        status: "Scheduled",
+        autoIncludeTarget: true,
+      },
+      ...fixedExpenses,
+    ]);
+    setDraft({
+      name: "",
+      category: "Housing",
+      subcategory: "Rent",
+      frequency: "Monthly",
+      amount: "",
+      dueDay: "",
+    });
   }
 
   return (
-    <div className="grid-3">
-      <div className="card" style={{ gridColumn: "span 2" }}>
-        <h2 className="section-title">Upload bank statement</h2>
-        <p className="muted">Import Revolut or bank CSV files. Savings transfers stay excluded from real totals.</p>
-        <div className="card" style={{ marginTop: 16, borderStyle: "dashed", textAlign: "center" }} onClick={() => inputRef.current?.click()}>
-          <input ref={inputRef} type="file" accept=".csv" style={{ display: "none" }} onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-          <Upload size={32} />
-          <div style={{ marginTop: 10, fontWeight: 700 }}>Drop or select your CSV statement</div>
-          <div className="small muted" style={{ marginTop: 6 }}>Supported columns: Date, Description, Amount, Type, Merchant, Reference, Value.</div>
+    <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+        <button className="btn btn-primary" onClick={addExpense}>
+          <Plus size={15} />
+          Add Expense
+        </button>
+      </div>
+
+      <div className="grid-4">
+        <MetricCard icon={CreditCard} label="Monthly Total" value={formatCurrency(monthlyTotal)} sub="Excl. paid" />
+        <MetricCard icon={CalendarDays} label="Weekly Equiv." value={formatCurrency(monthlyTotal / 4.333)} sub="Recurring load" />
+        <MetricCard icon={RefreshCw} label="Pending" value={formatCurrency(0)} sub={`${pending} items`} />
+        <MetricCard icon={Target} label="Overdue" value={formatCurrency(0)} sub={`${overdue} items`} />
+      </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <div className="mini-tabs">
+          {["All", "Pending", "Overdue", "Scheduled", "Paid"].map((t) => (
+            <button key={t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
+              {t}
+              {t === "All" ? ` (${fixedExpenses.length})` : ""}
+              {t === "Pending" ? ` (${pending})` : ""}
+              {t === "Overdue" ? ` (${overdue})` : ""}
+              {t === "Scheduled" ? ` (${scheduled})` : ""}
+              {t === "Paid" ? ` (${paid})` : ""}
+            </button>
+          ))}
         </div>
-        {lastImport && (
-          <div className="grid-4" style={{ marginTop: 16 }}>
-            <MetricCard title="Imported" value={String(lastImport.rows)} subtitle={lastImport.fileName} icon={Upload} />
-            <MetricCard title="Counted" value={String(lastImport.counted)} subtitle="Real cashflow" icon={CheckCircle2} />
-            <MetricCard title="Excluded" value={String(lastImport.excluded)} subtitle="Savings/internal" icon={PiggyBank} />
-            <MetricCard title="Watch" value={String(lastImport.watch)} subtitle="Broker/investment" icon={LineChart} />
-          </div>
-        )}
-      </div>
-      <div className="card">
-        <h2 className="section-title">Important rule</h2>
-        <p className="muted">Money moved from/to Savings is displayed but excluded from real income and spending, preventing double counting.</p>
-      </div>
-    </div>
-  );
-}
 
-function RulesPage({ rules, setRules }) {
-  const [draft, setDraft] = useState({ contains: "", type: "expense", category: "Uncategorised", entityType: "Company", entity: "", status: "counted" });
-
-  function addRule() {
-    if (!draft.contains || !draft.category) return;
-    setRules([{ id: Date.now(), ...draft, contains: draft.contains.split(",").map((x) => x.trim()).filter(Boolean) }, ...rules]);
-    setDraft({ contains: "", type: "expense", category: "Uncategorised", entityType: "Company", entity: "", status: "counted" });
-  }
-
-  return (
-    <div className="grid-3">
-      <div className="card" style={{ gridColumn: "span 2" }}>
-        <h2 className="section-title">Categorisation logic</h2>
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Keywords</th>
-                <th>Category</th>
-                <th>Type</th>
+                <th>Name</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Category</th>
+                <th>Frequency</th>
+                <th>Amount</th>
+                <th>Monthly Eq.</th>
+                <th>Due Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {rules.map((r) => (
-                <tr key={r.id}>
-                  <td>{r.contains.join(", ")}</td>
-                  <td>{r.category}</td>
-                  <td>{r.type}</td>
-                  <td>{r.status}</td>
-                  <td><button className="btn" onClick={() => setRules(rules.filter((x) => x.id !== r.id))}>Delete</button></td>
+              {visible.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{item.name}</div>
+                    <div className="muted" style={{ fontSize: 12 }}>{item.subcategory}</div>
+                  </td>
+                  <td><span className={`status-pill ${statusClass(item.status)}`}>{item.status}</span></td>
+                  <td>{item.category}</td>
+                  <td>{item.frequency}</td>
+                  <td style={{ fontWeight: 700 }}>{formatCurrency(item.amount)}</td>
+                  <td style={{ fontWeight: 700 }}>{formatCurrency(monthlyEquivalent(item.frequency, item.amount))}</td>
+                  <td>{item.nextDueDate || `Day ${item.dueDay}`}</td>
+                  <td>
+                    <button
+                      className="btn"
+                      onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div>
-      <div className="card">
-        <h2 className="section-title">Add rule</h2>
-        <div className="form-grid">
-          <input value={draft.contains} onChange={(e) => setDraft({ ...draft, contains: e.target.value })} placeholder="Keywords separated by commas" />
-          <input value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} placeholder="Category" />
-          <input value={draft.entity} onChange={(e) => setDraft({ ...draft, entity: e.target.value })} placeholder="Entity name" />
-          <select value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value })}>
-            <option value="expense">Expense</option>
-            <option value="income">Income</option>
-            <option value="internal_in">From Savings</option>
-            <option value="internal_out">To Savings</option>
-            <option value="investment_in">Investment In</option>
-            <option value="investment_out">Investment Out</option>
-          </select>
-          <select value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value })}>
-            <option value="counted">Counted</option>
-            <option value="excluded">Excluded</option>
-            <option value="watch">Watch</option>
-            <option value="reverted">Reverted</option>
-          </select>
-          <button className="btn btn-primary" onClick={addRule}>Add Rule</button>
+
+        <div style={{ marginTop: 12, fontWeight: 700, textAlign: "right" }}>
+          Active Total {formatCurrency(monthlyTotal)} / mo
         </div>
       </div>
-    </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">New Fixed Expense</h3>
+        <div className="split-2">
+          <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
+          <input className="input" placeholder="Category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
+          <input className="input" placeholder="Sub-category" value={draft.subcategory} onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })} />
+          <select value={draft.frequency} onChange={(e) => setDraft({ ...draft, frequency: e.target.value })}>
+            <option>Weekly</option>
+            <option>Monthly</option>
+            <option>Quarterly</option>
+            <option>Annual</option>
+            <option>Custom</option>
+          </select>
+          <input className="input" placeholder="Due day" type="number" value={draft.dueDay} onChange={(e) => setDraft({ ...draft, dueDay: e.target.value })} />
+        </div>
+      </div>
+    </>
   );
 }
 
-function FixedExpensesPage({ fixedObligations, setFixedObligations }) {
-  const [draft, setDraft] = useState({ name: "", monthly: "", due: "", status: "active" });
-  const monthly = fixedObligations.reduce((s, x) => s + Number(x.monthly), 0);
+function DailyExpensesPage({ transactions, setTransactions, categories }) {
+  const [period, setPeriod] = useState("30d");
+  const [categoryFilter, setCategoryFilter] = useState("All categories");
+  const [draft, setDraft] = useState({
+    date: toDateInput(new Date("2026-04-29")),
+    description: "",
+    merchant: "",
+    category: "Food",
+    subcategory: "Groceries",
+    amount: "",
+  });
 
-  function add() {
-    if (!draft.name || !draft.monthly) return;
-    setFixedObligations([{ id: Date.now(), ...draft, monthly: Number(draft.monthly) }, ...fixedObligations]);
-    setDraft({ name: "", monthly: "", due: "", status: "active" });
+  const expenseRows = getCountedRealExpenses(transactions).filter((t) => {
+    const periodMatch = matchPeriod(t.date, period);
+    const categoryMatch = categoryFilter === "All categories" ? true : t.category === categoryFilter;
+    return periodMatch && categoryMatch;
+  });
+
+  const total = sumAmounts(expenseRows);
+  const transactionsCount = expenseRows.length;
+  const dailyAvg = total / (period === "7d" ? 7 : period === "30d" ? 30 : 30);
+
+  function addExpense() {
+    if (!draft.description || !draft.amount) return;
+    setTransactions([
+      {
+        id: `tx-${Date.now()}`,
+        date: draft.date,
+        description: draft.description,
+        merchant: draft.merchant || draft.description,
+        category: draft.category,
+        subcategory: draft.subcategory,
+        direction: "expense",
+        nature: "real",
+        status: "counted",
+        amount: Number(draft.amount),
+        source: "manual",
+      },
+      ...transactions,
+    ]);
+    setDraft({
+      date: toDateInput(new Date("2026-04-29")),
+      description: "",
+      merchant: "",
+      category: "Food",
+      subcategory: "Groceries",
+      amount: "",
+    });
   }
 
   return (
-    <div className="grid-3">
-      <div className="card" style={{ gridColumn: "span 2" }}>
-        <h2 className="section-title">Fixed obligations</h2>
-        <div className="metric-value">{gbp.format(monthly)}</div>
-        <div className="small muted" style={{ marginBottom: 16 }}>/ month</div>
-        {fixedObligations.map((x) => (
-          <div key={x.id} style={{ marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid #1f2937" }}>
-            <div>{x.name}</div>
-            <div className="small muted">Due: {x.due || "—"}</div>
-            <div>{gbp.format(x.monthly)}</div>
-          </div>
-        ))}
+    <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+        <button className="btn">
+          <Plus size={15} />
+          Log Multiple
+        </button>
+        <button className="btn btn-primary" onClick={addExpense}>
+          <Plus size={15} />
+          Add Single
+        </button>
       </div>
+
       <div className="card">
-        <h2 className="section-title">New obligation</h2>
-        <div className="form-grid">
-          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Name" />
-          <input value={draft.monthly} onChange={(e) => setDraft({ ...draft, monthly: e.target.value })} placeholder="Monthly amount" type="number" />
-          <input value={draft.due} onChange={(e) => setDraft({ ...draft, due: e.target.value })} placeholder="Due day" />
-          <button className="btn btn-primary" onClick={add}>Save</button>
+        <div className="mini-tabs">
+          <button className={period === "7d" ? "active" : ""} onClick={() => setPeriod("7d")}>7 Days</button>
+          <button className={period === "30d" ? "active" : ""} onClick={() => setPeriod("30d")}>30 Days</button>
+          <button className={period === "month" ? "active" : ""} onClick={() => setPeriod("month")}>This Month</button>
+          <button>This Year</button>
+        </div>
+
+        <div className="split-2" style={{ marginBottom: 14 }}>
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+            <option>All categories</option>
+            {categories.map((c) => <option key={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+
+        <div className="grid-3">
+          <MetricCard icon={Wallet} label="Period Total" value={formatCurrency(total)} sub="Selected period" />
+          <MetricCard icon={BarChart3} label="Transactions" value={String(transactionsCount)} sub="Entries" />
+          <MetricCard icon={TrendingUp} label="Daily Average" value={formatCurrency(dailyAvg)} sub="Rolling average" />
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          {expenseRows.length === 0 ? (
+            <div className="empty-box">
+              <div>
+                <div style={{ marginBottom: 12 }}>No expenses in this period</div>
+                <button className="btn btn-primary" onClick={addExpense}>Log Expense</button>
+              </div>
+            </div>
+          ) : (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Merchant</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Sub-category</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expenseRows.map((row) => (
+                    <tr key={row.id}>
+                      <td>{row.date}</td>
+                      <td>{row.merchant}</td>
+                      <td>{row.description}</td>
+                      <td>{row.category}</td>
+                      <td>{row.subcategory}</td>
+                      <td style={{ fontWeight: 700 }}>{formatCurrency(row.amount)}</td>
+                      <td>
+                        <button className="btn" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== row.id))}>
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Log Daily Expense</h3>
+        <div className="split-2">
+          <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
+          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
+          <input className="input" placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+          <input className="input" placeholder="Merchant / Person" value={draft.merchant} onChange={(e) => setDraft({ ...draft, merchant: e.target.value })} />
+          <input className="input" placeholder="Category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
+          <input className="input" placeholder="Sub-category" value={draft.subcategory} onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })} />
+        </div>
+      </div>
+    </>
   );
 }
 
-function TransactionsPage({ transactions, setTransactions, title = "Transactions", compact = false }) {
-  const [query, setQuery] = useState("");
-  const visible = compact
-    ? transactions.slice(0, 12)
-    : transactions.filter((t) => `${t.name} ${t.entity} ${t.category} ${t.type}`.toLowerCase().includes(query.toLowerCase()));
+function IncomeDepositsPage({ transactions, setTransactions }) {
+  const [draft, setDraft] = useState({
+    date: "2026-04-29",
+    source: "Trading Income",
+    description: "",
+    amount: "",
+  });
+
+  const rows = getCountedRealIncome(transactions);
+  const totalReceived = sumAmounts(rows);
+  const totalSpentMonth = sumAmounts(getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "month")));
+  const net = totalReceived - totalSpentMonth;
+
+  const bySource = useMemo(() => {
+    const map = new Map();
+    rows.forEach((r) => {
+      const key = r.subcategory || r.source || "Other";
+      map.set(key, (map.get(key) || 0) + Number(r.amount));
+    });
+    return Array.from(map.entries()).map(([name, amount]) => ({ name, amount }));
+  }, [rows]);
+
+  function addIncome() {
+    if (!draft.description || !draft.amount) return;
+    setTransactions([
+      {
+        id: `tx-${Date.now()}`,
+        date: draft.date,
+        description: draft.description,
+        merchant: draft.source,
+        category: "Income",
+        subcategory: draft.source,
+        direction: "income",
+        nature: "real",
+        status: "counted",
+        amount: Number(draft.amount),
+        source: "manual",
+      },
+      ...transactions,
+    ]);
+    setDraft({
+      date: "2026-04-29",
+      source: "Trading Income",
+      description: "",
+      amount: "",
+    });
+  }
 
   return (
-    <div className="card" style={{ marginTop: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
-        <div>
-          <h2 className="section-title">{title}</h2>
-          <div className="small muted">Savings transfers stay excluded from real income/expense.</div>
-        </div>
-        {!compact && <div style={{ width: 260 }}><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" /></div>}
+    <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+        <button className="btn">
+          <Plus size={15} />
+          Log Multiple
+        </button>
+        <button className="btn btn-primary" onClick={addIncome}>
+          <Plus size={15} />
+          Add Single
+        </button>
       </div>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Sync</th>
-              <th>Amount</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((t) => (
-              <tr key={t.id}>
-                <td>{t.date}</td>
-                <td>
-                  <div>{t.name}</div>
-                  <div className="small muted">{t.entity}</div>
-                </td>
-                <td>{t.category}</td>
-                <td>
-                  <span className={`status-pill ${t.status === "counted" ? "status-counted" : t.status === "excluded" ? "status-excluded" : "status-watch"}`}>
-                    {t.status}
-                  </span>
-                </td>
-                <td>{t.synced ? <Cloud size={16} color="#6ee7b7" /> : <CloudOff size={16} color="#94a3b8" />}</td>
-                <td>{gbp.format(t.amount)}</td>
-                <td><button className="btn" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== t.id))}><Trash2 size={14} /></button></td>
+
+      <div className="grid-3">
+        <MetricCard icon={ArrowDownToLine} label="Total Received" value={formatCurrency(totalReceived)} sub="In selected period" />
+        <MetricCard icon={ArrowUpFromLine} label="Total Spent (Month)" value={formatCurrency(totalSpentMonth)} sub="Variable expenses this month" />
+        <MetricCard icon={LineChart} label="Net Position" value={`${net >= 0 ? "+" : ""}${formatCurrency(net)}`} sub="Received minus spent" />
+      </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Income by Source</h3>
+        <div className="grid-2">
+          {bySource.map((item) => {
+            const pct = totalReceived > 0 ? Math.round((item.amount / totalReceived) * 100) : 0;
+            return (
+              <div key={item.name} className="card" style={{ padding: 14 }}>
+                <div className="muted" style={{ fontSize: 12 }}>{item.name}</div>
+                <div style={{ marginTop: 8, fontWeight: 700, fontSize: 28 }}>{formatCurrency(item.amount)}</div>
+                <div className="progress" style={{ marginTop: 10 }}><span style={{ width: `${pct}%` }} /></div>
+                <div className="muted" style={{ marginTop: 6, fontSize: 12 }}>{pct}%</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Entries</h3>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Source</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Running Total</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function AnalyticsPage({ transactions }) {
-  const totals = calcTotals(transactions);
-  const healthScore = Math.max(0, Math.min(100, Math.round(50 + (totals.net / Math.max(totals.expenses, 1)) * 50)));
-  return (
-    <div className="grid-4">
-      <MetricCard title="Cashflow Health" value={`${healthScore}%`} subtitle="Income vs expense" icon={TrendingUp} />
-      <MetricCard title="Counted Items" value={String(transactions.filter((t) => t.status === "counted").length)} subtitle="Used in real totals" icon={CheckCircle2} />
-      <MetricCard title="Excluded Items" value={String(transactions.filter((t) => t.status === "excluded").length)} subtitle="Savings/internal" icon={PiggyBank} />
-      <MetricCard title="Watch Items" value={String(transactions.filter((t) => t.status === "watch").length)} subtitle="Broker/investment" icon={LineChart} />
-    </div>
-  );
-}
-
-function CloudSyncPage({ transactions, cloudSettings, setCloudSettings }) {
-  const [draft, setDraft] = useState(cloudSettings);
-  const [message, setMessage] = useState("");
-
-  function saveSettings() {
-    const next = { ...draft, connected: Boolean(draft.url && draft.anonKey), lastSync: cloudSettings.lastSync || null };
-    setCloudSettings(next);
-    localStorage.setItem(CLOUD_KEY, JSON.stringify(next));
-    setMessage(next.connected ? "Cloud settings saved. Ready to sync." : "Settings saved in local mode.");
-  }
-
-  return (
-    <div className="grid-3">
-      <div className="card" style={{ gridColumn: "span 2" }}>
-        <h2 className="section-title">Connect permanent storage</h2>
-        <p className="muted">Add your Supabase URL and anon key. Then deploy and connect app.sentimo.cloud.</p>
-        <div className="form-grid" style={{ marginTop: 16 }}>
-          <input value={draft.url || ""} onChange={(e) => setDraft({ ...draft, url: e.target.value })} placeholder="https://your-project.supabase.co" />
-          <input value={draft.anonKey || ""} onChange={(e) => setDraft({ ...draft, anonKey: e.target.value })} placeholder="Supabase anon public key" />
-          <button className="btn btn-primary" onClick={saveSettings}><Save size={16} /> Save Settings</button>
+            </thead>
+            <tbody>
+              {rows.map((r, index) => {
+                const running = rows.slice(0, index + 1).reduce((s, x) => s + Number(x.amount), 0);
+                return (
+                  <tr key={r.id}>
+                    <td>{r.date}</td>
+                    <td><span className="status-pill status-blue">{r.subcategory}</span></td>
+                    <td>{r.description}</td>
+                    <td style={{ fontWeight: 700 }}>+{formatCurrency(r.amount)}</td>
+                    <td>{formatCurrency(running)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-        {message && <div style={{ marginTop: 14 }} className="small muted">{message}</div>}
       </div>
-      <div className="card">
-        <h2 className="section-title">Sync status</h2>
-        <div className="small muted">Mode</div>
-        <div className="metric-value">{cloudSettings.connected ? "Cloud" : "Local"}</div>
-        <div className="small muted" style={{ marginTop: 10 }}>Transactions: {transactions.length}</div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Log Income / Deposit</h3>
+        <div className="split-2">
+          <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
+          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
+          <input className="input" placeholder="Source" value={draft.source} onChange={(e) => setDraft({ ...draft, source: e.target.value })} />
+          <input className="input" placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-function SettingsPage({ transactions, setTransactions, user, setUser }) {
+function DailyTargetPage({ transactions, fixedExpenses, settings }) {
+  const fixedMonthly = fixedExpenses
+    .filter((f) => f.autoIncludeTarget && f.status !== "Archived")
+    .reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
+
+  const variableExpenses = getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "30d"));
+  const variableAvg = sumAmounts(variableExpenses) / Number(settings.variableAverageDays || 30);
+  const autoTarget = (fixedMonthly / daysInMonth(new Date("2026-04-29"))) + variableAvg;
+  const target = settings.customDailyTarget ? Number(settings.customDailyTarget) : autoTarget;
+  const todaySpent = sumAmounts(
+    getCountedRealExpenses(transactions).filter((t) => t.date === "2026-04-29")
+  );
+  const remaining = target - todaySpent;
+  const pct = target > 0 ? Math.max(0, Math.min(100, Math.round((todaySpent / target) * 100))) : 0;
+
   return (
-    <div className="grid-3">
-      <div className="card">
-        <h2 className="section-title">Database-ready</h2>
-        <p className="muted">Supabase schema is prepared.</p>
-        <button className="btn btn-primary" onClick={() => downloadFile("sentimo-supabase-schema.sql", "-- add your schema here")}>Download SQL</button>
+    <>
+      <div className="grid-2">
+        <div className="card">
+          <div className="eyebrow muted">Wed, 29 Apr 2026 · Daily Target</div>
+          <h3 className="section-title" style={{ fontSize: 18 }}>Daily Target</h3>
+
+          <div style={{ display: "grid", placeItems: "center", padding: "24px 0" }}>
+            <div
+              style={{
+                width: 170,
+                height: 170,
+                borderRadius: "50%",
+                border: "12px solid var(--nav-active)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 44, fontWeight: 700 }}>{pct}%</div>
+                <div className="muted">of target</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid-3">
+            <div>
+              <div className="muted" style={{ fontSize: 12 }}>Today Spent</div>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>{formatCurrency(todaySpent)}</div>
+            </div>
+            <div>
+              <div className="muted" style={{ fontSize: 12 }}>Target</div>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>{formatCurrency(target)}</div>
+            </div>
+            <div>
+              <div className="muted" style={{ fontSize: 12 }}>Remaining</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: remaining >= 0 ? "var(--success)" : "var(--danger)" }}>
+                {formatCurrency(remaining)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="section-title">Daily Withdrawal Target</h3>
+          <div style={{ fontSize: 44, fontWeight: 700 }}>{formatCurrency(target)} <span className="muted" style={{ fontSize: 18 }}>/ day</span></div>
+          <p className="section-sub">
+            Auto-calculated from fixed monthly obligations plus variable rolling average.
+          </p>
+
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginTop: 12 }}>
+            <div className="muted" style={{ marginBottom: 8, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              Target Composition
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span className="muted">Fixed expenses (daily equiv.)</span>
+              <strong>{formatCurrency(fixedMonthly / daysInMonth(new Date("2026-04-29")))}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span className="muted">Variable avg (rolling)</span>
+              <strong>{formatCurrency(variableAvg)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, fontWeight: 700 }}>
+              <span>Daily target</span>
+              <span>{formatCurrency(target)}</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="card">
-        <h2 className="section-title">Login active</h2>
-        <p className="muted">Current demo user: {user.email}</p>
-        <button className="btn" onClick={() => { localStorage.removeItem(USER_KEY); setUser(null); }}>Sign Out</button>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Daily Spend vs Target</h3>
+        <p className="section-sub">7d / 14d / 30d / 60d graph block reserved for next build step.</p>
+        <div className="empty-box">Chart area placeholder</div>
       </div>
-      <div className="card">
-        <h2 className="section-title">Export data</h2>
-        <button className="btn" onClick={() => downloadFile("sentimo-transactions.json", JSON.stringify(transactions, null, 2), "application/json")}>Export JSON</button>
-        <div style={{ height: 10 }} />
-        <button className="btn" onClick={() => setTransactions(startingTransactions)}>Reset Demo Data</button>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Daily History — Last 30 Days</h3>
+        <div className="empty-box">History chart placeholder</div>
+      </div>
+    </>
+  );
+}
+
+function AnalyticsPage({ transactions, fixedExpenses, settings }) {
+  const spend30 = getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "30d"));
+  const totalSpend = sumAmounts(spend30);
+  const categories = [...new Set(spend30.map((x) => x.category))];
+  const dailyAvg = totalSpend / 30;
+  const fixedMonthly = fixedExpenses
+    .filter((f) => f.autoIncludeTarget && f.status !== "Archived")
+    .reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
+  const dailyTarget = settings.customDailyTarget
+    ? Number(settings.customDailyTarget)
+    : (fixedMonthly / daysInMonth(new Date("2026-04-29"))) + dailyAvg;
+
+  return (
+    <>
+      <div className="mini-tabs">
+        <button>Last 7 Days</button>
+        <button className="active">Last 30 Days</button>
+        <button>This Month</button>
+        <button>This Year</button>
+      </div>
+
+      <div className="grid-4">
+        <MetricCard icon={ArrowUpFromLine} label="Total Spend" value={formatCurrency(totalSpend)} sub="Last 30 days" />
+        <MetricCard icon={Tags} label="Categories" value={String(categories.length)} sub="Used in period" />
+        <MetricCard icon={TrendingUp} label="Daily Avg" value={formatCurrency(dailyAvg)} sub="Rolling" />
+        <MetricCard icon={Target} label="Daily Target" value={formatCurrency(dailyTarget)} sub="Budget pressure" />
+      </div>
+
+      <div className="grid-2" style={{ marginTop: 14 }}>
+        <div className="card">
+          <h3 className="section-title">Spend by Category</h3>
+          <div className="empty-box">No data for this period</div>
+        </div>
+        <div className="card">
+          <h3 className="section-title">Category Breakdown</h3>
+          <div className="empty-box">No data for this period</div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Daily Spending vs Target</h3>
+        <div className="empty-box">Chart area placeholder</div>
+      </div>
+    </>
+  );
+}
+
+function OverallPage({ transactions, fixedExpenses }) {
+  const thisMonthIncome = sumAmounts(getCountedRealIncome(transactions).filter((t) => matchPeriod(t.date, "month")));
+  const thisMonthExpenses = sumAmounts(getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "month")));
+  const previousMonthIncome = thisMonthIncome * 0.8;
+  const previousMonthExpenses = thisMonthExpenses * 1.1;
+  const budgetMonth = fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0) + 1000;
+
+  return (
+    <>
+      <div className="mini-tabs">
+        <button>Week</button>
+        <button className="active">Month</button>
+        <button>Year</button>
+        <button>Budget</button>
+      </div>
+
+      <div className="grid-3">
+        <div className="card">
+          <h3 className="section-title">This Month</h3>
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="muted">Income</span>
+              <strong>{formatCurrency(thisMonthIncome)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="muted">Expenses</span>
+              <strong>{formatCurrency(thisMonthExpenses)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+              <span>Net</span>
+              <strong>{formatCurrency(thisMonthIncome - thisMonthExpenses)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="section-title">Previous Month</h3>
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="muted">Income</span>
+              <strong>{formatCurrency(previousMonthIncome)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="muted">Expenses</span>
+              <strong>{formatCurrency(previousMonthExpenses)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+              <span>Net</span>
+              <strong>{formatCurrency(previousMonthIncome - previousMonthExpenses)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="section-title">Budget Month</h3>
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="muted">Budgeted Expenses</span>
+              <strong>{formatCurrency(budgetMonth)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+              <span className="muted">Target Income</span>
+              <strong>{formatCurrency(budgetMonth)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+              <span>Target Net</span>
+              <strong>{formatCurrency(0)}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Comparison View</h3>
+        <p className="section-sub">This module is for side-by-side weekly, monthly, yearly, and budget comparison.</p>
+        <div className="empty-box">Comparison table and charts placeholder</div>
+      </div>
+    </>
+  );
+}
+
+function CategoriesPage({ categories, categoryFilter, setCategories, activePage }) {
+  const visible = categoryFilter ? categories.filter((c) => c.name === categoryFilter) : categories;
+
+  return (
+    <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+        <button className="btn">
+          <Plus size={15} />
+          Seed Keywords
+        </button>
+        <button className="btn btn-primary">
+          <Plus size={15} />
+          New Category
+        </button>
+      </div>
+
+      <div className="grid-3">
+        <div className="card">
+          <div className="brand-sub" style={{ marginBottom: 12 }}>Categories</div>
+          <div className="category-list">
+            {categories.map((c) => (
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="category-dot" style={{ background: c.color }} />
+                <span>{c.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card" style={{ gridColumn: "span 2" }}>
+          <h3 className="section-title">Expense Classification</h3>
+          <p className="section-sub">Click any category to manage sub-categories and future auto-categorisation keywords.</p>
+
+          <div className="card" style={{ marginBottom: 14 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <Tags size={18} />
+              <div>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>Auto-Categorisation Engine</div>
+                <div className="muted" style={{ fontSize: 13 }}>
+                  Each category can have keyword rules. Example: “Vodafone subscription” → Utilities / Phones.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="category-list">
+            {visible.map((category) => (
+              <div className="category-item" key={category.id}>
+                <div className="category-left">
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      background: category.color,
+                      display: "grid",
+                      placeItems: "center",
+                      color: "white",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {category.name[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700 }}>{category.name}</div>
+                    <div className="muted" style={{ fontSize: 13 }}>
+                      {category.subcategories.join(" · ")}
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="muted" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses }) {
+  const fixedMonthly = fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
+  const autoTarget = (fixedMonthly / 30) + 0;
+
+  return (
+    <>
+      <div className="card" style={{ maxWidth: 760 }}>
+        <h3 className="section-title">Settings</h3>
+
+        <div className="card" style={{ marginTop: 14 }}>
+          <div className="brand-sub" style={{ marginBottom: 8 }}>Currency Settings</div>
+          <div className="split-2">
+            <div>
+              <div className="muted" style={{ marginBottom: 6, fontSize: 12 }}>Base Currency</div>
+              <select value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value })}>
+                <option>GBP</option>
+                <option>EUR</option>
+                <option>USD</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="card" style={{ marginTop: 14 }}>
+          <div className="brand-sub" style={{ marginBottom: 8 }}>Portal Theme</div>
+          <div className="theme-row">
+            <button className={`theme-btn ${theme === "dark" ? "active" : ""}`} onClick={() => setTheme("dark")}>
+              <Moon size={14} />
+              Dark Navy
+            </button>
+            <button className={`theme-btn ${theme === "light" ? "active" : ""}`} onClick={() => setTheme("light")}>
+              <Sun size={14} />
+              Light
+            </button>
+          </div>
+        </div>
+
+        <div className="card" style={{ marginTop: 14 }}>
+          <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target Settings</div>
+          <div className="grid-2" style={{ marginBottom: 14 }}>
+            <div className="card" style={{ padding: 12 }}>
+              <div className="muted" style={{ fontSize: 12 }}>Auto-calculated target</div>
+              <div style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(autoTarget)}</div>
+              <div className="muted">Fixed daily + variable avg</div>
+            </div>
+            <div className="card" style={{ padding: 12 }}>
+              <div className="muted" style={{ fontSize: 12 }}>Fixed monthly total</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
+              <div className="muted">All active fixed expenses</div>
+            </div>
+          </div>
+
+          <div className="form-grid">
+            <div>
+              <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>Daily Target Override</div>
+              <input
+                className="input"
+                value={settings.customDailyTarget}
+                onChange={(e) => setSettings({ ...settings, customDailyTarget: e.target.value })}
+                placeholder="150.83"
+              />
+            </div>
+
+            <div>
+              <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>Variable Average Window (Days)</div>
+              <input
+                className="input"
+                type="number"
+                value={settings.variableAverageDays}
+                onChange={(e) => setSettings({ ...settings, variableAverageDays: e.target.value })}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="card" style={{ marginTop: 14 }}>
+          <div className="brand-sub" style={{ marginBottom: 8 }}>About Sentimo</div>
+          <div className="grid-2">
+            <div>
+              <div className="muted">Version</div>
+              <div>2.0.0</div>
+            </div>
+            <div>
+              <div className="muted">PWA</div>
+              <div>Enabled</div>
+            </div>
+            <div>
+              <div className="muted">Target users</div>
+              <div>Traders · Self-employed · Investors</div>
+            </div>
+            <div>
+              <div className="muted">Theme</div>
+              <div>{theme === "dark" ? "Dark Navy" : "Light"}</div>
+            </div>
+          </div>
+        </div>
+
+        <button className="btn btn-primary" style={{ marginTop: 16 }}>
+          <Save size={15} />
+          Save Settings
+        </button>
+      </div>
+    </>
+  );
+}
+
+function AdminPanelPage({ user }) {
+  return (
+    <>
+      <div className="grid-4">
+        <MetricCard icon={UserCircle2} label="All Users" value="1" sub="Registered" />
+        <MetricCard icon={CheckCircle2} label="Active" value="0" sub="Paid licences" />
+        <MetricCard icon={Target} label="On Trial" value="0" sub="Trial period" />
+        <MetricCard icon={TrendingUp} label="New This Month" value="1" sub="Signups" />
+      </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <h3 className="section-title" style={{ marginBottom: 0 }}>Users</h3>
+          <button className="btn">
+            <RefreshCw size={14} />
+            Refresh
+          </button>
+        </div>
+
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Licence</th>
+                <th>Last Active</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td><span className="status-pill status-gray">admin</span></td>
+                <td><span className="status-pill status-gray">No licence</span></td>
+                <td>29 Apr 2026</td>
+                <td>09 Apr 2026</td>
+                <td style={{ display: "flex", gap: 8 }}>
+                  <button className="btn">Licence</button>
+                  <button className="btn">Demote</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function TradingPnLPage({ transactions, fixedExpenses }) {
+  const tradingIncome = sumAmounts(
+    transactions.filter(
+      (t) =>
+        t.direction === "income" &&
+        (t.subcategory === "Trading Income" || t.category === "Trading" || t.nature === "broker_transfer")
+    )
+  );
+  const lifeCost = fixedExpenses.reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
+  const remaining = lifeCost - tradingIncome;
+
+  return (
+    <>
+      <div className="grid-3">
+        <MetricCard icon={LineChart} label="Trading Income" value={formatCurrency(tradingIncome)} sub="Recorded inflows" />
+        <MetricCard icon={CreditCard} label="Monthly Life Cost" value={formatCurrency(lifeCost)} sub="Recurring burden" />
+        <MetricCard icon={Target} label="Still Needed" value={formatCurrency(Math.max(0, remaining))} sub="To cover fixed life cost" />
+      </div>
+
+      <div className="card" style={{ marginTop: 14 }}>
+        <h3 className="section-title">Trading Pressure View</h3>
+        <p className="section-sub">
+          This section links personal expenses to trading performance, so you know how much still needs to be made.
+        </p>
+        <div className="empty-box">Detailed trading pressure module placeholder</div>
+      </div>
+    </>
+  );
+}
+
+function ImportCsvPage() {
+  const inputRef = useRef(null);
+
+  return (
+    <div className="card">
+      <h3 className="section-title">Import CSV</h3>
+      <p className="section-sub">Upload bank statements and categorise transactions automatically.</p>
+      <div
+        className="empty-box"
+        onClick={() => inputRef.current?.click()}
+        style={{ cursor: "pointer" }}
+      >
+        <div>
+          <Upload size={28} style={{ marginBottom: 10 }} />
+          <div>Drop or select your CSV statement</div>
+        </div>
+        <input ref={inputRef} type="file" accept=".csv" style={{ display: "none" }} />
       </div>
     </div>
   );
 }
 
-function BuildingIcon({ type }) {
-  if (type === "Company") return <CreditCard size={14} />;
-  return <CheckCircle2 size={14} />;
+function RulesPage() {
+  return (
+    <div className="card">
+      <h3 className="section-title">Rules</h3>
+      <p className="section-sub">Keyword-based auto-categorisation rules will be managed here.</p>
+      <div className="empty-box">Rules engine placeholder</div>
+    </div>
+  );
 }
 
 export default function App() {
   const [user, setUser] = useState(null);
-  const [transactions, setTransactions] = useState(startingTransactions);
-  const [rules, setRules] = useState(rulesSeed);
-  const [budgetTargets] = useState(budgetTargetsSeed);
-  const [fixedObligations, setFixedObligations] = useState(fixedObligationsSeed);
-  const [cloudSettings, setCloudSettings] = useState({ url: "", anonKey: "", connected: false, lastSync: null });
+  const [theme, setTheme] = useState("dark");
   const [activePage, setActivePage] = useState("Dashboard");
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [transactions, setTransactions] = useState(seedTransactions);
+  const [fixedExpenses, setFixedExpenses] = useState(seedFixedExpenses);
+  const [categories, setCategories] = useState(seedCategories);
+  const [settings, setSettings] = useState(defaultSettings);
+
+  useEffect(() => {
+    const styleTag = document.createElement("style");
+    styleTag.setAttribute("data-sentimo-styles", "true");
+    styleTag.innerHTML = appStyles();
+    document.head.appendChild(styleTag);
+    return () => {
+      styleTag.remove();
+    };
+  }, []);
 
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem(USER_KEY);
+      const savedTheme = localStorage.getItem(THEME_KEY);
       const savedTransactions = localStorage.getItem(STORAGE_KEY);
-      const savedCloud = localStorage.getItem(CLOUD_KEY);
+      const savedFixed = localStorage.getItem(FIXED_KEY);
+      const savedCategories = localStorage.getItem(CATEGORIES_KEY);
+      const savedSettings = localStorage.getItem(SETTINGS_KEY);
+
       if (savedUser) setUser(JSON.parse(savedUser));
+      if (savedTheme) setTheme(savedTheme);
       if (savedTransactions) setTransactions(JSON.parse(savedTransactions));
-      if (savedCloud) setCloudSettings(JSON.parse(savedCloud));
+      if (savedFixed) setFixedExpenses(JSON.parse(savedFixed));
+      if (savedCategories) setCategories(JSON.parse(savedCategories));
+      if (savedSettings) setSettings(JSON.parse(savedSettings));
     } catch {
       // ignore
     }
   }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-    } catch {
-      // ignore
-    }
+    injectTheme(theme);
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
   }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem(FIXED_KEY, JSON.stringify(fixedExpenses));
+  }, [fixedExpenses]);
+
+  useEffect(() => {
+    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+  }, [categories]);
+
+  useEffect(() => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }, [settings]);
 
   function handleLogin(nextUser) {
     setUser(nextUser);
     localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
   }
 
-  if (!user) return <LoginScreen onLogin={handleLogin} />;
+  if (!user) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
 
   return (
     <div className="app-shell">
       <div className="layout">
-        <Sidebar activePage={activePage} setActivePage={setActivePage} user={user} cloudSettings={cloudSettings} />
+        <Sidebar
+          activePage={activePage}
+          setActivePage={setActivePage}
+          categoriesOpen={categoriesOpen}
+          setCategoriesOpen={setCategoriesOpen}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          categories={categories}
+          user={user}
+          theme={theme}
+          setTheme={setTheme}
+        />
+
         <main className="main">
           <div className="header">
             <div>
-              <div className="small muted">Sentimo · {activePage}</div>
-              <h1 style={{ margin: "8px 0" }}>{activePage}</h1>
-              <div className="muted">Financial behaviour control, bank statement analysis, savings exclusions, merchant analysis, and cloud sync.</div>
+              <div className="eyebrow">
+                {activePage === "Daily Target" ? "Wed, 29 Apr 2026 · Daily Target" :
+                 activePage === "Analytics" ? "Spending Intelligence" :
+                 activePage === "Categories" ? "Expense Classification" :
+                 activePage === "Admin Panel" ? "Platform Overview — Sentimo" :
+                 activePage}
+              </div>
+              <h1>{activePage}</h1>
+              <p className="muted" style={{ marginTop: 10, maxWidth: 900 }}>
+                {activePage === "Income & Deposits" && "All money received — trading draws, commissions, dividends, and more."}
+                {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
+                {activePage === "Daily Expenses" && "Day-to-day spending control with category and period filters."}
+                {activePage === "Daily Target" && "How much you can spend today — or need to earn — to stay on track."}
+                {activePage === "Analytics" && "Budgeting and spending intelligence across categories and periods."}
+                {activePage === "Overall" && "Compare this period, previous period, and target budget side by side."}
+                {activePage === "Categories" && "Categories, sub-categories, and keyword-ready classification logic."}
+                {activePage === "Dashboard" && "Control panel for spending, income, fixed obligations, and overall position."}
+                {activePage === "Trading P&L" && "Use trading performance as a financial control lens for real life obligations."}
+                {activePage === "Settings" && "Portal configuration, target settings, and theme selection."}
+                {activePage === "Admin Panel" && "Future licence and user-management layer for commercial rollout."}
+                {activePage === "Import CSV" && "Import bank statements and classify transactions."}
+                {activePage === "Rules" && "Define how descriptions and merchants are categorised automatically."}
+              </p>
             </div>
+
             <div className="header-actions">
-              <button className="btn" onClick={() => setActivePage("Import CSV")}><Upload size={16} /> Import CSV</button>
-              <button className="btn btn-primary" onClick={() => setActivePage("Cloud Sync")}><Cloud size={16} /> Cloud</button>
+              <button className="btn">
+                <Cloud size={15} />
+                Cloud Connected
+              </button>
             </div>
           </div>
 
-          {activePage === "Dashboard" && <DashboardPage transactions={transactions} setTransactions={setTransactions} budgetTargets={budgetTargets} fixedObligations={fixedObligations} />}
-          {activePage === "Import CSV" && <ImportCsvPage transactions={transactions} setTransactions={setTransactions} rules={rules} />}
-          {activePage === "Rules" && <RulesPage rules={rules} setRules={setRules} />}
-          {activePage === "Fixed Expenses" && <FixedExpensesPage fixedObligations={fixedObligations} setFixedObligations={setFixedObligations} />}
-          {activePage === "Daily Expenses" && <TransactionsPage transactions={transactions.filter((t) => t.type === "expense")} setTransactions={setTransactions} title="Daily Expenses" />}
-          {activePage === "Income & Deposits" && <TransactionsPage transactions={transactions.filter((t) => t.type === "income" || t.type === "investment_in")} setTransactions={setTransactions} title="Income & Deposits" />}
-          {activePage === "Trading P&L" && <TransactionsPage transactions={transactions.filter((t) => t.type.includes("investment") || t.category === "Investments")} setTransactions={setTransactions} title="Trading P&L / Broker Watch" />}
-          {activePage === "Analytics" && <AnalyticsPage transactions={transactions} />}
-          {activePage === "Cloud Sync" && <CloudSyncPage transactions={transactions} cloudSettings={cloudSettings} setCloudSettings={setCloudSettings} />}
-          {activePage === "Settings" && <SettingsPage transactions={transactions} setTransactions={setTransactions} user={user} setUser={setUser} />}
+          {activePage === "Dashboard" && (
+            <DashboardPage transactions={transactions} fixedExpenses={fixedExpenses} />
+          )}
+
+          {activePage === "Trading P&L" && (
+            <TradingPnLPage transactions={transactions} fixedExpenses={fixedExpenses} />
+          )}
+
+          {activePage === "Fixed Expenses" && (
+            <FixedExpensesPage fixedExpenses={fixedExpenses} setFixedExpenses={setFixedExpenses} />
+          )}
+
+          {activePage === "Daily Expenses" && (
+            <DailyExpensesPage
+              transactions={transactions}
+              setTransactions={setTransactions}
+              categories={categories}
+            />
+          )}
+
+          {activePage === "Income & Deposits" && (
+            <IncomeDepositsPage
+              transactions={transactions}
+              setTransactions={setTransactions}
+            />
+          )}
+
+          {activePage === "Daily Target" && (
+            <DailyTargetPage
+              transactions={transactions}
+              fixedExpenses={fixedExpenses}
+              settings={settings}
+            />
+          )}
+
+          {activePage === "Analytics" && (
+            <AnalyticsPage
+              transactions={transactions}
+              fixedExpenses={fixedExpenses}
+              settings={settings}
+            />
+          )}
+
+          {activePage === "Overall" && (
+            <OverallPage
+              transactions={transactions}
+              fixedExpenses={fixedExpenses}
+            />
+          )}
+
+          {activePage === "Categories" && (
+            <CategoriesPage
+              categories={categories}
+              categoryFilter={categoryFilter}
+              setCategories={setCategories}
+              activePage={activePage}
+            />
+          )}
+
+          {activePage === "Import CSV" && <ImportCsvPage />}
+          {activePage === "Rules" && <RulesPage />}
+
+          {activePage === "Settings" && (
+            <SettingsPage
+              theme={theme}
+              setTheme={setTheme}
+              settings={settings}
+              setSettings={setSettings}
+              fixedExpenses={fixedExpenses}
+            />
+          )}
+
+          {activePage === "Admin Panel" && <AdminPanelPage user={user} />}
         </main>
       </div>
     </div>
