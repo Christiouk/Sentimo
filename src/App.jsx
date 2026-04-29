@@ -29,18 +29,17 @@ import {
   Wallet,
   X,
   KeyRound,
-  PanelRightOpen,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v5";
-const USER_KEY = "sentimo_user_v5";
-const THEME_KEY = "sentimo_theme_v3";
-const FIXED_KEY = "sentimo_fixed_expenses_v4";
-const CATEGORIES_KEY = "sentimo_categories_v3";
-const SETTINGS_KEY = "sentimo_settings_v3";
-const SESSIONS_KEY = "sentimo_trading_sessions_v2";
-const PIN_KEY = "sentimo_pin_v1";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v1";
+const STORAGE_KEY = "sentimo_transactions_v6";
+const USER_KEY = "sentimo_user_v6";
+const THEME_KEY = "sentimo_theme_v4";
+const FIXED_KEY = "sentimo_fixed_expenses_v5";
+const CATEGORIES_KEY = "sentimo_categories_v4";
+const SETTINGS_KEY = "sentimo_settings_v4";
+const SESSIONS_KEY = "sentimo_trading_sessions_v3";
+const PIN_KEY = "sentimo_pin_v2";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v2";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -445,28 +444,29 @@ function appStyles() {
     .layout {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 244px 1fr;
+      grid-template-columns: 236px 1fr;
     }
 
     .sidebar {
       background: var(--nav);
       border-right: 1px solid rgba(255,255,255,0.06);
-      padding: 10px 8px 14px;
+      padding: 8px 8px 12px;
       color: var(--nav-text);
-      position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
+      padding: 10px 10px 12px;
+      margin-bottom: 6px;
     }
 
     .brand-badge {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 10px;
       display: grid;
       place-items: center;
@@ -475,14 +475,14 @@ function appStyles() {
     }
 
     .brand-title {
-      font-weight: 700;
+      font-weight: 600;
       line-height: 1.05;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--nav-text);
     }
 
     .brand-sub {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--nav-muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -492,24 +492,24 @@ function appStyles() {
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: var(--shadow);
     }
 
     .daily-card {
-      margin: 8px 8px 14px;
-      padding: 13px;
+      margin: 4px 6px 12px;
+      padding: 12px;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.10);
       box-shadow: none;
     }
 
     .daily-line {
-      height: 6px;
+      height: 5px;
       border-radius: 999px;
       background: rgba(255,255,255,0.08);
       overflow: hidden;
-      margin: 10px 0 8px;
+      margin: 8px 0 7px;
     }
 
     .daily-line span {
@@ -521,8 +521,9 @@ function appStyles() {
 
     .sidebar-nav {
       display: grid;
-      gap: 3px;
+      gap: 2px;
       padding: 0 6px;
+      flex: 1;
     }
 
     .sidebar-nav button {
@@ -531,12 +532,13 @@ function appStyles() {
       background: transparent;
       color: var(--nav-muted);
       text-align: left;
-      padding: 11px 13px;
-      border-radius: 11px;
+      padding: 10px 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 15px;
+      font-size: 13px;
+      font-weight: 500;
     }
 
     .sidebar-nav button.active {
@@ -545,29 +547,43 @@ function appStyles() {
     }
 
     .sidebar-footer {
-      margin-top: 18px;
-      padding: 0 8px;
+      padding: 0 6px;
+      margin-top: 10px;
+    }
+
+    .sidebar-bottom-card {
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .sidebar-userrow {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
     .theme-compact {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
+      gap: 6px;
     }
 
     .theme-chip {
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.05);
       color: var(--nav-text);
-      border-radius: 10px;
-      padding: 8px 10px;
+      border-radius: 9px;
+      padding: 7px 8px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      font-size: 13px;
-      min-height: 36px;
+      font-size: 12px;
+      min-height: 34px;
+      font-weight: 500;
     }
 
     .theme-chip.active {
@@ -575,45 +591,32 @@ function appStyles() {
       background: rgba(255,255,255,0.09);
     }
 
-    .sidebar-userbox {
-      margin-top: 10px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.05);
-      border-radius: 14px;
-      padding: 11px 12px;
-    }
-
-    .sidebar-userrow {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
     .main {
-      padding: 18px 20px;
+      padding: 16px 18px;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       align-items: flex-start;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .header .eyebrow {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
+      font-weight: 500;
     }
 
     .header h1 {
       margin: 0;
-      font-size: 30px;
+      font-size: 25px;
       line-height: 1.04;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.02em;
     }
 
@@ -623,7 +626,7 @@ function appStyles() {
 
     .header-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
@@ -631,13 +634,14 @@ function appStyles() {
       border: 1px solid var(--border);
       background: var(--panel);
       color: var(--text);
-      border-radius: 12px;
-      padding: 10px 13px;
+      border-radius: 10px;
+      padding: 8px 11px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      min-height: 40px;
+      gap: 7px;
+      font-size: 12px;
+      min-height: 36px;
+      font-weight: 500;
     }
 
     .btn-primary {
@@ -652,17 +656,17 @@ function appStyles() {
     }
 
     .btn-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
       padding: 0;
       justify-content: center;
-      min-height: 32px;
+      min-height: 30px;
     }
 
     .grid-4, .grid-3, .grid-2 {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -670,61 +674,65 @@ function appStyles() {
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
     .card {
-      padding: 14px;
+      padding: 12px;
     }
 
     .metric-card .label {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
+      font-weight: 500;
     }
 
     .metric-card .value {
-      margin-top: 10px;
-      font-size: 20px;
-      font-weight: 700;
+      margin-top: 8px;
+      font-size: 17px;
+      font-weight: 600;
       letter-spacing: -0.01em;
     }
 
     .metric-card .sub {
-      margin-top: 5px;
+      margin-top: 4px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.35;
+      font-weight: 400;
     }
 
     .section-title {
-      margin: 0 0 6px;
-      font-size: 15px;
-      font-weight: 700;
+      margin: 0 0 5px;
+      font-size: 13px;
+      font-weight: 600;
       letter-spacing: -0.01em;
     }
 
     .section-sub {
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.4;
+      font-weight: 400;
     }
 
     .mini-tabs {
       display: inline-flex;
       gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 13px;
+      margin-bottom: 11px;
     }
 
     .mini-tabs button {
       border: 1px solid var(--border);
       background: transparent;
       color: var(--muted);
-      border-radius: 10px;
-      padding: 7px 11px;
-      font-size: 13px;
+      border-radius: 9px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 500;
     }
 
     .mini-tabs button.active {
@@ -735,7 +743,7 @@ function appStyles() {
     .table-wrap {
       overflow: auto;
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
     }
 
     table {
@@ -744,30 +752,32 @@ function appStyles() {
     }
 
     th, td {
-      padding: 12px 12px;
+      padding: 10px 10px;
       border-top: 1px solid var(--border);
       text-align: left;
       vertical-align: top;
-      font-size: 14px;
+      font-size: 12px;
+      font-weight: 400;
     }
 
     th {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       background: transparent;
       border-top: 0;
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .status-pill {
       display: inline-block;
       border-radius: 999px;
-      padding: 4px 9px;
-      font-size: 11px;
+      padding: 4px 8px;
+      font-size: 10px;
       border: 1px solid transparent;
       line-height: 1.2;
+      font-weight: 500;
     }
 
     .status-green {
@@ -802,7 +812,7 @@ function appStyles() {
 
     .progress {
       width: 100%;
-      height: 7px;
+      height: 6px;
       border-radius: 999px;
       overflow: hidden;
       background: var(--panel-2);
@@ -817,7 +827,7 @@ function appStyles() {
 
     .form-grid {
       display: grid;
-      gap: 10px;
+      gap: 9px;
     }
 
     .input, select, textarea {
@@ -825,71 +835,74 @@ function appStyles() {
       border: 1px solid var(--border);
       background: var(--panel-2);
       color: var(--text);
-      border-radius: 12px;
-      padding: 11px 13px;
-      font-size: 14px;
+      border-radius: 10px;
+      padding: 10px 11px;
+      font-size: 12px;
       resize: vertical;
+      font-weight: 400;
     }
 
     .split-2 {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: 9px;
     }
 
     .empty-box {
-      min-height: 180px;
+      min-height: 150px;
       display: grid;
       place-items: center;
       text-align: center;
       color: var(--muted);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.02);
-      font-size: 14px;
+      font-size: 12px;
+      font-weight: 400;
     }
 
-    .category-list {
+    .category-grid {
       display: grid;
-      gap: 8px;
+      gap: 10px;
     }
 
     .category-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
-      padding: 12px;
+      padding: 11px;
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 11px;
       background: rgba(255,255,255,0.02);
     }
 
     .category-left {
       display: flex;
-      gap: 10px;
-      align-items: center;
+      gap: 9px;
+      align-items: flex-start;
     }
 
     .category-dot {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       border-radius: 999px;
       flex: 0 0 auto;
+      margin-top: 3px;
     }
 
     .hero-panel {
-      min-height: 215px;
+      min-height: 195px;
     }
 
     .table-footer-total {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
-      padding: 12px 4px 0;
-      font-weight: 700;
+      padding: 10px 4px 0;
+      font-weight: 600;
       color: var(--text);
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .action-row {
@@ -900,49 +913,52 @@ function appStyles() {
     }
 
     .fx-name {
-      font-weight: 700;
-      margin-bottom: 3px;
-      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      font-size: 12px;
     }
 
     .fx-sub {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
+      font-weight: 400;
     }
 
     .fx-kicker {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
+      font-weight: 500;
     }
 
     .compact-title {
-      font-size: 26px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 600;
       letter-spacing: -0.02em;
       margin: 0;
     }
 
     .tcard {
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 12px;
       background: rgba(255,255,255,0.02);
     }
 
     .tcard-label {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
+      font-weight: 500;
     }
 
     .tcard-value {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 600;
       letter-spacing: -0.01em;
     }
 
@@ -961,9 +977,9 @@ function appStyles() {
       max-width: 520px;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 16px;
       box-shadow: 0 18px 46px rgba(0,0,0,0.28);
-      padding: 18px;
+      padding: 16px;
     }
 
     .modal-head {
@@ -971,17 +987,17 @@ function appStyles() {
       justify-content: space-between;
       align-items: flex-start;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .cover-good {
       color: var(--success);
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .cover-bad {
       color: var(--danger);
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .auth-wrap {
@@ -996,25 +1012,25 @@ function appStyles() {
 
     .auth-card {
       width: 100%;
-      max-width: 410px;
+      max-width: 390px;
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 16px;
       box-shadow: var(--shadow);
-      padding: 22px;
+      padding: 20px;
     }
 
     .auth-head {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .auth-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
       display: grid;
       place-items: center;
       border: 1px solid var(--border);
@@ -1022,18 +1038,19 @@ function appStyles() {
     }
 
     .auth-title {
-      font-size: 19px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 600;
       line-height: 1.1;
       margin: 0;
     }
 
     .auth-sub {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
       margin-top: 2px;
+      font-weight: 500;
     }
 
     .pin-dots {
@@ -1063,39 +1080,13 @@ function appStyles() {
     }
 
     .pin-key {
-      min-height: 46px;
-      border-radius: 12px;
+      min-height: 42px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--panel-2);
       color: var(--text);
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .drawer-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(3, 8, 18, 0.32);
-      z-index: 40;
-    }
-
-    .drawer {
-      position: fixed;
-      top: 0;
-      left: 244px;
-      height: 100vh;
-      width: 320px;
-      background: var(--panel);
-      border-right: 1px solid var(--border);
-      box-shadow: 12px 0 28px rgba(0,0,0,0.15);
-      padding: 16px;
-      z-index: 50;
-      overflow: auto;
-    }
-
-    .drawer.mobile {
-      left: 0;
-      width: min(90vw, 320px);
+      font-size: 15px;
+      font-weight: 500;
     }
 
     @media (max-width: 1200px) {
@@ -1108,9 +1099,8 @@ function appStyles() {
       .sidebar { display: none; }
       .grid-4, .grid-3, .grid-2, .split-2 { grid-template-columns: 1fr; }
       .header { flex-direction: column; }
-      .header h1 { font-size: 26px; }
-      .main { padding: 14px; }
-      .drawer { left: 0; width: min(90vw, 320px); }
+      .header h1 { font-size: 23px; }
+      .main { padding: 12px; }
     }
   `;
 }
@@ -1119,7 +1109,7 @@ function MetricCard({ icon: Icon, label, value, sub }) {
   return (
     <div className="card metric-card">
       <div className="label">
-        <Icon size={14} />
+        <Icon size={13} />
         {label}
       </div>
       <div className="value">{value}</div>
@@ -1137,7 +1127,7 @@ function LoginScreen({ onLogin, theme }) {
       <div className="auth-card">
         <div className="auth-head">
           <div className="auth-logo">
-            <LineChart size={18} />
+            <LineChart size={17} />
           </div>
           <div>
             <div className="auth-title">Sentimo</div>
@@ -1145,12 +1135,12 @@ function LoginScreen({ onLogin, theme }) {
           </div>
         </div>
 
-        <h2 style={{ margin: "0 0 8px", fontSize: 22, letterSpacing: "-0.02em" }}>Sign in</h2>
-        <p className="muted" style={{ marginTop: 0, fontSize: 14, lineHeight: 1.45 }}>
+        <h2 style={{ margin: "0 0 8px", fontSize: 20, letterSpacing: "-0.02em", fontWeight: 600 }}>Sign in</h2>
+        <p className="muted" style={{ marginTop: 0, fontSize: 12, lineHeight: 1.45 }}>
           Enter your email and password. After sign-in, you’ll create a PIN for faster access next time.
         </p>
 
-        <div className="form-grid" style={{ marginTop: 14 }}>
+        <div className="form-grid" style={{ marginTop: 12 }}>
           <input
             className="input"
             value={email}
@@ -1169,7 +1159,7 @@ function LoginScreen({ onLogin, theme }) {
           </button>
         </div>
 
-        <div style={{ marginTop: 14, fontSize: 12 }} className="muted">
+        <div style={{ marginTop: 12, fontSize: 11 }} className="muted">
           Theme: {theme === "dark" ? "Dark Navy" : "Light"}
         </div>
       </div>
@@ -1205,11 +1195,8 @@ function PinSetupModal({ open, onSave }) {
   }
 
   function backspace() {
-    if (step === 1) {
-      setPin((s) => s.slice(0, -1));
-    } else {
-      setConfirmPin((s) => s.slice(0, -1));
-    }
+    if (step === 1) setPin((s) => s.slice(0, -1));
+    else setConfirmPin((s) => s.slice(0, -1));
   }
 
   const ready = pin.length === 4 && confirmPin.length === 4;
@@ -1221,14 +1208,14 @@ function PinSetupModal({ open, onSave }) {
         <div className="modal-head">
           <div>
             <div className="fx-kicker">Quick access</div>
-            <h3 className="section-title" style={{ fontSize: 20, marginBottom: 4 }}>Create PIN</h3>
+            <h3 className="section-title" style={{ fontSize: 18, marginBottom: 4 }}>Create PIN</h3>
             <div className="section-sub" style={{ marginBottom: 0 }}>
               Use a 4-digit PIN for faster future access.
             </div>
           </div>
         </div>
 
-        <div style={{ textAlign: "center", fontSize: 14, marginBottom: 4 }}>
+        <div style={{ textAlign: "center", fontSize: 12, marginBottom: 4 }}>
           {step === 1 ? "Enter new PIN" : "Confirm PIN"}
         </div>
 
@@ -1240,7 +1227,7 @@ function PinSetupModal({ open, onSave }) {
         </div>
 
         {ready && !match && (
-          <div style={{ color: "var(--danger)", textAlign: "center", fontSize: 13, marginBottom: 10 }}>
+          <div style={{ color: "var(--danger)", textAlign: "center", fontSize: 12, marginBottom: 10 }}>
             PINs do not match. Press clear and try again.
           </div>
         )}
@@ -1297,7 +1284,7 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
       <div className="auth-card" style={{ maxWidth: 360 }}>
         <div className="auth-head">
           <div className="auth-logo">
-            <KeyRound size={18} />
+            <KeyRound size={17} />
           </div>
           <div>
             <div className="auth-title">Quick PIN Access</div>
@@ -1305,7 +1292,7 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
           </div>
         </div>
 
-        <p className="muted" style={{ marginTop: 0, fontSize: 14, lineHeight: 1.45 }}>
+        <p className="muted" style={{ marginTop: 0, fontSize: 12, lineHeight: 1.45 }}>
           Enter your PIN to unlock quickly.
         </p>
 
@@ -1332,75 +1319,7 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
   );
 }
 
-function CategoriesDrawer({ open, onClose, categories, categoryFilter, setCategoryFilter, mobile = false }) {
-  if (!open) return null;
-
-  return (
-    <>
-      <div className="drawer-backdrop" onClick={onClose} />
-      <aside className={`drawer ${mobile ? "mobile" : ""}`}>
-        <div className="modal-head" style={{ marginBottom: 12 }}>
-          <div>
-            <div className="fx-kicker">Categories</div>
-            <h3 className="section-title" style={{ fontSize: 18, marginBottom: 0 }}>Browse</h3>
-          </div>
-          <button className="btn btn-icon" onClick={onClose}>
-            <X size={14} />
-          </button>
-        </div>
-
-        <div className="category-list">
-          <button
-            className="btn"
-            style={{
-              justifyContent: "flex-start",
-              background: !categoryFilter ? "var(--accent-soft)" : "var(--panel-2)",
-            }}
-            onClick={() => {
-              setCategoryFilter("");
-              onClose();
-            }}
-          >
-            All
-          </button>
-
-          {categories.map((category) => (
-            <div className="category-item" key={category.id}>
-              <div className="category-left">
-                <span className="category-dot" style={{ background: category.color }} />
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{category.name}</div>
-                  <div className="muted" style={{ fontSize: 11 }}>
-                    {category.subcategories.join(" · ")}
-                  </div>
-                </div>
-              </div>
-              <button
-                className="btn btn-icon"
-                onClick={() => {
-                  setCategoryFilter(category.name);
-                  onClose();
-                }}
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </aside>
-    </>
-  );
-}
-
-function Sidebar({
-  activePage,
-  setActivePage,
-  categories,
-  user,
-  theme,
-  setTheme,
-  onOpenCategories,
-}) {
+function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
   const nav = [
     [LayoutDashboard, "Dashboard"],
     [LineChart, "Trading P&L"],
@@ -1421,7 +1340,7 @@ function Sidebar({
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-badge">
-          <LineChart size={16} />
+          <LineChart size={15} />
         </div>
         <div>
           <div className="brand-title">Sentimo</div>
@@ -1431,9 +1350,9 @@ function Sidebar({
 
       <div className="daily-card">
         <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target</div>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--nav-text)" }}>0%</div>
+        <div style={{ fontSize: 17, fontWeight: 600, color: "var(--nav-text)" }}>0%</div>
         <div className="daily-line"><span /></div>
-        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--nav-muted)", fontSize: 11 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--nav-muted)", fontSize: 10 }}>
           <span>Spent £0</span>
           <span>£151 left</span>
         </div>
@@ -1446,30 +1365,22 @@ function Sidebar({
             <button
               key={label}
               className={active ? "active" : ""}
-              onClick={() => {
-                if (label === "Categories") {
-                  setActivePage("Categories");
-                  onOpenCategories();
-                } else {
-                  setActivePage(label);
-                }
-              }}
+              onClick={() => setActivePage(label)}
             >
-              <Icon size={15} />
+              <Icon size={14} />
               <span style={{ flex: 1 }}>{label}</span>
-              {label === "Categories" && <PanelRightOpen size={14} />}
             </button>
           );
         })}
       </div>
 
       <div className="sidebar-footer">
-        <div className="sidebar-userbox">
+        <div className="sidebar-bottom-card">
           <div className="sidebar-userrow">
-            <UserCircle2 size={20} />
+            <UserCircle2 size={18} />
             <div>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{user.name}</div>
-              <div style={{ fontSize: 11, color: "var(--nav-muted)" }}>{user.email}</div>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>{user.name}</div>
+              <div style={{ fontSize: 10, color: "var(--nav-muted)" }}>{user.email}</div>
             </div>
           </div>
 
@@ -1478,14 +1389,14 @@ function Sidebar({
               className={`theme-chip ${theme === "dark" ? "active" : ""}`}
               onClick={() => setTheme("dark")}
             >
-              <Moon size={12} />
+              <Moon size={11} />
               Dark
             </button>
             <button
               className={`theme-chip ${theme === "light" ? "active" : ""}`}
               onClick={() => setTheme("light")}
             >
-              <Sun size={12} />
+              <Sun size={11} />
               Light
             </button>
           </div>
@@ -1523,7 +1434,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <MetricCard icon={Target} label="30D Var Avg" value={formatCurrency(realExpenses / 30 || 0)} sub="Rolling average" />
       </div>
 
-      <div className="grid-3" style={{ marginTop: 12 }}>
+      <div className="grid-3" style={{ marginTop: 10 }}>
         <div className="card hero-panel" style={{ gridColumn: "span 2" }}>
           <h3 className="section-title">Category Budget Tracker</h3>
           <p className="section-sub">Past month vs current budget performance.</p>
@@ -1537,14 +1448,14 @@ function DashboardPage({ transactions, fixedExpenses }) {
                 const pct = Math.min(100, Math.round((row.amount / budget) * 100));
                 return (
                   <div key={row.name}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{row.name}</div>
-                        <div className="muted" style={{ fontSize: 11 }}>Budget {formatCurrency(budget)}</div>
+                        <div style={{ fontWeight: 600, fontSize: 12 }}>{row.name}</div>
+                        <div className="muted" style={{ fontSize: 10 }}>Budget {formatCurrency(budget)}</div>
                       </div>
                       <div style={{ textAlign: "right" }}>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{formatCurrency(row.amount)}</div>
-                        <div className="muted" style={{ fontSize: 11 }}>{pct}% used</div>
+                        <div style={{ fontWeight: 600, fontSize: 12 }}>{formatCurrency(row.amount)}</div>
+                        <div className="muted" style={{ fontSize: 10 }}>{pct}% used</div>
                       </div>
                     </div>
                     <div className="progress"><span style={{ width: `${pct}%` }} /></div>
@@ -1558,30 +1469,30 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Fixed Obligations</h3>
           <p className="section-sub">Current recurring burden.</p>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(fixedMonthly)}</div>
-          <div className="muted" style={{ fontSize: 13 }}>/ month</div>
+          <div style={{ fontSize: 24, fontWeight: 600 }}>{formatCurrency(fixedMonthly)}</div>
+          <div className="muted" style={{ fontSize: 11 }}>/ month</div>
 
-          <div className="grid-2" style={{ marginTop: 14 }}>
+          <div className="grid-2" style={{ marginTop: 12 }}>
             <div>
-              <div className="muted" style={{ fontSize: 11 }}>Weekly</div>
-              <div style={{ fontWeight: 700, fontSize: 14 }}>{formatCurrency(fixedMonthly / 4.333)}</div>
+              <div className="muted" style={{ fontSize: 10 }}>Weekly</div>
+              <div style={{ fontWeight: 600, fontSize: 12 }}>{formatCurrency(fixedMonthly / 4.333)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 11 }}>Daily</div>
-              <div style={{ fontWeight: 700, fontSize: 14 }}>{formatCurrency(fixedMonthly / 30)}</div>
+              <div className="muted" style={{ fontSize: 10 }}>Daily</div>
+              <div style={{ fontWeight: 600, fontSize: 12 }}>{formatCurrency(fixedMonthly / 30)}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid-3" style={{ marginTop: 12 }}>
+      <div className="grid-3" style={{ marginTop: 10 }}>
         <div className="card">
           <h3 className="section-title">Monthly Net Position</h3>
           <p className="section-sub">Income received minus total expenses this month.</p>
-          <div style={{ fontSize: 28, fontWeight: 700, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
+          <div style={{ fontSize: 24, fontWeight: 600, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
             {net >= 0 ? "+" : ""}{formatCurrency(net)}
           </div>
-          <div className="muted" style={{ marginTop: 6, fontSize: 13 }}>
+          <div className="muted" style={{ marginTop: 5, fontSize: 11 }}>
             {formatCurrency(realIncome)} in · {formatCurrency(realExpenses)} out
           </div>
         </div>
@@ -1589,7 +1500,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Savings / Internal</h3>
           <p className="section-sub">Tracked but excluded from real totals.</p>
-          <div style={{ fontSize: 26, fontWeight: 700 }}>{formatCurrency(internalTotal)}</div>
+          <div style={{ fontSize: 23, fontWeight: 600 }}>{formatCurrency(internalTotal)}</div>
         </div>
 
         <div className="card">
@@ -1597,7 +1508,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
           <p className="section-sub">Latest counted inflows.</p>
           <div className="form-grid">
             {getCountedRealIncome(transactions).slice(0, 3).map((t) => (
-              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 14 }}>
+              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 12 }}>
                 <span>{t.description}</span>
                 <strong>{formatCurrency(t.amount)}</strong>
               </div>
@@ -1684,9 +1595,9 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
         <button className="btn btn-primary" onClick={addExpense}>
-          <Plus size={14} />
+          <Plus size={13} />
           Add Expense
         </button>
       </div>
@@ -1698,7 +1609,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         <MetricCard icon={Target} label="Overdue" value={formatCurrency(overdueValue)} sub={`${overdueRows.length} item${overdueRows.length === 1 ? "" : "s"}`} />
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <div className="mini-tabs">
           {[
             { label: "All", count: fixedExpenses.length },
@@ -1745,8 +1656,8 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                   </td>
                   <td>{item.category}</td>
                   <td>{item.frequency}</td>
-                  <td style={{ fontWeight: 700 }}>{formatCurrency(item.amount)}</td>
-                  <td style={{ fontWeight: 700 }}>{formatCurrency(monthlyEquivalent(item.frequency, item.amount))}</td>
+                  <td style={{ fontWeight: 600 }}>{formatCurrency(item.amount)}</td>
+                  <td style={{ fontWeight: 600 }}>{formatCurrency(monthlyEquivalent(item.frequency, item.amount))}</td>
                   <td>
                     <div>{item.nextDueDate || `Day ${item.dueDay}`}</div>
                     <div className="fx-sub">{item.status === "Paid" ? "Completed" : "Upcoming"}</div>
@@ -1754,17 +1665,17 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                   <td>
                     <div className="action-row">
                       <button className="btn btn-icon" title="Cycle status" onClick={() => cycleStatus(item.id)}>
-                        {item.status === "Paid" ? <Check size={13} /> : <Clock3 size={13} />}
+                        {item.status === "Paid" ? <Check size={12} /> : <Clock3 size={12} />}
                       </button>
                       <button className="btn btn-icon" title="Edit">
-                        <Pencil size={13} />
+                        <Pencil size={12} />
                       </button>
                       <button
                         className="btn btn-icon"
                         title="Delete"
                         onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))}
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   </td>
@@ -1773,7 +1684,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
               {visible.length === 0 && (
                 <tr>
                   <td colSpan="8">
-                    <div className="empty-box" style={{ minHeight: 120 }}>
+                    <div className="empty-box" style={{ minHeight: 110 }}>
                       No fixed expenses in this status.
                     </div>
                   </td>
@@ -1789,7 +1700,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <div className="fx-kicker">Recurring obligations</div>
         <h3 className="section-title">Add Fixed Expense</h3>
         <p className="section-sub">
@@ -1811,9 +1722,9 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
           <input className="input" placeholder="Due day" type="number" value={draft.dueDay} onChange={(e) => setDraft({ ...draft, dueDay: e.target.value })} />
         </div>
 
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 10 }}>
           <button className="btn btn-primary" onClick={addExpense}>
-            <Plus size={14} />
+            <Plus size={13} />
             Save Fixed Expense
           </button>
         </div>
@@ -1874,13 +1785,13 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
         <button className="btn">
-          <Plus size={14} />
+          <Plus size={13} />
           Log Multiple
         </button>
         <button className="btn btn-primary" onClick={addExpense}>
-          <Plus size={14} />
+          <Plus size={13} />
           Add Single
         </button>
       </div>
@@ -1893,7 +1804,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
           <button>This Year</button>
         </div>
 
-        <div className="split-2" style={{ marginBottom: 12 }}>
+        <div className="split-2" style={{ marginBottom: 10 }}>
           <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
             <option>All categories</option>
             {categories.map((c) => <option key={c.id}>{c.name}</option>)}
@@ -1906,7 +1817,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
           <MetricCard icon={TrendingUp} label="Daily Average" value={formatCurrency(dailyAvg)} sub="Rolling average" />
         </div>
 
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 10 }}>
           {expenseRows.length === 0 ? (
             <div className="empty-box">
               <div>
@@ -1936,10 +1847,10 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
                       <td>{row.description}</td>
                       <td>{row.category}</td>
                       <td>{row.subcategory}</td>
-                      <td style={{ fontWeight: 700 }}>{formatCurrency(row.amount)}</td>
+                      <td style={{ fontWeight: 600 }}>{formatCurrency(row.amount)}</td>
                       <td>
                         <button className="btn btn-icon" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== row.id))}>
-                          <Trash2 size={13} />
+                          <Trash2 size={12} />
                         </button>
                       </td>
                     </tr>
@@ -1951,7 +1862,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Log Daily Expense</h3>
         <div className="split-2">
           <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
@@ -2016,13 +1927,13 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
         <button className="btn">
-          <Plus size={14} />
+          <Plus size={13} />
           Log Multiple
         </button>
         <button className="btn btn-primary" onClick={addIncome}>
-          <Plus size={14} />
+          <Plus size={13} />
           Add Single
         </button>
       </div>
@@ -2033,24 +1944,24 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
         <MetricCard icon={LineChart} label="Net Position" value={`${net >= 0 ? "+" : ""}${formatCurrency(net)}`} sub="Received minus spent" />
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Income by Source</h3>
         <div className="grid-2">
           {bySource.map((item) => {
             const pct = totalReceived > 0 ? Math.round((item.amount / totalReceived) * 100) : 0;
             return (
-              <div key={item.name} className="card" style={{ padding: 12 }}>
-                <div className="muted" style={{ fontSize: 11 }}>{item.name}</div>
-                <div style={{ marginTop: 8, fontWeight: 700, fontSize: 22 }}>{formatCurrency(item.amount)}</div>
-                <div className="progress" style={{ marginTop: 10 }}><span style={{ width: `${pct}%` }} /></div>
-                <div className="muted" style={{ marginTop: 6, fontSize: 11 }}>{pct}%</div>
+              <div key={item.name} className="card" style={{ padding: 10 }}>
+                <div className="muted" style={{ fontSize: 10 }}>{item.name}</div>
+                <div style={{ marginTop: 6, fontWeight: 600, fontSize: 18 }}>{formatCurrency(item.amount)}</div>
+                <div className="progress" style={{ marginTop: 8 }}><span style={{ width: `${pct}%` }} /></div>
+                <div className="muted" style={{ marginTop: 5, fontSize: 10 }}>{pct}%</div>
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Entries</h3>
         <div className="table-wrap">
           <table>
@@ -2071,7 +1982,7 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
                     <td>{r.date}</td>
                     <td><span className="status-pill status-blue">{r.subcategory}</span></td>
                     <td>{r.description}</td>
-                    <td style={{ fontWeight: 700 }}>+{formatCurrency(r.amount)}</td>
+                    <td style={{ fontWeight: 600 }}>+{formatCurrency(r.amount)}</td>
                     <td>{formatCurrency(running)}</td>
                   </tr>
                 );
@@ -2081,7 +1992,7 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Log Income / Deposit</h3>
         <div className="split-2">
           <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
@@ -2136,13 +2047,13 @@ function TradingPnlModal({ open, onClose, onSave }) {
         <div className="modal-head">
           <div>
             <div className="fx-kicker">Today — 29 Apr 2026</div>
-            <h3 className="section-title" style={{ fontSize: 20, marginBottom: 4 }}>Log Trading Session</h3>
+            <h3 className="section-title" style={{ fontSize: 17, marginBottom: 4 }}>Log Trading Session</h3>
             <div className="section-sub" style={{ marginBottom: 0 }}>
               Record manual daily performance and compare it against your expenses.
             </div>
           </div>
           <button className="btn btn-icon" onClick={onClose}>
-            <X size={14} />
+            <X size={13} />
           </button>
         </div>
 
@@ -2188,7 +2099,7 @@ function TradingPnlModal({ open, onClose, onSave }) {
           />
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
           <button className="btn" onClick={onClose}>Cancel</button>
           <button className="btn btn-primary" onClick={submit}>Log Session</button>
         </div>
@@ -2221,9 +2132,9 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
         <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
-          <Plus size={14} />
+          <Plus size={13} />
           Log Session
         </button>
       </div>
@@ -2235,7 +2146,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
           Daily performance vs expenses — did trading cover the day?
         </p>
 
-        <div className="grid-3" style={{ marginTop: 12 }}>
+        <div className="grid-3" style={{ marginTop: 10 }}>
           <div className="tcard">
             <div className="tcard-label">Trading P&L</div>
             <div className="tcard-value" style={{ color: todayTrading >= 0 ? "var(--success)" : "var(--danger)" }}>
@@ -2256,7 +2167,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
           </div>
         </div>
 
-        <div style={{ marginTop: 14, fontSize: 14 }}>
+        <div style={{ marginTop: 12, fontSize: 12 }}>
           {todaySessions.length === 0 && todayExpenses === 0 && (
             <span className="muted">No trading sessions or expenses logged today.</span>
           )}
@@ -2270,7 +2181,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <div className="fx-kicker">Day-by-day comparison — last 60 days</div>
         {last60.length === 0 ? (
           <div className="empty-box">
@@ -2300,7 +2211,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
                     <td>{session.date}</td>
                     <td>{session.instrument}</td>
                     <td>{session.currency}</td>
-                    <td style={{ fontWeight: 700, color: session.pnl >= 0 ? "var(--success)" : "var(--danger)" }}>
+                    <td style={{ fontWeight: 600, color: session.pnl >= 0 ? "var(--success)" : "var(--danger)" }}>
                       {session.pnl >= 0 ? "+" : ""}{formatCurrency(session.pnl)}
                     </td>
                     <td className="muted">{session.notes || "—"}</td>
@@ -2309,7 +2220,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
                         className="btn btn-icon"
                         onClick={() => setSessions((prev) => prev.filter((x) => x.id !== session.id))}
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={12} />
                       </button>
                     </td>
                   </tr>
@@ -2349,38 +2260,38 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
       <div className="grid-2">
         <div className="card">
           <div className="eyebrow muted">Wed, 29 Apr 2026 · Daily Target</div>
-          <h3 className="section-title" style={{ fontSize: 17 }}>Daily Target</h3>
+          <h3 className="section-title" style={{ fontSize: 15 }}>Daily Target</h3>
 
-          <div style={{ display: "grid", placeItems: "center", padding: "18px 0" }}>
+          <div style={{ display: "grid", placeItems: "center", padding: "14px 0" }}>
             <div
               style={{
-                width: 158,
-                height: 158,
+                width: 142,
+                height: 142,
                 borderRadius: "50%",
-                border: "10px solid var(--panel-2)",
+                border: "9px solid var(--panel-2)",
                 display: "grid",
                 placeItems: "center",
               }}
             >
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 38, fontWeight: 700 }}>{pct}%</div>
-                <div className="muted" style={{ fontSize: 13 }}>of target</div>
+                <div style={{ fontSize: 34, fontWeight: 600 }}>{pct}%</div>
+                <div className="muted" style={{ fontSize: 11 }}>of target</div>
               </div>
             </div>
           </div>
 
           <div className="grid-3">
             <div>
-              <div className="muted" style={{ fontSize: 11 }}>Today Spent</div>
-              <div style={{ fontSize: 16, fontWeight: 700 }}>{formatCurrency(todaySpent)}</div>
+              <div className="muted" style={{ fontSize: 10 }}>Today Spent</div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{formatCurrency(todaySpent)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 11 }}>Target</div>
-              <div style={{ fontSize: 16, fontWeight: 700 }}>{formatCurrency(target)}</div>
+              <div className="muted" style={{ fontSize: 10 }}>Target</div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{formatCurrency(target)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 11 }}>Remaining</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: remaining >= 0 ? "var(--success)" : "var(--danger)" }}>
+              <div className="muted" style={{ fontSize: 10 }}>Remaining</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: remaining >= 0 ? "var(--success)" : "var(--danger)" }}>
                 {formatCurrency(remaining)}
               </div>
             </div>
@@ -2389,24 +2300,24 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
 
         <div className="card">
           <h3 className="section-title">Daily Withdrawal Target</h3>
-          <div style={{ fontSize: 36, fontWeight: 700 }}>{formatCurrency(target)} <span className="muted" style={{ fontSize: 16 }}>/ day</span></div>
+          <div style={{ fontSize: 31, fontWeight: 600 }}>{formatCurrency(target)} <span className="muted" style={{ fontSize: 14 }}>/ day</span></div>
           <p className="section-sub">
             Auto-calculated from fixed monthly obligations plus variable rolling average.
           </p>
 
-          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12, marginTop: 10 }}>
-            <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, marginTop: 10 }}>
+            <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>
               Target Composition
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Fixed expenses (daily equiv.)</span>
               <strong>{formatCurrency(fixedMonthly / daysInMonth(new Date("2026-04-29")))}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Variable avg (rolling)</span>
               <strong>{formatCurrency(variableAvg)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontWeight: 700, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontWeight: 600, fontSize: 12 }}>
               <span>Daily target</span>
               <span>{formatCurrency(target)}</span>
             </div>
@@ -2414,13 +2325,13 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Daily Spend vs Target</h3>
         <p className="section-sub">7d / 14d / 30d / 60d graph block reserved for next build step.</p>
         <div className="empty-box">Chart area placeholder</div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Daily History — Last 30 Days</h3>
         <div className="empty-box">History chart placeholder</div>
       </div>
@@ -2456,7 +2367,7 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
         <MetricCard icon={Target} label="Daily Target" value={formatCurrency(dailyTarget)} sub="Budget pressure" />
       </div>
 
-      <div className="grid-2" style={{ marginTop: 12 }}>
+      <div className="grid-2" style={{ marginTop: 10 }}>
         <div className="card">
           <h3 className="section-title">Spend by Category</h3>
           <div className="empty-box">No data for this period</div>
@@ -2467,7 +2378,7 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Daily Spending vs Target</h3>
         <div className="empty-box">Chart area placeholder</div>
       </div>
@@ -2495,16 +2406,16 @@ function OverallPage({ transactions, fixedExpenses }) {
       <div className="grid-3">
         <div className="card">
           <h3 className="section-title">This Month</h3>
-          <div style={{ marginTop: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Income</span>
               <strong>{formatCurrency(thisMonthIncome)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Expenses</span>
               <strong>{formatCurrency(thisMonthExpenses)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 12 }}>
               <span>Net</span>
               <strong>{formatCurrency(thisMonthIncome - thisMonthExpenses)}</strong>
             </div>
@@ -2513,16 +2424,16 @@ function OverallPage({ transactions, fixedExpenses }) {
 
         <div className="card">
           <h3 className="section-title">Previous Month</h3>
-          <div style={{ marginTop: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Income</span>
               <strong>{formatCurrency(previousMonthIncome)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Expenses</span>
               <strong>{formatCurrency(previousMonthExpenses)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 12 }}>
               <span>Net</span>
               <strong>{formatCurrency(previousMonthIncome - previousMonthExpenses)}</strong>
             </div>
@@ -2531,16 +2442,16 @@ function OverallPage({ transactions, fixedExpenses }) {
 
         <div className="card">
           <h3 className="section-title">Budget Month</h3>
-          <div style={{ marginTop: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Budgeted Expenses</span>
               <strong>{formatCurrency(budgetMonth)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
               <span className="muted">Target Income</span>
               <strong>{formatCurrency(budgetMonth)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 12 }}>
               <span>Target Net</span>
               <strong>{formatCurrency(0)}</strong>
             </div>
@@ -2548,7 +2459,7 @@ function OverallPage({ transactions, fixedExpenses }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Comparison View</h3>
         <p className="section-sub">This module is for side-by-side weekly, monthly, yearly, and budget comparison.</p>
         <div className="empty-box">Comparison table and charts placeholder</div>
@@ -2557,71 +2468,101 @@ function OverallPage({ transactions, fixedExpenses }) {
   );
 }
 
-function CategoriesPage({ categories, categoryFilter, onOpenCategories }) {
-  const visible = categoryFilter ? categories.filter((c) => c.name === categoryFilter) : categories;
+function CategoriesPage({ categories, setCategories }) {
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategorySubs, setNewCategorySubs] = useState("");
+  const [newCategoryColor, setNewCategoryColor] = useState("#64748b");
+
+  function addCategory() {
+    if (!newCategoryName.trim()) return;
+    const subs = newCategorySubs
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    setCategories((prev) => [
+      ...prev,
+      {
+        id: `cat-${Date.now()}`,
+        name: newCategoryName.trim(),
+        color: newCategoryColor,
+        subcategories: subs,
+      },
+    ]);
+
+    setNewCategoryName("");
+    setNewCategorySubs("");
+    setNewCategoryColor("#64748b");
+  }
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
-        <button className="btn" onClick={onOpenCategories}>
-          <PanelRightOpen size={14} />
-          Browse Panel
-        </button>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
         <button className="btn">
-          <Plus size={14} />
+          <Plus size={13} />
           Seed Keywords
         </button>
-        <button className="btn btn-primary">
-          <Plus size={14} />
+        <button className="btn btn-primary" onClick={addCategory}>
+          <Plus size={13} />
           New Category
         </button>
       </div>
 
-      <div className="grid-2">
-        <div className="card">
-          <h3 className="section-title">Selected View</h3>
-          <p className="section-sub">
-            {categoryFilter ? `Filtered by ${categoryFilter}` : "Showing all categories"}
-          </p>
+      <div className="card" style={{ marginBottom: 10 }}>
+        <h3 className="section-title">Add Category</h3>
+        <p className="section-sub">
+          Add a main category and optional sub-categories separated by commas.
+        </p>
 
-          <div className="category-list">
-            {visible.map((category) => (
-              <div className="category-item" key={category.id}>
-                <div className="category-left">
-                  <span className="category-dot" style={{ background: category.color }} />
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{category.name}</div>
-                    <div className="muted" style={{ fontSize: 11 }}>
-                      {category.subcategories.join(" · ")}
-                    </div>
+        <div className="split-2">
+          <input
+            className="input"
+            placeholder="Category name"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+          />
+          <input
+            className="input"
+            placeholder="Colour hex e.g. #64748b"
+            value={newCategoryColor}
+            onChange={(e) => setNewCategoryColor(e.target.value)}
+          />
+          <input
+            className="input"
+            style={{ gridColumn: "1 / -1" }}
+            placeholder="Sub-categories e.g. Rent, Council Tax, Repairs"
+            value={newCategorySubs}
+            onChange={(e) => setNewCategorySubs(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="card">
+        <h3 className="section-title">Categories</h3>
+        <p className="section-sub">Main categories and visible sub-categories for transaction classification.</p>
+
+        <div className="category-grid">
+          {categories.map((category) => (
+            <div className="category-item" key={category.id}>
+              <div className="category-left">
+                <span className="category-dot" style={{ background: category.color }} />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 12 }}>{category.name}</div>
+                  <div className="muted" style={{ fontSize: 10, marginTop: 3 }}>
+                    {category.subcategories.length > 0 ? category.subcategories.join(" · ") : "No sub-categories yet"}
                   </div>
                 </div>
-                <ChevronRight size={14} className="muted" />
               </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="card">
-          <h3 className="section-title">Expense Classification</h3>
-          <p className="section-sub">Click Categories to manage sub-categories and future auto-categorisation keywords.</p>
-
-          <div className="card" style={{ marginBottom: 12 }}>
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <Tags size={17} />
-              <div>
-                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 14 }}>Auto-Categorisation Engine</div>
-                <div className="muted" style={{ fontSize: 12 }}>
-                  Each category can have keyword rules. Example: “Vodafone subscription” → Utilities / Phones.
-                </div>
-              </div>
+              <button
+                className="btn btn-icon"
+                onClick={() => setCategories((prev) => prev.filter((c) => c.id !== category.id))}
+                title="Delete category"
+              >
+                <Trash2 size={12} />
+              </button>
             </div>
-          </div>
-
-          <button className="btn" onClick={onOpenCategories}>
-            <PanelRightOpen size={14} />
-            Open Categories Panel
-          </button>
+          ))}
         </div>
       </div>
     </>
@@ -2637,11 +2578,11 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
       <div className="card" style={{ maxWidth: 760 }}>
         <h3 className="section-title">Settings</h3>
 
-        <div className="card" style={{ marginTop: 12 }}>
+        <div className="card" style={{ marginTop: 10 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>Currency Settings</div>
           <div className="split-2">
             <div>
-              <div className="muted" style={{ marginBottom: 6, fontSize: 11 }}>Base Currency</div>
+              <div className="muted" style={{ marginBottom: 6, fontSize: 10 }}>Base Currency</div>
               <select value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value })}>
                 <option>GBP</option>
                 <option>EUR</option>
@@ -2651,38 +2592,38 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           </div>
         </div>
 
-        <div className="card" style={{ marginTop: 12 }}>
+        <div className="card" style={{ marginTop: 10 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>Theme</div>
           <div style={{ display: "flex", gap: 8 }}>
             <button className={`btn ${theme === "dark" ? "btn-soft" : ""}`} onClick={() => setTheme("dark")}>
-              <Moon size={13} />
+              <Moon size={12} />
               Dark
             </button>
             <button className={`btn ${theme === "light" ? "btn-soft" : ""}`} onClick={() => setTheme("light")}>
-              <Sun size={13} />
+              <Sun size={12} />
               Light
             </button>
           </div>
         </div>
 
-        <div className="card" style={{ marginTop: 12 }}>
+        <div className="card" style={{ marginTop: 10 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target Settings</div>
-          <div className="grid-2" style={{ marginBottom: 12 }}>
-            <div className="card" style={{ padding: 12 }}>
-              <div className="muted" style={{ fontSize: 11 }}>Auto-calculated target</div>
-              <div style={{ fontSize: 24, fontWeight: 700 }}>{formatCurrency(autoTarget)}</div>
-              <div className="muted" style={{ fontSize: 12 }}>Fixed daily + variable avg</div>
+          <div className="grid-2" style={{ marginBottom: 10 }}>
+            <div className="card" style={{ padding: 10 }}>
+              <div className="muted" style={{ fontSize: 10 }}>Auto-calculated target</div>
+              <div style={{ fontSize: 20, fontWeight: 600 }}>{formatCurrency(autoTarget)}</div>
+              <div className="muted" style={{ fontSize: 10 }}>Fixed daily + variable avg</div>
             </div>
-            <div className="card" style={{ padding: 12 }}>
-              <div className="muted" style={{ fontSize: 11 }}>Fixed monthly total</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
-              <div className="muted" style={{ fontSize: 12 }}>All active fixed expenses</div>
+            <div className="card" style={{ padding: 10 }}>
+              <div className="muted" style={{ fontSize: 10 }}>Fixed monthly total</div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
+              <div className="muted" style={{ fontSize: 10 }}>All active fixed expenses</div>
             </div>
           </div>
 
           <div className="form-grid">
             <div>
-              <div className="muted" style={{ fontSize: 11, marginBottom: 6 }}>Daily Target Override</div>
+              <div className="muted" style={{ fontSize: 10, marginBottom: 6 }}>Daily Target Override</div>
               <input
                 className="input"
                 value={settings.customDailyTarget}
@@ -2692,7 +2633,7 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
             </div>
 
             <div>
-              <div className="muted" style={{ fontSize: 11, marginBottom: 6 }}>Variable Average Window (Days)</div>
+              <div className="muted" style={{ fontSize: 10, marginBottom: 6 }}>Variable Average Window (Days)</div>
               <input
                 className="input"
                 type="number"
@@ -2703,8 +2644,8 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           </div>
         </div>
 
-        <button className="btn btn-primary" style={{ marginTop: 14 }}>
-          <Save size={14} />
+        <button className="btn btn-primary" style={{ marginTop: 12 }}>
+          <Save size={13} />
           Save Settings
         </button>
       </div>
@@ -2722,11 +2663,11 @@ function AdminPanelPage({ user }) {
         <MetricCard icon={TrendingUp} label="New This Month" value="1" sub="Signups" />
       </div>
 
-      <div className="card" style={{ marginTop: 12 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+      <div className="card" style={{ marginTop: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <h3 className="section-title" style={{ marginBottom: 0 }}>Users</h3>
           <button className="btn">
-            <RefreshCw size={14} />
+            <RefreshCw size={13} />
             Refresh
           </button>
         </div>
@@ -2778,7 +2719,7 @@ function ImportCsvPage() {
         style={{ cursor: "pointer" }}
       >
         <div>
-          <Upload size={26} style={{ marginBottom: 10 }} />
+          <Upload size={24} style={{ marginBottom: 10 }} />
           <div>Drop or select your CSV statement</div>
         </div>
         <input ref={inputRef} type="file" accept=".csv" style={{ display: "none" }} />
@@ -2801,7 +2742,6 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("dark");
   const [activePage, setActivePage] = useState("Dashboard");
-  const [categoryFilter, setCategoryFilter] = useState("");
   const [transactions, setTransactions] = useState(seedTransactions);
   const [fixedExpenses, setFixedExpenses] = useState(seedFixedExpenses);
   const [categories, setCategories] = useState(seedCategories);
@@ -2809,7 +2749,6 @@ export default function App() {
   const [sessions, setSessions] = useState(seedTradingSessions);
   const [needsPinSetup, setNeedsPinSetup] = useState(false);
   const [authView, setAuthView] = useState("pin_or_password");
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   useEffect(() => {
     const styleTag = document.createElement("style");
@@ -2898,13 +2837,6 @@ export default function App() {
     setNeedsPinSetup(false);
   }
 
-  function handlePinUnlock() {
-    if (!user) {
-      const savedUser = localStorage.getItem(USER_KEY);
-      if (savedUser) setUser(JSON.parse(savedUser));
-    }
-  }
-
   function usePasswordInstead() {
     setUser(null);
     setAuthView("password");
@@ -2912,16 +2844,13 @@ export default function App() {
   }
 
   const storedPin = typeof window !== "undefined" ? localStorage.getItem(PIN_KEY) : null;
-  const isAuthenticated = !!user && authView !== "pin";
 
   if (authView === "pin" && storedPin) {
     return (
-      <>
-        <PinUnlockScreen
-          onUnlock={() => setAuthView("app")}
-          onUsePassword={usePasswordInstead}
-        />
-      </>
+      <PinUnlockScreen
+        onUnlock={() => setAuthView("app")}
+        onUsePassword={usePasswordInstead}
+      />
     );
   }
 
@@ -2935,11 +2864,9 @@ export default function App() {
         <Sidebar
           activePage={activePage}
           setActivePage={setActivePage}
-          categories={categories}
           user={user}
           theme={theme}
           setTheme={setTheme}
-          onOpenCategories={() => setCategoriesOpen(true)}
         />
 
         <main className="main">
@@ -2957,7 +2884,7 @@ export default function App() {
                   : activePage}
               </div>
               <h1>{activePage}</h1>
-              <p className="muted" style={{ marginTop: 8, maxWidth: 900, fontSize: 14, lineHeight: 1.45 }}>
+              <p className="muted" style={{ marginTop: 7, maxWidth: 900, fontSize: 12, lineHeight: 1.45 }}>
                 {activePage === "Income & Deposits" && "All money received — trading draws, commissions, dividends, and more."}
                 {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
                 {activePage === "Daily Expenses" && "Day-to-day spending control with category and period filters."}
@@ -2975,14 +2902,8 @@ export default function App() {
             </div>
 
             <div className="header-actions">
-              {activePage === "Categories" && (
-                <button className="btn" onClick={() => setCategoriesOpen(true)}>
-                  <PanelRightOpen size={14} />
-                  Categories Panel
-                </button>
-              )}
               <button className="btn">
-                <Cloud size={14} />
+                <Cloud size={13} />
                 Cloud Connected
               </button>
             </div>
@@ -3045,8 +2966,7 @@ export default function App() {
           {activePage === "Categories" && (
             <CategoriesPage
               categories={categories}
-              categoryFilter={categoryFilter}
-              onOpenCategories={() => setCategoriesOpen(true)}
+              setCategories={setCategories}
             />
           )}
 
@@ -3066,14 +2986,6 @@ export default function App() {
           {activePage === "Admin Panel" && <AdminPanelPage user={user} />}
         </main>
       </div>
-
-      <CategoriesDrawer
-        open={categoriesOpen}
-        onClose={() => setCategoriesOpen(false)}
-        categories={categories}
-        categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
-      />
 
       <PinSetupModal open={needsPinSetup} onSave={handlePinSaved} />
     </div>
