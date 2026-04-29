@@ -4,14 +4,16 @@ import {
   ArrowUpFromLine,
   BarChart3,
   CalendarDays,
+  Check,
   CheckCircle2,
   ChevronRight,
-  CircleDollarSign,
+  Clock3,
   Cloud,
   CreditCard,
   LayoutDashboard,
   LineChart,
   Moon,
+  Pencil,
   PiggyBank,
   Plus,
   RefreshCw,
@@ -26,17 +28,16 @@ import {
   Upload,
   UserCircle2,
   Wallet,
-  Clock3,
-  Check,
-  Pencil,
+  X,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v3";
-const USER_KEY = "sentimo_user_v3";
-const THEME_KEY = "sentimo_theme_v1";
-const FIXED_KEY = "sentimo_fixed_expenses_v2";
-const CATEGORIES_KEY = "sentimo_categories_v1";
-const SETTINGS_KEY = "sentimo_settings_v1";
+const STORAGE_KEY = "sentimo_transactions_v4";
+const USER_KEY = "sentimo_user_v4";
+const THEME_KEY = "sentimo_theme_v2";
+const FIXED_KEY = "sentimo_fixed_expenses_v3";
+const CATEGORIES_KEY = "sentimo_categories_v2";
+const SETTINGS_KEY = "sentimo_settings_v2";
+const SESSIONS_KEY = "sentimo_trading_sessions_v1";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -263,6 +264,25 @@ const seedTransactions = [
   },
 ];
 
+const seedTradingSessions = [
+  {
+    id: "sess-1",
+    date: "2026-04-24",
+    instrument: "DAX",
+    currency: "GBP",
+    pnl: 380,
+    notes: "Morning session, short from rejection area.",
+  },
+  {
+    id: "sess-2",
+    date: "2026-04-26",
+    instrument: "MARA",
+    currency: "GBP",
+    pnl: -95,
+    notes: "Late entry, cut quickly.",
+  },
+];
+
 const defaultSettings = {
   currency: "GBP",
   variableAverageDays: 30,
@@ -293,11 +313,11 @@ function monthlyEquivalent(frequency, amount) {
 function getThemeVars(theme) {
   if (theme === "light") {
     return {
-      "--bg": "#f5f7fb",
+      "--bg": "#f4f7fb",
       "--bg-secondary": "#ffffff",
       "--panel": "#ffffff",
       "--panel-2": "#f8fafc",
-      "--border": "#dbe3ef",
+      "--border": "#d9e2ef",
       "--text": "#0f172a",
       "--muted": "#64748b",
       "--accent": "#0f766e",
@@ -305,28 +325,30 @@ function getThemeVars(theme) {
       "--success": "#10b981",
       "--danger": "#ef4444",
       "--warning": "#f59e0b",
-      "--nav": "#eef2f7",
-      "--nav-active": "#dbe7f7",
-      "--shadow": "0 10px 28px rgba(15, 23, 42, 0.06)",
+      "--nav": "#eef3f8",
+      "--nav-active": "#dde7f3",
+      "--shadow": "0 8px 24px rgba(15, 23, 42, 0.06)",
+      "--hero-glow": "rgba(32, 201, 151, 0.08)",
     };
   }
 
   return {
-    "--bg": "#162033",
-    "--bg-secondary": "#1b2538",
-    "--panel": "#2a3446",
-    "--panel-2": "#263246",
-    "--border": "#38465f",
-    "--text": "#e5e7eb",
-    "--muted": "#9aa7bd",
+    "--bg": "#142038",
+    "--bg-secondary": "#18253d",
+    "--panel": "#253248",
+    "--panel-2": "#222f44",
+    "--border": "#36465f",
+    "--text": "#e8edf5",
+    "--muted": "#97a5bc",
     "--accent": "#20c997",
-    "--accent-soft": "rgba(32,201,151,0.12)",
+    "--accent-soft": "rgba(32,201,151,0.10)",
     "--success": "#20c997",
-    "--danger": "#ef4444",
+    "--danger": "#ff5b57",
     "--warning": "#f59e0b",
-    "--nav": "#10192a",
-    "--nav-active": "#253149",
-    "--shadow": "0 12px 32px rgba(0, 0, 0, 0.22)",
+    "--nav": "#0f182b",
+    "--nav-active": "#23324a",
+    "--shadow": "0 10px 28px rgba(0,0,0,0.20)",
+    "--hero-glow": "rgba(32, 201, 151, 0.10)",
   };
 }
 
@@ -375,10 +397,15 @@ function matchPeriod(dateStr, mode) {
   const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
   if (mode === "7d") return diffDays <= 7;
   if (mode === "30d") return diffDays <= 30;
-  if (mode === "month")
+  if (mode === "month") {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }
   if (mode === "year") return d.getFullYear() === now.getFullYear();
   return true;
+}
+
+function sameDay(a, b) {
+  return a === b;
 }
 
 function appStyles() {
@@ -390,19 +417,20 @@ function appStyles() {
 
     * { box-sizing: border-box; }
     html, body, #root { margin: 0; min-height: 100%; }
+
     body {
       background: var(--bg);
       color: var(--text);
       transition: background 0.2s ease, color 0.2s ease;
     }
 
-    button, input, select { font: inherit; }
+    button, input, select, textarea { font: inherit; }
     button { cursor: pointer; }
 
     .app-shell {
       min-height: 100vh;
       background:
-        radial-gradient(circle at top right, rgba(32, 201, 151, 0.08), transparent 24%),
+        radial-gradient(circle at top right, var(--hero-glow), transparent 24%),
         linear-gradient(180deg, var(--bg), var(--bg-secondary));
       color: var(--text);
     }
@@ -410,13 +438,13 @@ function appStyles() {
     .layout {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 252px 1fr;
     }
 
     .sidebar {
       background: var(--nav);
       border-right: 1px solid var(--border);
-      padding: 10px 8px 18px;
+      padding: 10px 8px 16px;
     }
 
     .brand {
@@ -428,8 +456,8 @@ function appStyles() {
     }
 
     .brand-badge {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 12px;
       display: grid;
       place-items: center;
@@ -440,31 +468,33 @@ function appStyles() {
 
     .brand-title {
       font-weight: 700;
-      line-height: 1.1;
+      line-height: 1.05;
+      font-size: 15px;
     }
 
     .brand-sub {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     .daily-card,
-    .card {
+    .card,
+    .panel-card {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 15px;
       box-shadow: var(--shadow);
     }
 
     .daily-card {
       margin: 8px 8px 14px;
-      padding: 14px;
+      padding: 13px;
     }
 
     .daily-line {
-      height: 8px;
+      height: 7px;
       border-radius: 999px;
       background: var(--panel-2);
       overflow: hidden;
@@ -480,7 +510,7 @@ function appStyles() {
 
     .sidebar-nav {
       display: grid;
-      gap: 4px;
+      gap: 3px;
       padding: 0 6px;
     }
 
@@ -490,11 +520,12 @@ function appStyles() {
       background: transparent;
       color: var(--muted);
       text-align: left;
-      padding: 12px 14px;
-      border-radius: 12px;
+      padding: 11px 13px;
+      border-radius: 11px;
       display: flex;
       align-items: center;
       gap: 10px;
+      font-size: 15px;
     }
 
     .sidebar-nav button.active {
@@ -509,9 +540,9 @@ function appStyles() {
     }
 
     .sidebar-sub button {
-      font-size: 13px;
-      padding: 8px 10px;
-      border-radius: 10px;
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 9px;
       border: 0;
       background: transparent;
       color: var(--muted);
@@ -524,7 +555,7 @@ function appStyles() {
     }
 
     .sidebar-footer {
-      margin-top: 20px;
+      margin-top: 18px;
       padding: 0 8px;
     }
 
@@ -540,11 +571,12 @@ function appStyles() {
       background: var(--panel);
       color: var(--text);
       border-radius: 12px;
-      padding: 10px 12px;
+      padding: 10px 10px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      font-size: 14px;
     }
 
     .theme-btn.active {
@@ -557,7 +589,7 @@ function appStyles() {
     }
 
     .main {
-      padding: 20px;
+      padding: 18px 20px;
     }
 
     .header {
@@ -565,11 +597,11 @@ function appStyles() {
       justify-content: space-between;
       gap: 16px;
       align-items: flex-start;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .header .eyebrow {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -578,8 +610,10 @@ function appStyles() {
 
     .header h1 {
       margin: 0;
-      font-size: 38px;
-      line-height: 1.05;
+      font-size: 30px;
+      line-height: 1.04;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
 
     .muted {
@@ -597,10 +631,12 @@ function appStyles() {
       background: var(--panel);
       color: var(--text);
       border-radius: 12px;
-      padding: 11px 14px;
+      padding: 10px 13px;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      font-size: 14px;
+      min-height: 40px;
     }
 
     .btn-primary {
@@ -610,9 +646,9 @@ function appStyles() {
     }
 
     [data-theme="dark"] .btn-primary {
-      background: #eef2f7;
+      background: #eff3f8;
       color: #111827;
-      border-color: #eef2f7;
+      border-color: #eff3f8;
     }
 
     .btn-soft {
@@ -621,16 +657,17 @@ function appStyles() {
     }
 
     .btn-icon {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 10px;
       padding: 0;
       justify-content: center;
+      min-height: 32px;
     }
 
     .grid-4, .grid-3, .grid-2 {
       display: grid;
-      gap: 14px;
+      gap: 12px;
     }
 
     .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -638,48 +675,52 @@ function appStyles() {
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
     .card {
-      padding: 16px;
+      padding: 14px;
     }
 
     .metric-card .label {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
 
     .metric-card .value {
       margin-top: 10px;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
     .metric-card .sub {
-      margin-top: 4px;
+      margin-top: 5px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .section-title {
       margin: 0 0 6px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
     .section-sub {
-      margin: 0 0 14px;
+      margin: 0 0 12px;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 1.4;
     }
 
     .mini-tabs {
       display: inline-flex;
       gap: 6px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin-bottom: 13px;
     }
 
     .mini-tabs button {
@@ -687,7 +728,8 @@ function appStyles() {
       background: transparent;
       color: var(--muted);
       border-radius: 10px;
-      padding: 8px 12px;
+      padding: 7px 11px;
+      font-size: 13px;
     }
 
     .mini-tabs button.active {
@@ -698,7 +740,7 @@ function appStyles() {
     .table-wrap {
       overflow: auto;
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
     }
 
     table {
@@ -707,15 +749,16 @@ function appStyles() {
     }
 
     th, td {
-      padding: 14px 14px;
+      padding: 12px 12px;
       border-top: 1px solid var(--border);
       text-align: left;
       vertical-align: top;
+      font-size: 14px;
     }
 
     th {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       background: transparent;
@@ -726,9 +769,10 @@ function appStyles() {
     .status-pill {
       display: inline-block;
       border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 12px;
+      padding: 4px 9px;
+      font-size: 11px;
       border: 1px solid transparent;
+      line-height: 1.2;
     }
 
     .status-green {
@@ -751,7 +795,7 @@ function appStyles() {
 
     .status-red {
       background: rgba(239,68,68,0.12);
-      color: #ef4444;
+      color: #ff6b6b;
       border-color: rgba(239,68,68,0.25);
     }
 
@@ -763,7 +807,7 @@ function appStyles() {
 
     .progress {
       width: 100%;
-      height: 8px;
+      height: 7px;
       border-radius: 999px;
       overflow: hidden;
       background: var(--panel-2);
@@ -781,13 +825,15 @@ function appStyles() {
       gap: 10px;
     }
 
-    .input, select {
+    .input, select, textarea {
       width: 100%;
       border: 1px solid var(--border);
       background: var(--panel-2);
       color: var(--text);
       border-radius: 12px;
-      padding: 12px 14px;
+      padding: 11px 13px;
+      font-size: 14px;
+      resize: vertical;
     }
 
     .split-2 {
@@ -796,15 +842,22 @@ function appStyles() {
       gap: 10px;
     }
 
+    .split-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
     .empty-box {
-      min-height: 220px;
+      min-height: 180px;
       display: grid;
       place-items: center;
       text-align: center;
       color: var(--muted);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
       background: rgba(255,255,255,0.02);
+      font-size: 14px;
     }
 
     .category-list {
@@ -817,7 +870,7 @@ function appStyles() {
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 14px;
+      padding: 13px;
       border: 1px solid var(--border);
       border-radius: 14px;
       background: rgba(255,255,255,0.02);
@@ -837,41 +890,109 @@ function appStyles() {
     }
 
     .hero-panel {
-      min-height: 250px;
+      min-height: 215px;
     }
 
     .table-footer-total {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
-      padding: 14px 4px 0;
+      padding: 12px 4px 0;
       font-weight: 700;
       color: var(--text);
+      font-size: 14px;
     }
 
     .action-row {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       align-items: center;
     }
 
     .fx-name {
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
+      font-size: 14px;
     }
 
     .fx-sub {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .fx-kicker {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       margin-bottom: 6px;
+    }
+
+    .compact-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+
+    .tcard {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .tcard-label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .tcard-value {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 8, 18, 0.52);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 540px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 18px 46px rgba(0,0,0,0.28);
+      padding: 18px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .cover-good {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .cover-bad {
+      color: var(--danger);
+      font-weight: 700;
     }
 
     @media (max-width: 1200px) {
@@ -882,9 +1003,9 @@ function appStyles() {
     @media (max-width: 960px) {
       .layout { grid-template-columns: 1fr; }
       .sidebar { display: none; }
-      .grid-4, .grid-3, .grid-2, .split-2 { grid-template-columns: 1fr; }
+      .grid-4, .grid-3, .grid-2, .split-2, .split-3 { grid-template-columns: 1fr; }
       .header { flex-direction: column; }
-      .header h1 { font-size: 30px; }
+      .header h1 { font-size: 26px; }
       .main { padding: 14px; }
     }
   `;
@@ -894,7 +1015,7 @@ function MetricCard({ icon: Icon, label, value, sub }) {
   return (
     <div className="card metric-card">
       <div className="label">
-        <Icon size={15} />
+        <Icon size={14} />
         {label}
       </div>
       <div className="value">{value}</div>
@@ -918,23 +1039,23 @@ function LoginScreen({ onLogin }) {
           "radial-gradient(circle at top right, rgba(32,201,151,0.12), transparent 30%), linear-gradient(180deg, var(--bg), var(--bg-secondary))",
       }}
     >
-      <div className="card" style={{ width: "100%", maxWidth: 440, padding: 28 }}>
-        <div className="brand" style={{ padding: 0, marginBottom: 18 }}>
+      <div className="card" style={{ width: "100%", maxWidth: 430, padding: 24 }}>
+        <div className="brand" style={{ padding: 0, marginBottom: 16 }}>
           <div className="brand-badge">
             <LineChart size={18} />
           </div>
           <div>
-            <div className="brand-title" style={{ fontSize: 24 }}>Sentimo</div>
+            <div className="brand-title" style={{ fontSize: 23 }}>Sentimo</div>
             <div className="brand-sub">Financial Control</div>
           </div>
         </div>
 
-        <h2 style={{ margin: "0 0 8px" }}>Sign in</h2>
-        <p className="muted" style={{ marginTop: 0 }}>
+        <h2 style={{ margin: "0 0 8px", fontSize: 24 }}>Sign in</h2>
+        <p className="muted" style={{ marginTop: 0, fontSize: 14 }}>
           Prototype login for the live build. Supabase auth wiring comes next.
         </p>
 
-        <div className="form-grid" style={{ marginTop: 16 }}>
+        <div className="form-grid" style={{ marginTop: 14 }}>
           <input
             className="input"
             value={email}
@@ -989,7 +1110,7 @@ function Sidebar({
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-badge">
-          <LineChart size={18} />
+          <LineChart size={17} />
         </div>
         <div>
           <div className="brand-title">Sentimo</div>
@@ -999,11 +1120,9 @@ function Sidebar({
 
       <div className="daily-card">
         <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target</div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 22, fontWeight: 700 }}>
-          <span>0%</span>
-        </div>
+        <div style={{ fontSize: 18, fontWeight: 700 }}>0%</div>
         <div className="daily-line"><span /></div>
-        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: 11 }}>
           <span>Spent £0</span>
           <span>£151 left</span>
         </div>
@@ -1021,9 +1140,14 @@ function Sidebar({
                   if (label === "Categories") setCategoriesOpen(!categoriesOpen);
                 }}
               >
-                <Icon size={16} />
+                <Icon size={15} />
                 <span style={{ flex: 1 }}>{label}</span>
-                {label === "Categories" && <ChevronRight size={14} style={{ transform: categoriesOpen ? "rotate(90deg)" : "none", transition: "0.2s" }} />}
+                {label === "Categories" && (
+                  <ChevronRight
+                    size={14}
+                    style={{ transform: categoriesOpen ? "rotate(90deg)" : "none", transition: "0.2s" }}
+                  />
+                )}
               </button>
 
               {label === "Categories" && categoriesOpen && (
@@ -1062,24 +1186,24 @@ function Sidebar({
             className={`theme-btn ${theme === "dark" ? "active" : ""}`}
             onClick={() => setTheme("dark")}
           >
-            <Moon size={14} />
+            <Moon size={13} />
             Dark Navy
           </button>
           <button
             className={`theme-btn ${theme === "light" ? "active" : ""}`}
             onClick={() => setTheme("light")}
           >
-            <Sun size={14} />
+            <Sun size={13} />
             Light
           </button>
         </div>
 
         <div className="card profile-card">
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <UserCircle2 size={24} />
+            <UserCircle2 size={22} />
             <div>
-              <div style={{ fontWeight: 600 }}>{user.name}</div>
-              <div className="muted" style={{ fontSize: 12 }}>{user.email}</div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>{user.name}</div>
+              <div className="muted" style={{ fontSize: 11 }}>{user.email}</div>
             </div>
           </div>
         </div>
@@ -1116,7 +1240,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <MetricCard icon={Target} label="30D Var Avg" value={formatCurrency(realExpenses / 30 || 0)} sub="Rolling average" />
       </div>
 
-      <div className="grid-3" style={{ marginTop: 14 }}>
+      <div className="grid-3" style={{ marginTop: 12 }}>
         <div className="card hero-panel" style={{ gridColumn: "span 2" }}>
           <h3 className="section-title">Category Budget Tracker</h3>
           <p className="section-sub">Past month vs current budget performance.</p>
@@ -1130,14 +1254,14 @@ function DashboardPage({ transactions, fixedExpenses }) {
                 const pct = Math.min(100, Math.round((row.amount / budget) * 100));
                 return (
                   <div key={row.name}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                       <div>
-                        <div style={{ fontWeight: 600 }}>{row.name}</div>
-                        <div className="muted" style={{ fontSize: 12 }}>Budget {formatCurrency(budget)}</div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{row.name}</div>
+                        <div className="muted" style={{ fontSize: 11 }}>Budget {formatCurrency(budget)}</div>
                       </div>
                       <div style={{ textAlign: "right" }}>
-                        <div style={{ fontWeight: 600 }}>{formatCurrency(row.amount)}</div>
-                        <div className="muted" style={{ fontSize: 12 }}>{pct}% used</div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{formatCurrency(row.amount)}</div>
+                        <div className="muted" style={{ fontSize: 11 }}>{pct}% used</div>
                       </div>
                     </div>
                     <div className="progress"><span style={{ width: `${pct}%` }} /></div>
@@ -1151,30 +1275,30 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Fixed Obligations</h3>
           <p className="section-sub">Current recurring burden.</p>
-          <div style={{ fontSize: 36, fontWeight: 700 }}>{formatCurrency(fixedMonthly)}</div>
-          <div className="muted">/ month</div>
+          <div style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(fixedMonthly)}</div>
+          <div className="muted" style={{ fontSize: 13 }}>/ month</div>
 
-          <div className="grid-2" style={{ marginTop: 16 }}>
+          <div className="grid-2" style={{ marginTop: 14 }}>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Weekly</div>
-              <div style={{ fontWeight: 700 }}>{formatCurrency(fixedMonthly / 4.333)}</div>
+              <div className="muted" style={{ fontSize: 11 }}>Weekly</div>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{formatCurrency(fixedMonthly / 4.333)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Daily</div>
-              <div style={{ fontWeight: 700 }}>{formatCurrency(fixedMonthly / 30)}</div>
+              <div className="muted" style={{ fontSize: 11 }}>Daily</div>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{formatCurrency(fixedMonthly / 30)}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid-3" style={{ marginTop: 14 }}>
+      <div className="grid-3" style={{ marginTop: 12 }}>
         <div className="card">
           <h3 className="section-title">Monthly Net Position</h3>
           <p className="section-sub">Income received minus total expenses this month.</p>
-          <div style={{ fontSize: 42, fontWeight: 700, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
             {net >= 0 ? "+" : ""}{formatCurrency(net)}
           </div>
-          <div className="muted" style={{ marginTop: 6 }}>
+          <div className="muted" style={{ marginTop: 6, fontSize: 13 }}>
             {formatCurrency(realIncome)} in · {formatCurrency(realExpenses)} out
           </div>
         </div>
@@ -1182,7 +1306,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Savings / Internal</h3>
           <p className="section-sub">Tracked but excluded from real totals.</p>
-          <div style={{ fontSize: 32, fontWeight: 700 }}>{formatCurrency(internalTotal)}</div>
+          <div style={{ fontSize: 26, fontWeight: 700 }}>{formatCurrency(internalTotal)}</div>
         </div>
 
         <div className="card">
@@ -1190,7 +1314,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
           <p className="section-sub">Latest counted inflows.</p>
           <div className="form-grid">
             {getCountedRealIncome(transactions).slice(0, 3).map((t) => (
-              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 14 }}>
                 <span>{t.description}</span>
                 <strong>{formatCurrency(t.amount)}</strong>
               </div>
@@ -1277,9 +1401,9 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
         <button className="btn btn-primary" onClick={addExpense}>
-          <Plus size={15} />
+          <Plus size={14} />
           Add Expense
         </button>
       </div>
@@ -1291,7 +1415,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         <MetricCard icon={Target} label="Overdue" value={formatCurrency(overdueValue)} sub={`${overdueRows.length} item${overdueRows.length === 1 ? "" : "s"}`} />
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <div className="mini-tabs">
           {[
             { label: "All", count: fixedExpenses.length },
@@ -1347,17 +1471,17 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                   <td>
                     <div className="action-row">
                       <button className="btn btn-icon" title="Cycle status" onClick={() => cycleStatus(item.id)}>
-                        {item.status === "Paid" ? <Check size={14} /> : <Clock3 size={14} />}
+                        {item.status === "Paid" ? <Check size={13} /> : <Clock3 size={13} />}
                       </button>
                       <button className="btn btn-icon" title="Edit">
-                        <Pencil size={14} />
+                        <Pencil size={13} />
                       </button>
                       <button
                         className="btn btn-icon"
                         title="Delete"
                         onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))}
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>
@@ -1366,7 +1490,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
               {visible.length === 0 && (
                 <tr>
                   <td colSpan="8">
-                    <div className="empty-box" style={{ minHeight: 140 }}>
+                    <div className="empty-box" style={{ minHeight: 120 }}>
                       No fixed expenses in this status.
                     </div>
                   </td>
@@ -1382,7 +1506,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <div className="fx-kicker">Recurring obligations</div>
         <h3 className="section-title">Add Fixed Expense</h3>
         <p className="section-sub">
@@ -1390,31 +1514,10 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         </p>
 
         <div className="split-2">
-          <input
-            className="input"
-            placeholder="Name"
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="Amount"
-            type="number"
-            value={draft.amount}
-            onChange={(e) => setDraft({ ...draft, amount: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="Category"
-            value={draft.category}
-            onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-          />
-          <input
-            className="input"
-            placeholder="Sub-category"
-            value={draft.subcategory}
-            onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })}
-          />
+          <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
+          <input className="input" placeholder="Category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
+          <input className="input" placeholder="Sub-category" value={draft.subcategory} onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })} />
           <select value={draft.frequency} onChange={(e) => setDraft({ ...draft, frequency: e.target.value })}>
             <option>Weekly</option>
             <option>Monthly</option>
@@ -1422,18 +1525,12 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
             <option>Annual</option>
             <option>Custom</option>
           </select>
-          <input
-            className="input"
-            placeholder="Due day"
-            type="number"
-            value={draft.dueDay}
-            onChange={(e) => setDraft({ ...draft, dueDay: e.target.value })}
-          />
+          <input className="input" placeholder="Due day" type="number" value={draft.dueDay} onChange={(e) => setDraft({ ...draft, dueDay: e.target.value })} />
         </div>
 
-        <div style={{ marginTop: 14 }}>
+        <div style={{ marginTop: 12 }}>
           <button className="btn btn-primary" onClick={addExpense}>
-            <Plus size={15} />
+            <Plus size={14} />
             Save Fixed Expense
           </button>
         </div>
@@ -1494,13 +1591,13 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
         <button className="btn">
-          <Plus size={15} />
+          <Plus size={14} />
           Log Multiple
         </button>
         <button className="btn btn-primary" onClick={addExpense}>
-          <Plus size={15} />
+          <Plus size={14} />
           Add Single
         </button>
       </div>
@@ -1513,7 +1610,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
           <button>This Year</button>
         </div>
 
-        <div className="split-2" style={{ marginBottom: 14 }}>
+        <div className="split-2" style={{ marginBottom: 12 }}>
           <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
             <option>All categories</option>
             {categories.map((c) => <option key={c.id}>{c.name}</option>)}
@@ -1526,7 +1623,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
           <MetricCard icon={TrendingUp} label="Daily Average" value={formatCurrency(dailyAvg)} sub="Rolling average" />
         </div>
 
-        <div style={{ marginTop: 14 }}>
+        <div style={{ marginTop: 12 }}>
           {expenseRows.length === 0 ? (
             <div className="empty-box">
               <div>
@@ -1558,8 +1655,8 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
                       <td>{row.subcategory}</td>
                       <td style={{ fontWeight: 700 }}>{formatCurrency(row.amount)}</td>
                       <td>
-                        <button className="btn" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== row.id))}>
-                          <Trash2 size={14} />
+                        <button className="btn btn-icon" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== row.id))}>
+                          <Trash2 size={13} />
                         </button>
                       </td>
                     </tr>
@@ -1571,7 +1668,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Log Daily Expense</h3>
         <div className="split-2">
           <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
@@ -1636,13 +1733,13 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
         <button className="btn">
-          <Plus size={15} />
+          <Plus size={14} />
           Log Multiple
         </button>
         <button className="btn btn-primary" onClick={addIncome}>
-          <Plus size={15} />
+          <Plus size={14} />
           Add Single
         </button>
       </div>
@@ -1653,24 +1750,24 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
         <MetricCard icon={LineChart} label="Net Position" value={`${net >= 0 ? "+" : ""}${formatCurrency(net)}`} sub="Received minus spent" />
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Income by Source</h3>
         <div className="grid-2">
           {bySource.map((item) => {
             const pct = totalReceived > 0 ? Math.round((item.amount / totalReceived) * 100) : 0;
             return (
-              <div key={item.name} className="card" style={{ padding: 14 }}>
-                <div className="muted" style={{ fontSize: 12 }}>{item.name}</div>
-                <div style={{ marginTop: 8, fontWeight: 700, fontSize: 28 }}>{formatCurrency(item.amount)}</div>
+              <div key={item.name} className="card" style={{ padding: 12 }}>
+                <div className="muted" style={{ fontSize: 11 }}>{item.name}</div>
+                <div style={{ marginTop: 8, fontWeight: 700, fontSize: 22 }}>{formatCurrency(item.amount)}</div>
                 <div className="progress" style={{ marginTop: 10 }}><span style={{ width: `${pct}%` }} /></div>
-                <div className="muted" style={{ marginTop: 6, fontSize: 12 }}>{pct}%</div>
+                <div className="muted" style={{ marginTop: 6, fontSize: 11 }}>{pct}%</div>
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Entries</h3>
         <div className="table-wrap">
           <table>
@@ -1701,7 +1798,7 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Log Income / Deposit</h3>
         <div className="split-2">
           <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
@@ -1710,6 +1807,241 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
           <input className="input" placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
         </div>
       </div>
+    </>
+  );
+}
+
+function TradingPnlModal({ open, onClose, onSave }) {
+  const [form, setForm] = useState({
+    date: "2026-04-29",
+    currency: "GBP",
+    instrument: "",
+    pnl: "",
+    notes: "",
+  });
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        date: "2026-04-29",
+        currency: "GBP",
+        instrument: "",
+        pnl: "",
+        notes: "",
+      });
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  function submit() {
+    if (form.pnl === "") return;
+    onSave({
+      id: `sess-${Date.now()}`,
+      date: form.date,
+      currency: form.currency,
+      instrument: form.instrument || "General",
+      pnl: Number(form.pnl),
+      notes: form.notes,
+    });
+    onClose();
+  }
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-card">
+        <div className="modal-head">
+          <div>
+            <div className="fx-kicker">Today — 29 Apr 2026</div>
+            <h3 className="section-title" style={{ fontSize: 20, marginBottom: 4 }}>Log Trading Session</h3>
+            <div className="section-sub" style={{ marginBottom: 0 }}>
+              Record manual daily performance and compare it against your expenses.
+            </div>
+          </div>
+          <button className="btn btn-icon" onClick={onClose}>
+            <X size={14} />
+          </button>
+        </div>
+
+        <div className="form-grid">
+          <div className="split-2">
+            <input
+              className="input"
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+            />
+            <select
+              value={form.currency}
+              onChange={(e) => setForm({ ...form, currency: e.target.value })}
+            >
+              <option>GBP</option>
+              <option>EUR</option>
+              <option>USD</option>
+            </select>
+          </div>
+
+          <input
+            className="input"
+            placeholder="Instrument (optional) e.g. EURUSD, DAX, Gold, BTC"
+            value={form.instrument}
+            onChange={(e) => setForm({ ...form, instrument: e.target.value })}
+          />
+
+          <input
+            className="input"
+            placeholder="P&L amount e.g. 450 or -120"
+            type="number"
+            value={form.pnl}
+            onChange={(e) => setForm({ ...form, pnl: e.target.value })}
+          />
+
+          <textarea
+            className="input"
+            rows="3"
+            placeholder="Notes (optional)"
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+          />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
+          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={submit}>Log Session</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TradingPnLPage({ transactions, sessions, setSessions }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const today = "2026-04-29";
+
+  const todaySessions = sessions.filter((s) => sameDay(s.date, today));
+  const todayTrading = todaySessions.reduce((sum, s) => sum + Number(s.pnl || 0), 0);
+  const todayExpenses = getCountedRealExpenses(transactions)
+    .filter((t) => sameDay(t.date, today))
+    .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+  const todayNet = todayTrading - todayExpenses;
+
+  const last60 = useMemo(() => {
+    return [...sessions]
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 60);
+  }, [sessions]);
+
+  function saveSession(session) {
+    setSessions((prev) => [session, ...prev]);
+  }
+
+  return (
+    <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+        <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
+          <Plus size={14} />
+          Log Session
+        </button>
+      </div>
+
+      <div className="card">
+        <div className="fx-kicker">Today — 29 Apr 2026</div>
+        <h2 className="compact-title">Daily Performance</h2>
+        <p className="section-sub" style={{ marginTop: 6 }}>
+          Daily performance vs expenses — did trading cover the day?
+        </p>
+
+        <div className="grid-3" style={{ marginTop: 12 }}>
+          <div className="tcard">
+            <div className="tcard-label">Trading P&L</div>
+            <div className="tcard-value" style={{ color: todayTrading >= 0 ? "var(--success)" : "var(--danger)" }}>
+              {todayTrading >= 0 ? "+" : ""}{formatCurrency(todayTrading)}
+            </div>
+          </div>
+          <div className="tcard">
+            <div className="tcard-label">Expenses</div>
+            <div className="tcard-value" style={{ color: "var(--warning)" }}>
+              {formatCurrency(todayExpenses)}
+            </div>
+          </div>
+          <div className="tcard">
+            <div className="tcard-label">Net</div>
+            <div className="tcard-value" style={{ color: todayNet >= 0 ? "var(--success)" : "var(--danger)" }}>
+              {todayNet >= 0 ? "+" : ""}{formatCurrency(todayNet)}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 14, fontSize: 14 }}>
+          {todaySessions.length === 0 && todayExpenses === 0 && (
+            <span className="muted">No trading sessions or expenses logged today.</span>
+          )}
+          {(todaySessions.length > 0 || todayExpenses > 0) && (
+            <span className={todayNet >= 0 ? "cover-good" : "cover-bad"}>
+              {todayNet >= 0
+                ? "Trading covered the day."
+                : "Trading did not cover the day yet."}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 12 }}>
+        <div className="fx-kicker">Day-by-day comparison — last 60 days</div>
+        {last60.length === 0 ? (
+          <div className="empty-box">
+            <div>
+              <div style={{ marginBottom: 12 }}>No trading sessions yet</div>
+              <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
+                Log Trading Session
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Instrument</th>
+                  <th>Currency</th>
+                  <th>P&L</th>
+                  <th>Notes</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {last60.map((session) => (
+                  <tr key={session.id}>
+                    <td>{session.date}</td>
+                    <td>{session.instrument}</td>
+                    <td>{session.currency}</td>
+                    <td style={{ fontWeight: 700, color: session.pnl >= 0 ? "var(--success)" : "var(--danger)" }}>
+                      {session.pnl >= 0 ? "+" : ""}{formatCurrency(session.pnl)}
+                    </td>
+                    <td className="muted">{session.notes || "—"}</td>
+                    <td>
+                      <button
+                        className="btn btn-icon"
+                        onClick={() => setSessions((prev) => prev.filter((x) => x.id !== session.id))}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <TradingPnlModal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSave={saveSession}
+      />
     </>
   );
 }
@@ -1734,38 +2066,38 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
       <div className="grid-2">
         <div className="card">
           <div className="eyebrow muted">Wed, 29 Apr 2026 · Daily Target</div>
-          <h3 className="section-title" style={{ fontSize: 18 }}>Daily Target</h3>
+          <h3 className="section-title" style={{ fontSize: 17 }}>Daily Target</h3>
 
-          <div style={{ display: "grid", placeItems: "center", padding: "24px 0" }}>
+          <div style={{ display: "grid", placeItems: "center", padding: "18px 0" }}>
             <div
               style={{
-                width: 170,
-                height: 170,
+                width: 158,
+                height: 158,
                 borderRadius: "50%",
-                border: "12px solid var(--nav-active)",
+                border: "10px solid var(--nav-active)",
                 display: "grid",
                 placeItems: "center",
               }}
             >
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 44, fontWeight: 700 }}>{pct}%</div>
-                <div className="muted">of target</div>
+                <div style={{ fontSize: 38, fontWeight: 700 }}>{pct}%</div>
+                <div className="muted" style={{ fontSize: 13 }}>of target</div>
               </div>
             </div>
           </div>
 
           <div className="grid-3">
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Today Spent</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{formatCurrency(todaySpent)}</div>
+              <div className="muted" style={{ fontSize: 11 }}>Today Spent</div>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>{formatCurrency(todaySpent)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Target</div>
-              <div style={{ fontSize: 18, fontWeight: 700 }}>{formatCurrency(target)}</div>
+              <div className="muted" style={{ fontSize: 11 }}>Target</div>
+              <div style={{ fontSize: 16, fontWeight: 700 }}>{formatCurrency(target)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 12 }}>Remaining</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: remaining >= 0 ? "var(--success)" : "var(--danger)" }}>
+              <div className="muted" style={{ fontSize: 11 }}>Remaining</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: remaining >= 0 ? "var(--success)" : "var(--danger)" }}>
                 {formatCurrency(remaining)}
               </div>
             </div>
@@ -1774,24 +2106,24 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
 
         <div className="card">
           <h3 className="section-title">Daily Withdrawal Target</h3>
-          <div style={{ fontSize: 44, fontWeight: 700 }}>{formatCurrency(target)} <span className="muted" style={{ fontSize: 18 }}>/ day</span></div>
+          <div style={{ fontSize: 36, fontWeight: 700 }}>{formatCurrency(target)} <span className="muted" style={{ fontSize: 16 }}>/ day</span></div>
           <p className="section-sub">
             Auto-calculated from fixed monthly obligations plus variable rolling average.
           </p>
 
-          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginTop: 12 }}>
-            <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12, marginTop: 10 }}>
+            <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Target Composition
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
               <span className="muted">Fixed expenses (daily equiv.)</span>
               <strong>{formatCurrency(fixedMonthly / daysInMonth(new Date("2026-04-29")))}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
               <span className="muted">Variable avg (rolling)</span>
               <strong>{formatCurrency(variableAvg)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, fontWeight: 700 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontWeight: 700, fontSize: 14 }}>
               <span>Daily target</span>
               <span>{formatCurrency(target)}</span>
             </div>
@@ -1799,13 +2131,13 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Daily Spend vs Target</h3>
         <p className="section-sub">7d / 14d / 30d / 60d graph block reserved for next build step.</p>
         <div className="empty-box">Chart area placeholder</div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Daily History — Last 30 Days</h3>
         <div className="empty-box">History chart placeholder</div>
       </div>
@@ -1841,7 +2173,7 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
         <MetricCard icon={Target} label="Daily Target" value={formatCurrency(dailyTarget)} sub="Budget pressure" />
       </div>
 
-      <div className="grid-2" style={{ marginTop: 14 }}>
+      <div className="grid-2" style={{ marginTop: 12 }}>
         <div className="card">
           <h3 className="section-title">Spend by Category</h3>
           <div className="empty-box">No data for this period</div>
@@ -1852,7 +2184,7 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Daily Spending vs Target</h3>
         <div className="empty-box">Chart area placeholder</div>
       </div>
@@ -1880,16 +2212,16 @@ function OverallPage({ transactions, fixedExpenses }) {
       <div className="grid-3">
         <div className="card">
           <h3 className="section-title">This Month</h3>
-          <div style={{ marginTop: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
               <span className="muted">Income</span>
               <strong>{formatCurrency(thisMonthIncome)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
               <span className="muted">Expenses</span>
               <strong>{formatCurrency(thisMonthExpenses)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 14 }}>
               <span>Net</span>
               <strong>{formatCurrency(thisMonthIncome - thisMonthExpenses)}</strong>
             </div>
@@ -1898,16 +2230,16 @@ function OverallPage({ transactions, fixedExpenses }) {
 
         <div className="card">
           <h3 className="section-title">Previous Month</h3>
-          <div style={{ marginTop: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
               <span className="muted">Income</span>
               <strong>{formatCurrency(previousMonthIncome)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
               <span className="muted">Expenses</span>
               <strong>{formatCurrency(previousMonthExpenses)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 14 }}>
               <span>Net</span>
               <strong>{formatCurrency(previousMonthIncome - previousMonthExpenses)}</strong>
             </div>
@@ -1916,16 +2248,16 @@ function OverallPage({ transactions, fixedExpenses }) {
 
         <div className="card">
           <h3 className="section-title">Budget Month</h3>
-          <div style={{ marginTop: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
               <span className="muted">Budgeted Expenses</span>
               <strong>{formatCurrency(budgetMonth)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 9, fontSize: 14 }}>
               <span className="muted">Target Income</span>
               <strong>{formatCurrency(budgetMonth)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 14 }}>
               <span>Target Net</span>
               <strong>{formatCurrency(0)}</strong>
             </div>
@@ -1933,7 +2265,7 @@ function OverallPage({ transactions, fixedExpenses }) {
         </div>
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
         <h3 className="section-title">Comparison View</h3>
         <p className="section-sub">This module is for side-by-side weekly, monthly, yearly, and budget comparison.</p>
         <div className="empty-box">Comparison table and charts placeholder</div>
@@ -1947,13 +2279,13 @@ function CategoriesPage({ categories, categoryFilter }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 14 }}>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
         <button className="btn">
-          <Plus size={15} />
+          <Plus size={14} />
           Seed Keywords
         </button>
         <button className="btn btn-primary">
-          <Plus size={15} />
+          <Plus size={14} />
           New Category
         </button>
       </div>
@@ -1963,7 +2295,7 @@ function CategoriesPage({ categories, categoryFilter }) {
           <div className="brand-sub" style={{ marginBottom: 12 }}>Categories</div>
           <div className="category-list">
             {categories.map((c) => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
                 <span className="category-dot" style={{ background: c.color }} />
                 <span>{c.name}</span>
               </div>
@@ -1975,12 +2307,12 @@ function CategoriesPage({ categories, categoryFilter }) {
           <h3 className="section-title">Expense Classification</h3>
           <p className="section-sub">Click any category to manage sub-categories and future auto-categorisation keywords.</p>
 
-          <div className="card" style={{ marginBottom: 14 }}>
+          <div className="card" style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <Tags size={18} />
+              <Tags size={17} />
               <div>
-                <div style={{ fontWeight: 700, marginBottom: 6 }}>Auto-Categorisation Engine</div>
-                <div className="muted" style={{ fontSize: 13 }}>
+                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 14 }}>Auto-Categorisation Engine</div>
+                <div className="muted" style={{ fontSize: 12 }}>
                   Each category can have keyword rules. Example: “Vodafone subscription” → Utilities / Phones.
                 </div>
               </div>
@@ -1993,26 +2325,27 @@ function CategoriesPage({ categories, categoryFilter }) {
                 <div className="category-left">
                   <div
                     style={{
-                      width: 40,
-                      height: 40,
+                      width: 38,
+                      height: 38,
                       borderRadius: 12,
                       background: category.color,
                       display: "grid",
                       placeItems: "center",
                       color: "white",
                       fontWeight: 700,
+                      fontSize: 14,
                     }}
                   >
                     {category.name[0]}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700 }}>{category.name}</div>
-                    <div className="muted" style={{ fontSize: 13 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{category.name}</div>
+                    <div className="muted" style={{ fontSize: 12 }}>
                       {category.subcategories.join(" · ")}
                     </div>
                   </div>
                 </div>
-                <ChevronRight size={18} className="muted" />
+                <ChevronRight size={17} className="muted" />
               </div>
             ))}
           </div>
@@ -2031,11 +2364,11 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
       <div className="card" style={{ maxWidth: 760 }}>
         <h3 className="section-title">Settings</h3>
 
-        <div className="card" style={{ marginTop: 14 }}>
+        <div className="card" style={{ marginTop: 12 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>Currency Settings</div>
           <div className="split-2">
             <div>
-              <div className="muted" style={{ marginBottom: 6, fontSize: 12 }}>Base Currency</div>
+              <div className="muted" style={{ marginBottom: 6, fontSize: 11 }}>Base Currency</div>
               <select value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value })}>
                 <option>GBP</option>
                 <option>EUR</option>
@@ -2045,38 +2378,38 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           </div>
         </div>
 
-        <div className="card" style={{ marginTop: 14 }}>
+        <div className="card" style={{ marginTop: 12 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>Portal Theme</div>
           <div className="theme-row">
             <button className={`theme-btn ${theme === "dark" ? "active" : ""}`} onClick={() => setTheme("dark")}>
-              <Moon size={14} />
+              <Moon size={13} />
               Dark Navy
             </button>
             <button className={`theme-btn ${theme === "light" ? "active" : ""}`} onClick={() => setTheme("light")}>
-              <Sun size={14} />
+              <Sun size={13} />
               Light
             </button>
           </div>
         </div>
 
-        <div className="card" style={{ marginTop: 14 }}>
+        <div className="card" style={{ marginTop: 12 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target Settings</div>
-          <div className="grid-2" style={{ marginBottom: 14 }}>
+          <div className="grid-2" style={{ marginBottom: 12 }}>
             <div className="card" style={{ padding: 12 }}>
-              <div className="muted" style={{ fontSize: 12 }}>Auto-calculated target</div>
-              <div style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(autoTarget)}</div>
-              <div className="muted">Fixed daily + variable avg</div>
+              <div className="muted" style={{ fontSize: 11 }}>Auto-calculated target</div>
+              <div style={{ fontSize: 24, fontWeight: 700 }}>{formatCurrency(autoTarget)}</div>
+              <div className="muted" style={{ fontSize: 12 }}>Fixed daily + variable avg</div>
             </div>
             <div className="card" style={{ padding: 12 }}>
-              <div className="muted" style={{ fontSize: 12 }}>Fixed monthly total</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
-              <div className="muted">All active fixed expenses</div>
+              <div className="muted" style={{ fontSize: 11 }}>Fixed monthly total</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
+              <div className="muted" style={{ fontSize: 12 }}>All active fixed expenses</div>
             </div>
           </div>
 
           <div className="form-grid">
             <div>
-              <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>Daily Target Override</div>
+              <div className="muted" style={{ fontSize: 11, marginBottom: 6 }}>Daily Target Override</div>
               <input
                 className="input"
                 value={settings.customDailyTarget}
@@ -2086,7 +2419,7 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
             </div>
 
             <div>
-              <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>Variable Average Window (Days)</div>
+              <div className="muted" style={{ fontSize: 11, marginBottom: 6 }}>Variable Average Window (Days)</div>
               <input
                 className="input"
                 type="number"
@@ -2097,30 +2430,30 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           </div>
         </div>
 
-        <div className="card" style={{ marginTop: 14 }}>
+        <div className="card" style={{ marginTop: 12 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>About Sentimo</div>
           <div className="grid-2">
             <div>
-              <div className="muted">Version</div>
-              <div>2.1.0</div>
+              <div className="muted" style={{ fontSize: 12 }}>Version</div>
+              <div style={{ fontSize: 14 }}>3.0.0</div>
             </div>
             <div>
-              <div className="muted">PWA</div>
-              <div>Enabled</div>
+              <div className="muted" style={{ fontSize: 12 }}>PWA</div>
+              <div style={{ fontSize: 14 }}>Enabled</div>
             </div>
             <div>
-              <div className="muted">Target users</div>
-              <div>Traders · Self-employed · Investors</div>
+              <div className="muted" style={{ fontSize: 12 }}>Target users</div>
+              <div style={{ fontSize: 14 }}>Traders · Self-employed · Investors</div>
             </div>
             <div>
-              <div className="muted">Theme</div>
-              <div>{theme === "dark" ? "Dark Navy" : "Light"}</div>
+              <div className="muted" style={{ fontSize: 12 }}>Theme</div>
+              <div style={{ fontSize: 14 }}>{theme === "dark" ? "Dark Navy" : "Light"}</div>
             </div>
           </div>
         </div>
 
-        <button className="btn btn-primary" style={{ marginTop: 16 }}>
-          <Save size={15} />
+        <button className="btn btn-primary" style={{ marginTop: 14 }}>
+          <Save size={14} />
           Save Settings
         </button>
       </div>
@@ -2138,8 +2471,8 @@ function AdminPanelPage({ user }) {
         <MetricCard icon={TrendingUp} label="New This Month" value="1" sub="Signups" />
       </div>
 
-      <div className="card" style={{ marginTop: 14 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+      <div className="card" style={{ marginTop: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <h3 className="section-title" style={{ marginBottom: 0 }}>Users</h3>
           <button className="btn">
             <RefreshCw size={14} />
@@ -2181,36 +2514,6 @@ function AdminPanelPage({ user }) {
   );
 }
 
-function TradingPnLPage({ transactions, fixedExpenses }) {
-  const tradingIncome = sumAmounts(
-    transactions.filter(
-      (t) =>
-        t.direction === "income" &&
-        (t.subcategory === "Trading Income" || t.category === "Trading" || t.nature === "broker_transfer")
-    )
-  );
-  const lifeCost = fixedExpenses.reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
-  const remaining = lifeCost - tradingIncome;
-
-  return (
-    <>
-      <div className="grid-3">
-        <MetricCard icon={LineChart} label="Trading Income" value={formatCurrency(tradingIncome)} sub="Recorded inflows" />
-        <MetricCard icon={CreditCard} label="Monthly Life Cost" value={formatCurrency(lifeCost)} sub="Recurring burden" />
-        <MetricCard icon={Target} label="Still Needed" value={formatCurrency(Math.max(0, remaining))} sub="To cover fixed life cost" />
-      </div>
-
-      <div className="card" style={{ marginTop: 14 }}>
-        <h3 className="section-title">Trading Pressure View</h3>
-        <p className="section-sub">
-          This section links personal expenses to trading performance, so you know how much still needs to be made.
-        </p>
-        <div className="empty-box">Detailed trading pressure module placeholder</div>
-      </div>
-    </>
-  );
-}
-
 function ImportCsvPage() {
   const inputRef = useRef(null);
 
@@ -2224,7 +2527,7 @@ function ImportCsvPage() {
         style={{ cursor: "pointer" }}
       >
         <div>
-          <Upload size={28} style={{ marginBottom: 10 }} />
+          <Upload size={26} style={{ marginBottom: 10 }} />
           <div>Drop or select your CSV statement</div>
         </div>
         <input ref={inputRef} type="file" accept=".csv" style={{ display: "none" }} />
@@ -2253,6 +2556,7 @@ export default function App() {
   const [fixedExpenses, setFixedExpenses] = useState(seedFixedExpenses);
   const [categories, setCategories] = useState(seedCategories);
   const [settings, setSettings] = useState(defaultSettings);
+  const [sessions, setSessions] = useState(seedTradingSessions);
 
   useEffect(() => {
     const styleTag = document.createElement("style");
@@ -2272,6 +2576,7 @@ export default function App() {
       const savedFixed = localStorage.getItem(FIXED_KEY);
       const savedCategories = localStorage.getItem(CATEGORIES_KEY);
       const savedSettings = localStorage.getItem(SETTINGS_KEY);
+      const savedSessions = localStorage.getItem(SESSIONS_KEY);
 
       if (savedUser) setUser(JSON.parse(savedUser));
       if (savedTheme) setTheme(savedTheme);
@@ -2279,6 +2584,7 @@ export default function App() {
       if (savedFixed) setFixedExpenses(JSON.parse(savedFixed));
       if (savedCategories) setCategories(JSON.parse(savedCategories));
       if (savedSettings) setSettings(JSON.parse(savedSettings));
+      if (savedSessions) setSessions(JSON.parse(savedSessions));
     } catch {
       // ignore
     }
@@ -2304,6 +2610,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+  }, [sessions]);
 
   function handleLogin(nextUser) {
     setUser(nextUser);
@@ -2334,14 +2644,18 @@ export default function App() {
           <div className="header">
             <div>
               <div className="eyebrow">
-                {activePage === "Daily Target" ? "Wed, 29 Apr 2026 · Daily Target" :
-                 activePage === "Analytics" ? "Spending Intelligence" :
-                 activePage === "Categories" ? "Expense Classification" :
-                 activePage === "Admin Panel" ? "Platform Overview — Sentimo" :
-                 activePage}
+                {activePage === "Daily Target"
+                  ? "Wed, 29 Apr 2026 · Daily Target"
+                  : activePage === "Analytics"
+                  ? "Spending Intelligence"
+                  : activePage === "Categories"
+                  ? "Expense Classification"
+                  : activePage === "Admin Panel"
+                  ? "Platform Overview — Sentimo"
+                  : activePage}
               </div>
               <h1>{activePage}</h1>
-              <p className="muted" style={{ marginTop: 10, maxWidth: 900 }}>
+              <p className="muted" style={{ marginTop: 8, maxWidth: 900, fontSize: 14, lineHeight: 1.45 }}>
                 {activePage === "Income & Deposits" && "All money received — trading draws, commissions, dividends, and more."}
                 {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
                 {activePage === "Daily Expenses" && "Day-to-day spending control with category and period filters."}
@@ -2350,7 +2664,7 @@ export default function App() {
                 {activePage === "Overall" && "Compare this period, previous period, and target budget side by side."}
                 {activePage === "Categories" && "Categories, sub-categories, and keyword-ready classification logic."}
                 {activePage === "Dashboard" && "Control panel for spending, income, fixed obligations, and overall position."}
-                {activePage === "Trading P&L" && "Use trading performance as a financial control lens for real life obligations."}
+                {activePage === "Trading P&L" && "Daily performance vs expenses — did trading cover the day?"}
                 {activePage === "Settings" && "Portal configuration, target settings, and theme selection."}
                 {activePage === "Admin Panel" && "Future licence and user-management layer for commercial rollout."}
                 {activePage === "Import CSV" && "Import bank statements and classify transactions."}
@@ -2360,7 +2674,7 @@ export default function App() {
 
             <div className="header-actions">
               <button className="btn">
-                <Cloud size={15} />
+                <Cloud size={14} />
                 Cloud Connected
               </button>
             </div>
@@ -2371,7 +2685,11 @@ export default function App() {
           )}
 
           {activePage === "Trading P&L" && (
-            <TradingPnLPage transactions={transactions} fixedExpenses={fixedExpenses} />
+            <TradingPnLPage
+              transactions={transactions}
+              sessions={sessions}
+              setSessions={setSessions}
+            />
           )}
 
           {activePage === "Fixed Expenses" && (
