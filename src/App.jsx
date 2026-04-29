@@ -6,7 +6,6 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
-  ChevronRight,
   Clock3,
   Cloud,
   CreditCard,
@@ -31,15 +30,15 @@ import {
   KeyRound,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v6";
-const USER_KEY = "sentimo_user_v6";
-const THEME_KEY = "sentimo_theme_v4";
-const FIXED_KEY = "sentimo_fixed_expenses_v5";
-const CATEGORIES_KEY = "sentimo_categories_v4";
-const SETTINGS_KEY = "sentimo_settings_v4";
-const SESSIONS_KEY = "sentimo_trading_sessions_v3";
-const PIN_KEY = "sentimo_pin_v2";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v2";
+const STORAGE_KEY = "sentimo_transactions_v7";
+const USER_KEY = "sentimo_user_v7";
+const THEME_KEY = "sentimo_theme_v5";
+const FIXED_KEY = "sentimo_fixed_expenses_v6";
+const CATEGORIES_KEY = "sentimo_categories_v5";
+const SETTINGS_KEY = "sentimo_settings_v5";
+const SESSIONS_KEY = "sentimo_trading_sessions_v4";
+const PIN_KEY = "sentimo_pin_v3";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v3";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -50,239 +49,40 @@ const demoUser = {
   id: "demo-founder-user",
   name: "Chris Holanda",
   email: "c.mail@me.com",
-  plan: "Founder Build",
 };
 
 const seedCategories = [
-  {
-    id: "cat-housing",
-    name: "Housing",
-    color: "#64748b",
-    subcategories: ["Rent", "Council Tax", "Repairs"],
-  },
-  {
-    id: "cat-food",
-    name: "Food",
-    color: "#22c55e",
-    subcategories: ["Groceries", "Restaurants", "Coffee"],
-  },
-  {
-    id: "cat-utilities",
-    name: "Utilities",
-    color: "#14b8a6",
-    subcategories: ["Phones", "Electricity", "Internet", "Water"],
-  },
-  {
-    id: "cat-transport",
-    name: "Transport",
-    color: "#f97316",
-    subcategories: ["Fuel", "Parking", "Train", "Taxi"],
-  },
-  {
-    id: "cat-education",
-    name: "Education",
-    color: "#8b5cf6",
-    subcategories: ["School Fees", "Activities", "Ballet"],
-  },
-  {
-    id: "cat-business",
-    name: "Business",
-    color: "#3b82f6",
-    subcategories: ["Software", "Services", "Contractors"],
-  },
-  {
-    id: "cat-trading",
-    name: "Trading",
-    color: "#ec4899",
-    subcategories: ["Deposits", "Withdrawals", "Broker Fees"],
-  },
-  {
-    id: "cat-savings",
-    name: "Savings / Internal",
-    color: "#94a3b8",
-    subcategories: ["To Savings", "From Savings"],
-  },
+  { id: "cat-housing", name: "Housing", color: "#64748b", subcategories: ["Rent", "Council Tax", "Repairs"] },
+  { id: "cat-food", name: "Food", color: "#22c55e", subcategories: ["Groceries", "Restaurants", "Coffee"] },
+  { id: "cat-utilities", name: "Utilities", color: "#14b8a6", subcategories: ["Phones", "Electricity", "Internet", "Water"] },
+  { id: "cat-transport", name: "Transport", color: "#f97316", subcategories: ["Fuel", "Parking", "Train", "Taxi"] },
+  { id: "cat-education", name: "Education", color: "#8b5cf6", subcategories: ["School Fees", "Activities", "Ballet"] },
+  { id: "cat-business", name: "Business", color: "#3b82f6", subcategories: ["Software", "Services", "Contractors"] },
+  { id: "cat-trading", name: "Trading", color: "#ec4899", subcategories: ["Deposits", "Withdrawals", "Broker Fees"] },
+  { id: "cat-savings", name: "Savings / Internal", color: "#94a3b8", subcategories: ["To Savings", "From Savings"] },
 ];
 
 const seedFixedExpenses = [
-  {
-    id: "fx-1",
-    name: "Rent",
-    category: "Housing",
-    subcategory: "Rent",
-    frequency: "Monthly",
-    amount: 4500,
-    dueDay: 1,
-    nextDueDate: "2026-05-01",
-    status: "Scheduled",
-    autoIncludeTarget: true,
-    notes: "",
-  },
-  {
-    id: "fx-2",
-    name: "Car / Insurance",
-    category: "Transport",
-    subcategory: "Fuel",
-    frequency: "Monthly",
-    amount: 425,
-    dueDay: 12,
-    nextDueDate: "2026-05-12",
-    status: "Paid",
-    autoIncludeTarget: true,
-    notes: "",
-  },
-  {
-    id: "fx-3",
-    name: "School / Activities",
-    category: "Education",
-    subcategory: "School Fees",
-    frequency: "Monthly",
-    amount: 1250,
-    dueDay: 15,
-    nextDueDate: "2026-05-15",
-    status: "Pending",
-    autoIncludeTarget: true,
-    notes: "",
-  },
-  {
-    id: "fx-4",
-    name: "Subscriptions",
-    category: "Business",
-    subcategory: "Software",
-    frequency: "Monthly",
-    amount: 98,
-    dueDay: 20,
-    nextDueDate: "2026-05-20",
-    status: "Overdue",
-    autoIncludeTarget: true,
-    notes: "",
-  },
+  { id: "fx-1", name: "Rent", category: "Housing", subcategory: "Rent", frequency: "Monthly", amount: 4500, dueDay: 1, nextDueDate: "2026-05-01", status: "Scheduled", autoIncludeTarget: true },
+  { id: "fx-2", name: "Car / Insurance", category: "Transport", subcategory: "Fuel", frequency: "Monthly", amount: 425, dueDay: 12, nextDueDate: "2026-05-12", status: "Paid", autoIncludeTarget: true },
+  { id: "fx-3", name: "School / Activities", category: "Education", subcategory: "School Fees", frequency: "Monthly", amount: 1250, dueDay: 15, nextDueDate: "2026-05-15", status: "Pending", autoIncludeTarget: true },
+  { id: "fx-4", name: "Subscriptions", category: "Business", subcategory: "Software", frequency: "Monthly", amount: 98, dueDay: 20, nextDueDate: "2026-05-20", status: "Overdue", autoIncludeTarget: true },
 ];
 
 const seedTransactions = [
-  {
-    id: "tx-1",
-    date: "2026-04-01",
-    description: "Monthly rent income",
-    merchant: "Rental Income",
-    category: "Income",
-    subcategory: "Rental Income",
-    direction: "income",
-    nature: "real",
-    status: "counted",
-    amount: 500,
-    source: "manual",
-  },
-  {
-    id: "tx-2",
-    date: "2026-04-23",
-    description: "Restaurant",
-    merchant: "Local Restaurant",
-    category: "Food",
-    subcategory: "Restaurants",
-    direction: "expense",
-    nature: "real",
-    status: "counted",
-    amount: 64.9,
-    source: "manual",
-  },
-  {
-    id: "tx-3",
-    date: "2026-04-24",
-    description: "Trading withdrawal",
-    merchant: "Trading 212",
-    category: "Trading",
-    subcategory: "Withdrawals",
-    direction: "income",
-    nature: "broker_transfer",
-    status: "watch",
-    amount: 1200,
-    source: "manual",
-  },
-  {
-    id: "tx-4",
-    date: "2026-04-25",
-    description: "Transfer to Savings",
-    merchant: "Savings",
-    category: "Savings / Internal",
-    subcategory: "To Savings",
-    direction: "expense",
-    nature: "savings_transfer",
-    status: "excluded",
-    amount: 1500,
-    source: "manual",
-  },
-  {
-    id: "tx-5",
-    date: "2026-04-25",
-    description: "Transfer from Savings",
-    merchant: "Savings",
-    category: "Savings / Internal",
-    subcategory: "From Savings",
-    direction: "income",
-    nature: "savings_transfer",
-    status: "excluded",
-    amount: 2000,
-    source: "manual",
-  },
-  {
-    id: "tx-6",
-    date: "2026-04-28",
-    description: "Groceries",
-    merchant: "Tesco",
-    category: "Food",
-    subcategory: "Groceries",
-    direction: "expense",
-    nature: "real",
-    status: "counted",
-    amount: 86.42,
-    source: "manual",
-  },
-  {
-    id: "tx-7",
-    date: "2026-04-27",
-    description: "Fuel",
-    merchant: "Shell",
-    category: "Transport",
-    subcategory: "Fuel",
-    direction: "expense",
-    nature: "real",
-    status: "counted",
-    amount: 72.31,
-    source: "manual",
-  },
-  {
-    id: "tx-8",
-    date: "2026-04-26",
-    description: "School fees payment",
-    merchant: "School",
-    category: "Education",
-    subcategory: "School Fees",
-    direction: "expense",
-    nature: "real",
-    status: "counted",
-    amount: 1250,
-    source: "manual",
-  },
+  { id: "tx-1", date: "2026-04-01", description: "Monthly rent income", merchant: "Rental Income", category: "Income", subcategory: "Rental Income", direction: "income", nature: "real", status: "counted", amount: 500 },
+  { id: "tx-2", date: "2026-04-23", description: "Restaurant", merchant: "Local Restaurant", category: "Food", subcategory: "Restaurants", direction: "expense", nature: "real", status: "counted", amount: 64.9 },
+  { id: "tx-3", date: "2026-04-24", description: "Trading withdrawal", merchant: "Trading 212", category: "Trading", subcategory: "Withdrawals", direction: "income", nature: "broker_transfer", status: "watch", amount: 1200 },
+  { id: "tx-4", date: "2026-04-25", description: "Transfer to Savings", merchant: "Savings", category: "Savings / Internal", subcategory: "To Savings", direction: "expense", nature: "savings_transfer", status: "excluded", amount: 1500 },
+  { id: "tx-5", date: "2026-04-25", description: "Transfer from Savings", merchant: "Savings", category: "Savings / Internal", subcategory: "From Savings", direction: "income", nature: "savings_transfer", status: "excluded", amount: 2000 },
+  { id: "tx-6", date: "2026-04-28", description: "Groceries", merchant: "Tesco", category: "Food", subcategory: "Groceries", direction: "expense", nature: "real", status: "counted", amount: 86.42 },
+  { id: "tx-7", date: "2026-04-27", description: "Fuel", merchant: "Shell", category: "Transport", subcategory: "Fuel", direction: "expense", nature: "real", status: "counted", amount: 72.31 },
+  { id: "tx-8", date: "2026-04-26", description: "School fees payment", merchant: "School", category: "Education", subcategory: "School Fees", direction: "expense", nature: "real", status: "counted", amount: 1250 },
 ];
 
 const seedTradingSessions = [
-  {
-    id: "sess-1",
-    date: "2026-04-24",
-    instrument: "DAX",
-    currency: "GBP",
-    pnl: 380,
-    notes: "Morning session, short from rejection area.",
-  },
-  {
-    id: "sess-2",
-    date: "2026-04-26",
-    instrument: "MARA",
-    currency: "GBP",
-    pnl: -95,
-    notes: "Late entry, cut quickly.",
-  },
+  { id: "sess-1", date: "2026-04-24", instrument: "DAX", currency: "GBP", pnl: 380, notes: "Morning session, short from rejection area." },
+  { id: "sess-2", date: "2026-04-26", instrument: "MARA", currency: "GBP", pnl: -95, notes: "Late entry, cut quickly." },
 ];
 
 const defaultSettings = {
@@ -331,7 +131,7 @@ function getThemeVars(theme) {
       "--nav-active": "#446895",
       "--nav-text": "#eff4fb",
       "--nav-muted": "rgba(239,244,251,0.78)",
-      "--shadow": "0 8px 22px rgba(15, 23, 42, 0.05)",
+      "--shadow": "0 8px 20px rgba(15, 23, 42, 0.05)",
       "--hero-glow": "rgba(65, 105, 165, 0.08)",
     };
   }
@@ -353,7 +153,7 @@ function getThemeVars(theme) {
     "--nav-active": "#23324a",
     "--nav-text": "#eef3fa",
     "--nav-muted": "rgba(238,243,250,0.74)",
-    "--shadow": "0 10px 28px rgba(0,0,0,0.20)",
+    "--shadow": "0 10px 24px rgba(0,0,0,0.18)",
     "--hero-glow": "rgba(32, 201, 151, 0.10)",
   };
 }
@@ -368,19 +168,13 @@ function injectTheme(theme) {
 
 function getCountedRealExpenses(transactions) {
   return transactions.filter(
-    (t) =>
-      t.direction === "expense" &&
-      t.status === "counted" &&
-      t.nature === "real"
+    (t) => t.direction === "expense" && t.status === "counted" && t.nature === "real"
   );
 }
 
 function getCountedRealIncome(transactions) {
   return transactions.filter(
-    (t) =>
-      t.direction === "income" &&
-      t.status === "counted" &&
-      t.nature === "real"
+    (t) => t.direction === "income" && t.status === "counted" && t.nature === "real"
   );
 }
 
@@ -403,9 +197,7 @@ function matchPeriod(dateStr, mode) {
   const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
   if (mode === "7d") return diffDays <= 7;
   if (mode === "30d") return diffDays <= 30;
-  if (mode === "month") {
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  }
+  if (mode === "month") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   if (mode === "year") return d.getFullYear() === now.getFullYear();
   return true;
 }
@@ -420,16 +212,13 @@ function appStyles() {
       color-scheme: light dark;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-
     * { box-sizing: border-box; }
     html, body, #root { margin: 0; min-height: 100%; }
-
     body {
       background: var(--bg);
       color: var(--text);
       transition: background 0.2s ease, color 0.2s ease;
     }
-
     button, input, select, textarea { font: inherit; }
     button { cursor: pointer; }
 
@@ -444,48 +233,51 @@ function appStyles() {
     .layout {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 236px 1fr;
+      grid-template-columns: 194px 1fr;
     }
 
     .sidebar {
       background: var(--nav);
       border-right: 1px solid rgba(255,255,255,0.06);
-      padding: 8px 8px 12px;
       color: var(--nav-text);
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 10px 12px;
-      margin-bottom: 6px;
+      gap: 9px;
+      padding: 16px 14px 10px;
     }
 
     .brand-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
       display: grid;
       place-items: center;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.10);
+      flex: 0 0 auto;
     }
 
     .brand-title {
       font-weight: 600;
       line-height: 1.05;
-      font-size: 14px;
+      font-size: 12px;
       color: var(--nav-text);
     }
 
     .brand-sub {
-      font-size: 9px;
+      font-size: 8px;
       color: var(--nav-muted);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
+      margin-top: 2px;
     }
 
     .daily-card,
@@ -497,15 +289,15 @@ function appStyles() {
     }
 
     .daily-card {
-      margin: 4px 6px 12px;
-      padding: 12px;
-      background: rgba(255,255,255,0.06);
+      margin: 6px 8px 8px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.10);
       box-shadow: none;
     }
 
     .daily-line {
-      height: 5px;
+      height: 4px;
       border-radius: 999px;
       background: rgba(255,255,255,0.08);
       overflow: hidden;
@@ -521,9 +313,9 @@ function appStyles() {
 
     .sidebar-nav {
       display: grid;
-      gap: 2px;
+      align-content: start;
+      gap: 1px;
       padding: 0 6px;
-      flex: 1;
     }
 
     .sidebar-nav button {
@@ -532,13 +324,15 @@ function appStyles() {
       background: transparent;
       color: var(--nav-muted);
       text-align: left;
-      padding: 10px 12px;
+      padding: 11px 12px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
+      position: relative;
+      z-index: 2;
     }
 
     .sidebar-nav button.active {
@@ -547,52 +341,58 @@ function appStyles() {
     }
 
     .sidebar-footer {
-      padding: 0 6px;
-      margin-top: 10px;
+      padding: 8px;
     }
 
     .sidebar-bottom-card {
       border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      padding: 8px;
     }
 
-    .sidebar-userrow {
-      display: flex;
-      gap: 9px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .theme-compact {
+    .theme-single-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
+      margin-bottom: 8px;
     }
 
     .theme-chip {
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.05);
       color: var(--nav-text);
-      border-radius: 9px;
+      border-radius: 8px;
       padding: 7px 8px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      font-size: 12px;
-      min-height: 34px;
+      gap: 5px;
+      font-size: 11px;
+      min-height: 32px;
       font-weight: 500;
+      position: relative;
+      z-index: 2;
     }
 
     .theme-chip.active {
       outline: 1px solid var(--accent);
-      background: rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .sidebar-userrow {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding-top: 4px;
+      position: relative;
+      z-index: 2;
     }
 
     .main {
       padding: 16px 18px;
+      position: relative;
+      z-index: 1;
     }
 
     .header {
@@ -614,15 +414,13 @@ function appStyles() {
 
     .header h1 {
       margin: 0;
-      font-size: 25px;
-      line-height: 1.04;
+      font-size: 22px;
+      line-height: 1.05;
       font-weight: 600;
       letter-spacing: -0.02em;
     }
 
-    .muted {
-      color: var(--muted);
-    }
+    .muted { color: var(--muted); }
 
     .header-actions {
       display: flex;
@@ -639,9 +437,11 @@ function appStyles() {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      font-size: 12px;
-      min-height: 36px;
+      font-size: 11px;
+      min-height: 34px;
       font-weight: 500;
+      position: relative;
+      z-index: 2;
     }
 
     .btn-primary {
@@ -656,26 +456,23 @@ function appStyles() {
     }
 
     .btn-icon {
-      width: 30px;
-      height: 30px;
-      border-radius: 9px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
       padding: 0;
       justify-content: center;
-      min-height: 30px;
+      min-height: 28px;
     }
 
     .grid-4, .grid-3, .grid-2 {
       display: grid;
       gap: 10px;
     }
-
     .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-    .card {
-      padding: 12px;
-    }
+    .card { padding: 12px; }
 
     .metric-card .label {
       color: var(--muted);
@@ -689,8 +486,8 @@ function appStyles() {
     }
 
     .metric-card .value {
-      margin-top: 8px;
-      font-size: 17px;
+      margin-top: 7px;
+      font-size: 16px;
       font-weight: 600;
       letter-spacing: -0.01em;
     }
@@ -698,7 +495,7 @@ function appStyles() {
     .metric-card .sub {
       margin-top: 4px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       line-height: 1.35;
       font-weight: 400;
     }
@@ -713,25 +510,25 @@ function appStyles() {
     .section-sub {
       margin: 0 0 10px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       line-height: 1.4;
       font-weight: 400;
     }
 
     .mini-tabs {
       display: inline-flex;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
-      margin-bottom: 11px;
+      margin-bottom: 10px;
     }
 
     .mini-tabs button {
       border: 1px solid var(--border);
       background: transparent;
       color: var(--muted);
-      border-radius: 9px;
-      padding: 6px 10px;
-      font-size: 12px;
+      border-radius: 8px;
+      padding: 6px 9px;
+      font-size: 10px;
       font-weight: 500;
     }
 
@@ -756,59 +553,35 @@ function appStyles() {
       border-top: 1px solid var(--border);
       text-align: left;
       vertical-align: top;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 400;
     }
 
     th {
       color: var(--muted);
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       background: transparent;
       border-top: 0;
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .status-pill {
       display: inline-block;
       border-radius: 999px;
       padding: 4px 8px;
-      font-size: 10px;
+      font-size: 9px;
       border: 1px solid transparent;
       line-height: 1.2;
-      font-weight: 500;
+      font-weight: 600;
     }
 
-    .status-green {
-      background: rgba(16,185,129,0.12);
-      color: #10b981;
-      border-color: rgba(16,185,129,0.25);
-    }
-
-    .status-blue {
-      background: rgba(59,130,246,0.12);
-      color: #60a5fa;
-      border-color: rgba(59,130,246,0.25);
-    }
-
-    .status-amber {
-      background: rgba(245,158,11,0.12);
-      color: #f59e0b;
-      border-color: rgba(245,158,11,0.25);
-    }
-
-    .status-red {
-      background: rgba(239,68,68,0.12);
-      color: #ff6b6b;
-      border-color: rgba(239,68,68,0.25);
-    }
-
-    .status-gray {
-      background: rgba(148,163,184,0.12);
-      color: #94a3b8;
-      border-color: rgba(148,163,184,0.25);
-    }
+    .status-green { background: rgba(16,185,129,0.12); color: #10b981; border-color: rgba(16,185,129,0.25); }
+    .status-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border-color: rgba(59,130,246,0.25); }
+    .status-amber { background: rgba(245,158,11,0.12); color: #f59e0b; border-color: rgba(245,158,11,0.25); }
+    .status-red { background: rgba(239,68,68,0.12); color: #ff6b6b; border-color: rgba(239,68,68,0.25); }
+    .status-gray { background: rgba(148,163,184,0.12); color: #94a3b8; border-color: rgba(148,163,184,0.25); }
 
     .progress {
       width: 100%;
@@ -827,7 +600,7 @@ function appStyles() {
 
     .form-grid {
       display: grid;
-      gap: 9px;
+      gap: 8px;
     }
 
     .input, select, textarea {
@@ -836,20 +609,22 @@ function appStyles() {
       background: var(--panel-2);
       color: var(--text);
       border-radius: 10px;
-      padding: 10px 11px;
-      font-size: 12px;
+      padding: 10px 12px;
+      font-size: 11px;
       resize: vertical;
       font-weight: 400;
+      position: relative;
+      z-index: 2;
     }
 
     .split-2 {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 9px;
+      gap: 8px;
     }
 
     .empty-box {
-      min-height: 150px;
+      min-height: 140px;
       display: grid;
       place-items: center;
       text-align: center;
@@ -857,13 +632,13 @@ function appStyles() {
       border: 1px solid var(--border);
       border-radius: 12px;
       background: rgba(255,255,255,0.02);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 400;
     }
 
-    .category-grid {
+    .category-list {
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
 
     .category-item {
@@ -873,27 +648,25 @@ function appStyles() {
       gap: 12px;
       padding: 11px;
       border: 1px solid var(--border);
-      border-radius: 11px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.02);
     }
 
     .category-left {
       display: flex;
-      gap: 9px;
+      gap: 10px;
       align-items: flex-start;
     }
 
     .category-dot {
-      width: 11px;
-      height: 11px;
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
       flex: 0 0 auto;
-      margin-top: 3px;
+      margin-top: 4px;
     }
 
-    .hero-panel {
-      min-height: 195px;
-    }
+    .hero-panel { min-height: 185px; }
 
     .table-footer-total {
       display: flex;
@@ -902,7 +675,7 @@ function appStyles() {
       padding: 10px 4px 0;
       font-weight: 600;
       color: var(--text);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .action-row {
@@ -914,19 +687,19 @@ function appStyles() {
 
     .fx-name {
       font-weight: 600;
-      margin-bottom: 2px;
-      font-size: 12px;
+      margin-bottom: 3px;
+      font-size: 11px;
     }
 
     .fx-sub {
       color: var(--muted);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 400;
     }
 
     .fx-kicker {
       color: var(--muted);
-      font-size: 10px;
+      font-size: 9px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       margin-bottom: 5px;
@@ -934,7 +707,7 @@ function appStyles() {
     }
 
     .compact-title {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 600;
       letter-spacing: -0.02em;
       margin: 0;
@@ -948,7 +721,7 @@ function appStyles() {
     }
 
     .tcard-label {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -957,7 +730,7 @@ function appStyles() {
     }
 
     .tcard-value {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       letter-spacing: -0.01em;
     }
@@ -974,7 +747,7 @@ function appStyles() {
 
     .modal-card {
       width: 100%;
-      max-width: 520px;
+      max-width: 500px;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -990,15 +763,8 @@ function appStyles() {
       margin-bottom: 12px;
     }
 
-    .cover-good {
-      color: var(--success);
-      font-weight: 600;
-    }
-
-    .cover-bad {
-      color: var(--danger);
-      font-weight: 600;
-    }
+    .cover-good { color: var(--success); font-weight: 600; }
+    .cover-bad { color: var(--danger); font-weight: 600; }
 
     .auth-wrap {
       min-height: 100vh;
@@ -1030,7 +796,7 @@ function appStyles() {
     .auth-logo {
       width: 34px;
       height: 34px;
-      border-radius: 10px;
+      border-radius: 11px;
       display: grid;
       place-items: center;
       border: 1px solid var(--border);
@@ -1050,7 +816,6 @@ function appStyles() {
       letter-spacing: 0.08em;
       text-transform: uppercase;
       margin-top: 2px;
-      font-weight: 500;
     }
 
     .pin-dots {
@@ -1061,8 +826,8 @@ function appStyles() {
     }
 
     .pin-dot {
-      width: 13px;
-      height: 13px;
+      width: 12px;
+      height: 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: transparent;
@@ -1085,8 +850,8 @@ function appStyles() {
       border: 1px solid var(--border);
       background: var(--panel-2);
       color: var(--text);
-      font-size: 15px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
     }
 
     @media (max-width: 1200px) {
@@ -1099,7 +864,7 @@ function appStyles() {
       .sidebar { display: none; }
       .grid-4, .grid-3, .grid-2, .split-2 { grid-template-columns: 1fr; }
       .header { flex-direction: column; }
-      .header h1 { font-size: 23px; }
+      .header h1 { font-size: 21px; }
       .main { padding: 12px; }
     }
   `;
@@ -1109,7 +874,7 @@ function MetricCard({ icon: Icon, label, value, sub }) {
   return (
     <div className="card metric-card">
       <div className="label">
-        <Icon size={13} />
+        <Icon size={12} />
         {label}
       </div>
       <div className="value">{value}</div>
@@ -1135,31 +900,20 @@ function LoginScreen({ onLogin, theme }) {
           </div>
         </div>
 
-        <h2 style={{ margin: "0 0 8px", fontSize: 20, letterSpacing: "-0.02em", fontWeight: 600 }}>Sign in</h2>
-        <p className="muted" style={{ marginTop: 0, fontSize: 12, lineHeight: 1.45 }}>
+        <h2 style={{ margin: "0 0 8px", fontSize: 19, letterSpacing: "-0.02em", fontWeight: 600 }}>Sign in</h2>
+        <p className="muted" style={{ marginTop: 0, fontSize: 11, lineHeight: 1.45 }}>
           Enter your email and password. After sign-in, you’ll create a PIN for faster access next time.
         </p>
 
         <div className="form-grid" style={{ marginTop: 12 }}>
-          <input
-            className="input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-          />
-          <input
-            className="input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            type="password"
-          />
+          <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+          <input className="input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
           <button className="btn btn-primary" onClick={() => onLogin({ ...demoUser, email })}>
             Sign in
           </button>
         </div>
 
-        <div style={{ marginTop: 12, fontSize: 11 }} className="muted">
+        <div style={{ marginTop: 12, fontSize: 10 }} className="muted">
           Theme: {theme === "dark" ? "Dark Navy" : "Light"}
         </div>
       </div>
@@ -1204,18 +958,18 @@ function PinSetupModal({ open, onSave }) {
 
   return (
     <div className="modal-backdrop">
-      <div className="modal-card" style={{ maxWidth: 420 }}>
+      <div className="modal-card" style={{ maxWidth: 410 }}>
         <div className="modal-head">
           <div>
             <div className="fx-kicker">Quick access</div>
-            <h3 className="section-title" style={{ fontSize: 18, marginBottom: 4 }}>Create PIN</h3>
+            <h3 className="section-title" style={{ fontSize: 17, marginBottom: 4 }}>Create PIN</h3>
             <div className="section-sub" style={{ marginBottom: 0 }}>
               Use a 4-digit PIN for faster future access.
             </div>
           </div>
         </div>
 
-        <div style={{ textAlign: "center", fontSize: 12, marginBottom: 4 }}>
+        <div style={{ textAlign: "center", fontSize: 11, marginBottom: 4 }}>
           {step === 1 ? "Enter new PIN" : "Confirm PIN"}
         </div>
 
@@ -1227,7 +981,7 @@ function PinSetupModal({ open, onSave }) {
         </div>
 
         {ready && !match && (
-          <div style={{ color: "var(--danger)", textAlign: "center", fontSize: 12, marginBottom: 10 }}>
+          <div style={{ color: "var(--danger)", textAlign: "center", fontSize: 11, marginBottom: 10 }}>
             PINs do not match. Press clear and try again.
           </div>
         )}
@@ -1236,24 +990,13 @@ function PinSetupModal({ open, onSave }) {
           {["1","2","3","4","5","6","7","8","9"].map((n) => (
             <button key={n} className="pin-key" onClick={() => press(n)}>{n}</button>
           ))}
-          <button className="pin-key" onClick={() => {
-            setPin("");
-            setConfirmPin("");
-            setStep(1);
-          }}>
-            Clear
-          </button>
+          <button className="pin-key" onClick={() => { setPin(""); setConfirmPin(""); setStep(1); }}>Clear</button>
           <button className="pin-key" onClick={() => press("0")}>0</button>
           <button className="pin-key" onClick={backspace}>⌫</button>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
-          <button
-            className="btn btn-primary"
-            disabled={!match}
-            style={{ opacity: match ? 1 : 0.45 }}
-            onClick={() => match && onSave(pin)}
-          >
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+          <button className="btn btn-primary" disabled={!match} style={{ opacity: match ? 1 : 0.45 }} onClick={() => match && onSave(pin)}>
             Save PIN
           </button>
         </div>
@@ -1271,17 +1014,14 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
     const next = pin + n;
     setPin(next);
     if (next.length === 4) {
-      if (next === savedPin) {
-        setTimeout(() => onUnlock(), 120);
-      } else {
-        setTimeout(() => setPin(""), 200);
-      }
+      if (next === savedPin) setTimeout(() => onUnlock(), 120);
+      else setTimeout(() => setPin(""), 200);
     }
   }
 
   return (
     <div className="auth-wrap">
-      <div className="auth-card" style={{ maxWidth: 360 }}>
+      <div className="auth-card" style={{ maxWidth: 350 }}>
         <div className="auth-head">
           <div className="auth-logo">
             <KeyRound size={17} />
@@ -1292,7 +1032,7 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
           </div>
         </div>
 
-        <p className="muted" style={{ marginTop: 0, fontSize: 12, lineHeight: 1.45 }}>
+        <p className="muted" style={{ marginTop: 0, fontSize: 11, lineHeight: 1.45 }}>
           Enter your PIN to unlock quickly.
         </p>
 
@@ -1311,7 +1051,7 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
           <button className="pin-key" onClick={() => setPin((s) => s.slice(0, -1))}>⌫</button>
         </div>
 
-        <button className="btn" style={{ width: "100%", justifyContent: "center", marginTop: 14 }} onClick={onUsePassword}>
+        <button className="btn" style={{ width: "100%", justifyContent: "center", marginTop: 12 }} onClick={onUsePassword}>
           Sign in with email instead
         </button>
       </div>
@@ -1340,7 +1080,7 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-badge">
-          <LineChart size={15} />
+          <LineChart size={14} />
         </div>
         <div>
           <div className="brand-title">Sentimo</div>
@@ -1350,55 +1090,47 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
 
       <div className="daily-card">
         <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target</div>
-        <div style={{ fontSize: 17, fontWeight: 600, color: "var(--nav-text)" }}>0%</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: "var(--nav-text)" }}>0%</div>
         <div className="daily-line"><span /></div>
-        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--nav-muted)", fontSize: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--nav-muted)", fontSize: 9 }}>
           <span>Spent £0</span>
           <span>£151 left</span>
         </div>
       </div>
 
       <div className="sidebar-nav">
-        {nav.map(([Icon, label]) => {
-          const active = activePage === label;
-          return (
-            <button
-              key={label}
-              className={active ? "active" : ""}
-              onClick={() => setActivePage(label)}
-            >
-              <Icon size={14} />
-              <span style={{ flex: 1 }}>{label}</span>
-            </button>
-          );
-        })}
+        {nav.map(([Icon, label]) => (
+          <button
+            key={label}
+            className={activePage === label ? "active" : ""}
+            onClick={() => setActivePage(label)}
+            type="button"
+          >
+            <Icon size={13} />
+            <span style={{ flex: 1 }}>{label}</span>
+          </button>
+        ))}
       </div>
 
       <div className="sidebar-footer">
         <div className="sidebar-bottom-card">
-          <div className="sidebar-userrow">
-            <UserCircle2 size={18} />
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 13 }}>{user.name}</div>
-              <div style={{ fontSize: 10, color: "var(--nav-muted)" }}>{user.email}</div>
-            </div>
-          </div>
-
-          <div className="theme-compact">
-            <button
-              className={`theme-chip ${theme === "dark" ? "active" : ""}`}
-              onClick={() => setTheme("dark")}
-            >
-              <Moon size={11} />
+          <div className="theme-single-row">
+            <button className={`theme-chip ${theme === "dark" ? "active" : ""}`} onClick={() => setTheme("dark")} type="button">
+              <Moon size={10} />
               Dark
             </button>
-            <button
-              className={`theme-chip ${theme === "light" ? "active" : ""}`}
-              onClick={() => setTheme("light")}
-            >
-              <Sun size={11} />
+            <button className={`theme-chip ${theme === "light" ? "active" : ""}`} onClick={() => setTheme("light")} type="button">
+              <Sun size={10} />
               Light
             </button>
+          </div>
+
+          <div className="sidebar-userrow">
+            <UserCircle2 size={17} />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 12 }}>{user.name}</div>
+              <div style={{ fontSize: 9, color: "var(--nav-muted)" }}>{user.email}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1450,12 +1182,12 @@ function DashboardPage({ transactions, fixedExpenses }) {
                   <div key={row.name}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: 12 }}>{row.name}</div>
-                        <div className="muted" style={{ fontSize: 10 }}>Budget {formatCurrency(budget)}</div>
+                        <div style={{ fontWeight: 600, fontSize: 11 }}>{row.name}</div>
+                        <div className="muted" style={{ fontSize: 9 }}>Budget {formatCurrency(budget)}</div>
                       </div>
                       <div style={{ textAlign: "right" }}>
-                        <div style={{ fontWeight: 600, fontSize: 12 }}>{formatCurrency(row.amount)}</div>
-                        <div className="muted" style={{ fontSize: 10 }}>{pct}% used</div>
+                        <div style={{ fontWeight: 600, fontSize: 11 }}>{formatCurrency(row.amount)}</div>
+                        <div className="muted" style={{ fontSize: 9 }}>{pct}% used</div>
                       </div>
                     </div>
                     <div className="progress"><span style={{ width: `${pct}%` }} /></div>
@@ -1469,17 +1201,17 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Fixed Obligations</h3>
           <p className="section-sub">Current recurring burden.</p>
-          <div style={{ fontSize: 24, fontWeight: 600 }}>{formatCurrency(fixedMonthly)}</div>
+          <div style={{ fontSize: 22, fontWeight: 600 }}>{formatCurrency(fixedMonthly)}</div>
           <div className="muted" style={{ fontSize: 11 }}>/ month</div>
 
           <div className="grid-2" style={{ marginTop: 12 }}>
             <div>
-              <div className="muted" style={{ fontSize: 10 }}>Weekly</div>
-              <div style={{ fontWeight: 600, fontSize: 12 }}>{formatCurrency(fixedMonthly / 4.333)}</div>
+              <div className="muted" style={{ fontSize: 9 }}>Weekly</div>
+              <div style={{ fontWeight: 600, fontSize: 11 }}>{formatCurrency(fixedMonthly / 4.333)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 10 }}>Daily</div>
-              <div style={{ fontWeight: 600, fontSize: 12 }}>{formatCurrency(fixedMonthly / 30)}</div>
+              <div className="muted" style={{ fontSize: 9 }}>Daily</div>
+              <div style={{ fontWeight: 600, fontSize: 11 }}>{formatCurrency(fixedMonthly / 30)}</div>
             </div>
           </div>
         </div>
@@ -1489,10 +1221,10 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Monthly Net Position</h3>
           <p className="section-sub">Income received minus total expenses this month.</p>
-          <div style={{ fontSize: 24, fontWeight: 600, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
+          <div style={{ fontSize: 21, fontWeight: 600, color: net >= 0 ? "var(--success)" : "var(--danger)" }}>
             {net >= 0 ? "+" : ""}{formatCurrency(net)}
           </div>
-          <div className="muted" style={{ marginTop: 5, fontSize: 11 }}>
+          <div className="muted" style={{ marginTop: 5, fontSize: 10 }}>
             {formatCurrency(realIncome)} in · {formatCurrency(realExpenses)} out
           </div>
         </div>
@@ -1500,7 +1232,7 @@ function DashboardPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Savings / Internal</h3>
           <p className="section-sub">Tracked but excluded from real totals.</p>
-          <div style={{ fontSize: 23, fontWeight: 600 }}>{formatCurrency(internalTotal)}</div>
+          <div style={{ fontSize: 21, fontWeight: 600 }}>{formatCurrency(internalTotal)}</div>
         </div>
 
         <div className="card">
@@ -1508,9 +1240,9 @@ function DashboardPage({ transactions, fixedExpenses }) {
           <p className="section-sub">Latest counted inflows.</p>
           <div className="form-grid">
             {getCountedRealIncome(transactions).slice(0, 3).map((t) => (
-              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 12 }}>
+              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 11 }}>
                 <span>{t.description}</span>
-                <strong>{formatCurrency(t.amount)}</strong>
+                <strong style={{ fontWeight: 600 }}>{formatCurrency(t.amount)}</strong>
               </div>
             ))}
           </div>
@@ -1567,7 +1299,6 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         nextDueDate: "",
         status: "Scheduled",
         autoIncludeTarget: true,
-        notes: "",
       },
       ...fixedExpenses,
     ]);
@@ -1596,8 +1327,8 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
   return (
     <>
       <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn btn-primary" onClick={addExpense}>
-          <Plus size={13} />
+        <button className="btn btn-primary" onClick={addExpense} type="button">
+          <Plus size={12} />
           Add Expense
         </button>
       </div>
@@ -1622,6 +1353,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
               key={item.label}
               className={tab === item.label ? "active" : ""}
               onClick={() => setTab(item.label)}
+              type="button"
             >
               {item.label} ({item.count})
             </button>
@@ -1664,18 +1396,14 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                   </td>
                   <td>
                     <div className="action-row">
-                      <button className="btn btn-icon" title="Cycle status" onClick={() => cycleStatus(item.id)}>
-                        {item.status === "Paid" ? <Check size={12} /> : <Clock3 size={12} />}
+                      <button className="btn btn-icon" title="Cycle status" onClick={() => cycleStatus(item.id)} type="button">
+                        {item.status === "Paid" ? <Check size={11} /> : <Clock3 size={11} />}
                       </button>
-                      <button className="btn btn-icon" title="Edit">
-                        <Pencil size={12} />
+                      <button className="btn btn-icon" title="Edit" type="button">
+                        <Pencil size={11} />
                       </button>
-                      <button
-                        className="btn btn-icon"
-                        title="Delete"
-                        onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))}
-                      >
-                        <Trash2 size={12} />
+                      <button className="btn btn-icon" title="Delete" onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))} type="button">
+                        <Trash2 size={11} />
                       </button>
                     </div>
                   </td>
@@ -1684,7 +1412,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
               {visible.length === 0 && (
                 <tr>
                   <td colSpan="8">
-                    <div className="empty-box" style={{ minHeight: 110 }}>
+                    <div className="empty-box" style={{ minHeight: 100 }}>
                       No fixed expenses in this status.
                     </div>
                   </td>
@@ -1697,36 +1425,6 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
         <div className="table-footer-total">
           <span>Active Total</span>
           <span>{formatCurrency(activeMonthlyTotal)} / mo</span>
-        </div>
-      </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <div className="fx-kicker">Recurring obligations</div>
-        <h3 className="section-title">Add Fixed Expense</h3>
-        <p className="section-sub">
-          Add recurring rent, subscriptions, school costs, insurance, and other scheduled commitments.
-        </p>
-
-        <div className="split-2">
-          <input className="input" placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
-          <input className="input" placeholder="Category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
-          <input className="input" placeholder="Sub-category" value={draft.subcategory} onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })} />
-          <select value={draft.frequency} onChange={(e) => setDraft({ ...draft, frequency: e.target.value })}>
-            <option>Weekly</option>
-            <option>Monthly</option>
-            <option>Quarterly</option>
-            <option>Annual</option>
-            <option>Custom</option>
-          </select>
-          <input className="input" placeholder="Due day" type="number" value={draft.dueDay} onChange={(e) => setDraft({ ...draft, dueDay: e.target.value })} />
-        </div>
-
-        <div style={{ marginTop: 10 }}>
-          <button className="btn btn-primary" onClick={addExpense}>
-            <Plus size={13} />
-            Save Fixed Expense
-          </button>
         </div>
       </div>
     </>
@@ -1769,7 +1467,6 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
         nature: "real",
         status: "counted",
         amount: Number(draft.amount),
-        source: "manual",
       },
       ...transactions,
     ]);
@@ -1786,22 +1483,22 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
   return (
     <>
       <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn">
-          <Plus size={13} />
+        <button className="btn" type="button">
+          <Plus size={12} />
           Log Multiple
         </button>
-        <button className="btn btn-primary" onClick={addExpense}>
-          <Plus size={13} />
+        <button className="btn btn-primary" onClick={addExpense} type="button">
+          <Plus size={12} />
           Add Single
         </button>
       </div>
 
       <div className="card">
         <div className="mini-tabs">
-          <button className={period === "7d" ? "active" : ""} onClick={() => setPeriod("7d")}>7 Days</button>
-          <button className={period === "30d" ? "active" : ""} onClick={() => setPeriod("30d")}>30 Days</button>
-          <button className={period === "month" ? "active" : ""} onClick={() => setPeriod("month")}>This Month</button>
-          <button>This Year</button>
+          <button className={period === "7d" ? "active" : ""} onClick={() => setPeriod("7d")} type="button">7 Days</button>
+          <button className={period === "30d" ? "active" : ""} onClick={() => setPeriod("30d")} type="button">30 Days</button>
+          <button className={period === "month" ? "active" : ""} onClick={() => setPeriod("month")} type="button">This Month</button>
+          <button type="button">This Year</button>
         </div>
 
         <div className="split-2" style={{ marginBottom: 10 }}>
@@ -1821,8 +1518,8 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
           {expenseRows.length === 0 ? (
             <div className="empty-box">
               <div>
-                <div style={{ marginBottom: 12 }}>No expenses in this period</div>
-                <button className="btn btn-primary" onClick={addExpense}>Log Expense</button>
+                <div style={{ marginBottom: 10 }}>No expenses in this period</div>
+                <button className="btn btn-primary" onClick={addExpense} type="button">Log Expense</button>
               </div>
             </div>
           ) : (
@@ -1849,8 +1546,8 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
                       <td>{row.subcategory}</td>
                       <td style={{ fontWeight: 600 }}>{formatCurrency(row.amount)}</td>
                       <td>
-                        <button className="btn btn-icon" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== row.id))}>
-                          <Trash2 size={12} />
+                        <button className="btn btn-icon" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== row.id))} type="button">
+                          <Trash2 size={11} />
                         </button>
                       </td>
                     </tr>
@@ -1859,18 +1556,6 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
               </table>
             </div>
           )}
-        </div>
-      </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <h3 className="section-title">Log Daily Expense</h3>
-        <div className="split-2">
-          <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
-          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
-          <input className="input" placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
-          <input className="input" placeholder="Merchant / Person" value={draft.merchant} onChange={(e) => setDraft({ ...draft, merchant: e.target.value })} />
-          <input className="input" placeholder="Category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} />
-          <input className="input" placeholder="Sub-category" value={draft.subcategory} onChange={(e) => setDraft({ ...draft, subcategory: e.target.value })} />
         </div>
       </div>
     </>
@@ -1893,7 +1578,7 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
   const bySource = useMemo(() => {
     const map = new Map();
     rows.forEach((r) => {
-      const key = r.subcategory || r.source || "Other";
+      const key = r.subcategory || "Other";
       map.set(key, (map.get(key) || 0) + Number(r.amount));
     });
     return Array.from(map.entries()).map(([name, amount]) => ({ name, amount }));
@@ -1913,7 +1598,6 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
         nature: "real",
         status: "counted",
         amount: Number(draft.amount),
-        source: "manual",
       },
       ...transactions,
     ]);
@@ -1928,12 +1612,12 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
   return (
     <>
       <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn">
-          <Plus size={13} />
+        <button className="btn" type="button">
+          <Plus size={12} />
           Log Multiple
         </button>
-        <button className="btn btn-primary" onClick={addIncome}>
-          <Plus size={13} />
+        <button className="btn btn-primary" onClick={addIncome} type="button">
+          <Plus size={12} />
           Add Single
         </button>
       </div>
@@ -1951,10 +1635,10 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
             const pct = totalReceived > 0 ? Math.round((item.amount / totalReceived) * 100) : 0;
             return (
               <div key={item.name} className="card" style={{ padding: 10 }}>
-                <div className="muted" style={{ fontSize: 10 }}>{item.name}</div>
-                <div style={{ marginTop: 6, fontWeight: 600, fontSize: 18 }}>{formatCurrency(item.amount)}</div>
+                <div className="muted" style={{ fontSize: 9 }}>{item.name}</div>
+                <div style={{ marginTop: 6, fontWeight: 600, fontSize: 17 }}>{formatCurrency(item.amount)}</div>
                 <div className="progress" style={{ marginTop: 8 }}><span style={{ width: `${pct}%` }} /></div>
-                <div className="muted" style={{ marginTop: 5, fontSize: 10 }}>{pct}%</div>
+                <div className="muted" style={{ marginTop: 5, fontSize: 9 }}>{pct}%</div>
               </div>
             );
           })}
@@ -1989,16 +1673,6 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
               })}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <h3 className="section-title">Log Income / Deposit</h3>
-        <div className="split-2">
-          <input className="input" type="date" value={draft.date} onChange={(e) => setDraft({ ...draft, date: e.target.value })} />
-          <input className="input" placeholder="Amount" type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: e.target.value })} />
-          <input className="input" placeholder="Source" value={draft.source} onChange={(e) => setDraft({ ...draft, source: e.target.value })} />
-          <input className="input" placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
         </div>
       </div>
     </>
@@ -2047,61 +1721,34 @@ function TradingPnlModal({ open, onClose, onSave }) {
         <div className="modal-head">
           <div>
             <div className="fx-kicker">Today — 29 Apr 2026</div>
-            <h3 className="section-title" style={{ fontSize: 17, marginBottom: 4 }}>Log Trading Session</h3>
+            <h3 className="section-title" style={{ fontSize: 16, marginBottom: 4 }}>Log Trading Session</h3>
             <div className="section-sub" style={{ marginBottom: 0 }}>
               Record manual daily performance and compare it against your expenses.
             </div>
           </div>
-          <button className="btn btn-icon" onClick={onClose}>
-            <X size={13} />
+          <button className="btn btn-icon" onClick={onClose} type="button">
+            <X size={12} />
           </button>
         </div>
 
         <div className="form-grid">
           <div className="split-2">
-            <input
-              className="input"
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-            />
-            <select
-              value={form.currency}
-              onChange={(e) => setForm({ ...form, currency: e.target.value })}
-            >
+            <input className="input" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+            <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
               <option>GBP</option>
               <option>EUR</option>
               <option>USD</option>
             </select>
           </div>
 
-          <input
-            className="input"
-            placeholder="Instrument (optional) e.g. EURUSD, DAX, Gold, BTC"
-            value={form.instrument}
-            onChange={(e) => setForm({ ...form, instrument: e.target.value })}
-          />
-
-          <input
-            className="input"
-            placeholder="P&L amount e.g. 450 or -120"
-            type="number"
-            value={form.pnl}
-            onChange={(e) => setForm({ ...form, pnl: e.target.value })}
-          />
-
-          <textarea
-            className="input"
-            rows="3"
-            placeholder="Notes (optional)"
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          />
+          <input className="input" placeholder="Instrument (optional) e.g. EURUSD, DAX, Gold, BTC" value={form.instrument} onChange={(e) => setForm({ ...form, instrument: e.target.value })} />
+          <input className="input" placeholder="P&L amount e.g. 450 or -120" type="number" value={form.pnl} onChange={(e) => setForm({ ...form, pnl: e.target.value })} />
+          <textarea className="input" rows="3" placeholder="Notes (optional)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
         </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
-          <button className="btn" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={submit}>Log Session</button>
+          <button className="btn" onClick={onClose} type="button">Cancel</button>
+          <button className="btn btn-primary" onClick={submit} type="button">Log Session</button>
         </div>
       </div>
     </div>
@@ -2112,7 +1759,6 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const today = "2026-04-29";
-
   const todaySessions = sessions.filter((s) => sameDay(s.date, today));
   const todayTrading = todaySessions.reduce((sum, s) => sum + Number(s.pnl || 0), 0);
   const todayExpenses = getCountedRealExpenses(transactions)
@@ -2121,9 +1767,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
   const todayNet = todayTrading - todayExpenses;
 
   const last60 = useMemo(() => {
-    return [...sessions]
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 60);
+    return [...sessions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 60);
   }, [sessions]);
 
   function saveSession(session) {
@@ -2133,8 +1777,8 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
   return (
     <>
       <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
-          <Plus size={13} />
+        <button className="btn btn-primary" onClick={() => setIsOpen(true)} type="button">
+          <Plus size={12} />
           Log Session
         </button>
       </div>
@@ -2142,7 +1786,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
       <div className="card">
         <div className="fx-kicker">Today — 29 Apr 2026</div>
         <h2 className="compact-title">Daily Performance</h2>
-        <p className="section-sub" style={{ marginTop: 6 }}>
+        <p className="section-sub" style={{ marginTop: 5 }}>
           Daily performance vs expenses — did trading cover the day?
         </p>
 
@@ -2167,15 +1811,13 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
           </div>
         </div>
 
-        <div style={{ marginTop: 12, fontSize: 12 }}>
+        <div style={{ marginTop: 12, fontSize: 11 }}>
           {todaySessions.length === 0 && todayExpenses === 0 && (
             <span className="muted">No trading sessions or expenses logged today.</span>
           )}
           {(todaySessions.length > 0 || todayExpenses > 0) && (
             <span className={todayNet >= 0 ? "cover-good" : "cover-bad"}>
-              {todayNet >= 0
-                ? "Trading covered the day."
-                : "Trading did not cover the day yet."}
+              {todayNet >= 0 ? "Trading covered the day." : "Trading did not cover the day yet."}
             </span>
           )}
         </div>
@@ -2186,8 +1828,8 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
         {last60.length === 0 ? (
           <div className="empty-box">
             <div>
-              <div style={{ marginBottom: 12 }}>No trading sessions yet</div>
-              <button className="btn btn-primary" onClick={() => setIsOpen(true)}>
+              <div style={{ marginBottom: 10 }}>No trading sessions yet</div>
+              <button className="btn btn-primary" onClick={() => setIsOpen(true)} type="button">
                 Log Trading Session
               </button>
             </div>
@@ -2216,11 +1858,8 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
                     </td>
                     <td className="muted">{session.notes || "—"}</td>
                     <td>
-                      <button
-                        className="btn btn-icon"
-                        onClick={() => setSessions((prev) => prev.filter((x) => x.id !== session.id))}
-                      >
-                        <Trash2 size={12} />
+                      <button className="btn btn-icon" onClick={() => setSessions((prev) => prev.filter((x) => x.id !== session.id))} type="button">
+                        <Trash2 size={11} />
                       </button>
                     </td>
                   </tr>
@@ -2231,11 +1870,7 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
         )}
       </div>
 
-      <TradingPnlModal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        onSave={saveSession}
-      />
+      <TradingPnlModal open={isOpen} onClose={() => setIsOpen(false)} onSave={saveSession} />
     </>
   );
 }
@@ -2249,9 +1884,7 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
   const variableAvg = sumAmounts(variableExpenses) / Number(settings.variableAverageDays || 30);
   const autoTarget = fixedMonthly / daysInMonth(new Date("2026-04-29")) + variableAvg;
   const target = settings.customDailyTarget ? Number(settings.customDailyTarget) : autoTarget;
-  const todaySpent = sumAmounts(
-    getCountedRealExpenses(transactions).filter((t) => t.date === "2026-04-29")
-  );
+  const todaySpent = sumAmounts(getCountedRealExpenses(transactions).filter((t) => t.date === "2026-04-29"));
   const remaining = target - todaySpent;
   const pct = target > 0 ? Math.max(0, Math.min(100, Math.round((todaySpent / target) * 100))) : 0;
 
@@ -2260,13 +1893,13 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
       <div className="grid-2">
         <div className="card">
           <div className="eyebrow muted">Wed, 29 Apr 2026 · Daily Target</div>
-          <h3 className="section-title" style={{ fontSize: 15 }}>Daily Target</h3>
+          <h3 className="section-title" style={{ fontSize: 13 }}>Daily Target</h3>
 
           <div style={{ display: "grid", placeItems: "center", padding: "14px 0" }}>
             <div
               style={{
-                width: 142,
-                height: 142,
+                width: 140,
+                height: 140,
                 borderRadius: "50%",
                 border: "9px solid var(--panel-2)",
                 display: "grid",
@@ -2274,24 +1907,24 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
               }}
             >
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 34, fontWeight: 600 }}>{pct}%</div>
-                <div className="muted" style={{ fontSize: 11 }}>of target</div>
+                <div style={{ fontSize: 30, fontWeight: 600 }}>{pct}%</div>
+                <div className="muted" style={{ fontSize: 10 }}>of target</div>
               </div>
             </div>
           </div>
 
           <div className="grid-3">
             <div>
-              <div className="muted" style={{ fontSize: 10 }}>Today Spent</div>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{formatCurrency(todaySpent)}</div>
+              <div className="muted" style={{ fontSize: 9 }}>Today Spent</div>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>{formatCurrency(todaySpent)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 10 }}>Target</div>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{formatCurrency(target)}</div>
+              <div className="muted" style={{ fontSize: 9 }}>Target</div>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>{formatCurrency(target)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 10 }}>Remaining</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: remaining >= 0 ? "var(--success)" : "var(--danger)" }}>
+              <div className="muted" style={{ fontSize: 9 }}>Remaining</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: remaining >= 0 ? "var(--success)" : "var(--danger)" }}>
                 {formatCurrency(remaining)}
               </div>
             </div>
@@ -2300,24 +1933,24 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
 
         <div className="card">
           <h3 className="section-title">Daily Withdrawal Target</h3>
-          <div style={{ fontSize: 31, fontWeight: 600 }}>{formatCurrency(target)} <span className="muted" style={{ fontSize: 14 }}>/ day</span></div>
-          <p className="section-sub">
-            Auto-calculated from fixed monthly obligations plus variable rolling average.
-          </p>
+          <div style={{ fontSize: 28, fontWeight: 600 }}>
+            {formatCurrency(target)} <span className="muted" style={{ fontSize: 13 }}>/ day</span>
+          </div>
+          <p className="section-sub">Auto-calculated from fixed monthly obligations plus variable rolling average.</p>
 
-          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, marginTop: 10 }}>
-            <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 500 }}>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, marginTop: 8 }}>
+            <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Target Composition
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Fixed expenses (daily equiv.)</span>
-              <strong>{formatCurrency(fixedMonthly / daysInMonth(new Date("2026-04-29")))}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(fixedMonthly / daysInMonth(new Date("2026-04-29")))}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Variable avg (rolling)</span>
-              <strong>{formatCurrency(variableAvg)}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(variableAvg)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontWeight: 600, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontWeight: 600, fontSize: 11 }}>
               <span>Daily target</span>
               <span>{formatCurrency(target)}</span>
             </div>
@@ -2329,11 +1962,6 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
         <h3 className="section-title">Daily Spend vs Target</h3>
         <p className="section-sub">7d / 14d / 30d / 60d graph block reserved for next build step.</p>
         <div className="empty-box">Chart area placeholder</div>
-      </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <h3 className="section-title">Daily History — Last 30 Days</h3>
-        <div className="empty-box">History chart placeholder</div>
       </div>
     </>
   );
@@ -2354,10 +1982,10 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
   return (
     <>
       <div className="mini-tabs">
-        <button>Last 7 Days</button>
-        <button className="active">Last 30 Days</button>
-        <button>This Month</button>
-        <button>This Year</button>
+        <button type="button">Last 7 Days</button>
+        <button className="active" type="button">Last 30 Days</button>
+        <button type="button">This Month</button>
+        <button type="button">This Year</button>
       </div>
 
       <div className="grid-4">
@@ -2377,11 +2005,6 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
           <div className="empty-box">No data for this period</div>
         </div>
       </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <h3 className="section-title">Daily Spending vs Target</h3>
-        <div className="empty-box">Chart area placeholder</div>
-      </div>
     </>
   );
 }
@@ -2391,31 +2014,30 @@ function OverallPage({ transactions, fixedExpenses }) {
   const thisMonthExpenses = sumAmounts(getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "month")));
   const previousMonthIncome = thisMonthIncome * 0.8;
   const previousMonthExpenses = thisMonthExpenses * 1.1;
-  const budgetMonth =
-    fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0) + 1000;
+  const budgetMonth = fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0) + 1000;
 
   return (
     <>
       <div className="mini-tabs">
-        <button>Week</button>
-        <button className="active">Month</button>
-        <button>Year</button>
-        <button>Budget</button>
+        <button type="button">Week</button>
+        <button className="active" type="button">Month</button>
+        <button type="button">Year</button>
+        <button type="button">Budget</button>
       </div>
 
       <div className="grid-3">
         <div className="card">
           <h3 className="section-title">This Month</h3>
           <div style={{ marginTop: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Income</span>
-              <strong>{formatCurrency(thisMonthIncome)}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(thisMonthIncome)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Expenses</span>
-              <strong>{formatCurrency(thisMonthExpenses)}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(thisMonthExpenses)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 11 }}>
               <span>Net</span>
               <strong>{formatCurrency(thisMonthIncome - thisMonthExpenses)}</strong>
             </div>
@@ -2425,15 +2047,15 @@ function OverallPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Previous Month</h3>
           <div style={{ marginTop: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Income</span>
-              <strong>{formatCurrency(previousMonthIncome)}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(previousMonthIncome)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Expenses</span>
-              <strong>{formatCurrency(previousMonthExpenses)}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(previousMonthExpenses)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 11 }}>
               <span>Net</span>
               <strong>{formatCurrency(previousMonthIncome - previousMonthExpenses)}</strong>
             </div>
@@ -2443,39 +2065,36 @@ function OverallPage({ transactions, fixedExpenses }) {
         <div className="card">
           <h3 className="section-title">Budget Month</h3>
           <div style={{ marginTop: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Budgeted Expenses</span>
-              <strong>{formatCurrency(budgetMonth)}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(budgetMonth)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
               <span className="muted">Target Income</span>
-              <strong>{formatCurrency(budgetMonth)}</strong>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(budgetMonth)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, fontSize: 11 }}>
               <span>Target Net</span>
               <strong>{formatCurrency(0)}</strong>
             </div>
           </div>
         </div>
       </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <h3 className="section-title">Comparison View</h3>
-        <p className="section-sub">This module is for side-by-side weekly, monthly, yearly, and budget comparison.</p>
-        <div className="empty-box">Comparison table and charts placeholder</div>
-      </div>
     </>
   );
 }
 
 function CategoriesPage({ categories, setCategories }) {
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategorySubs, setNewCategorySubs] = useState("");
-  const [newCategoryColor, setNewCategoryColor] = useState("#64748b");
+  const [draft, setDraft] = useState({
+    name: "",
+    color: "#64748b",
+    subcategories: "",
+  });
 
   function addCategory() {
-    if (!newCategoryName.trim()) return;
-    const subs = newCategorySubs
+    if (!draft.name.trim()) return;
+
+    const parsedSubs = draft.subcategories
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
@@ -2484,55 +2103,57 @@ function CategoriesPage({ categories, setCategories }) {
       ...prev,
       {
         id: `cat-${Date.now()}`,
-        name: newCategoryName.trim(),
-        color: newCategoryColor,
-        subcategories: subs,
+        name: draft.name.trim(),
+        color: draft.color || "#64748b",
+        subcategories: parsedSubs,
       },
     ]);
 
-    setNewCategoryName("");
-    setNewCategorySubs("");
-    setNewCategoryColor("#64748b");
+    setDraft({
+      name: "",
+      color: "#64748b",
+      subcategories: "",
+    });
   }
 
   return (
     <>
       <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn">
-          <Plus size={13} />
+        <button className="btn" type="button">
+          <Plus size={12} />
           Seed Keywords
         </button>
-        <button className="btn btn-primary" onClick={addCategory}>
-          <Plus size={13} />
+        <button className="btn btn-primary" onClick={addCategory} type="button">
+          <Plus size={12} />
           New Category
         </button>
       </div>
 
       <div className="card" style={{ marginBottom: 10 }}>
         <h3 className="section-title">Add Category</h3>
-        <p className="section-sub">
-          Add a main category and optional sub-categories separated by commas.
-        </p>
+        <p className="section-sub">Add a main category and optional sub-categories separated by commas.</p>
 
         <div className="split-2">
           <input
             className="input"
             placeholder="Category name"
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
           />
           <input
             className="input"
-            placeholder="Colour hex e.g. #64748b"
-            value={newCategoryColor}
-            onChange={(e) => setNewCategoryColor(e.target.value)}
+            placeholder="#64748b"
+            value={draft.color}
+            onChange={(e) => setDraft({ ...draft, color: e.target.value })}
           />
+        </div>
+
+        <div style={{ marginTop: 8 }}>
           <input
             className="input"
-            style={{ gridColumn: "1 / -1" }}
             placeholder="Sub-categories e.g. Rent, Council Tax, Repairs"
-            value={newCategorySubs}
-            onChange={(e) => setNewCategorySubs(e.target.value)}
+            value={draft.subcategories}
+            onChange={(e) => setDraft({ ...draft, subcategories: e.target.value })}
           />
         </div>
       </div>
@@ -2541,25 +2162,25 @@ function CategoriesPage({ categories, setCategories }) {
         <h3 className="section-title">Categories</h3>
         <p className="section-sub">Main categories and visible sub-categories for transaction classification.</p>
 
-        <div className="category-grid">
+        <div className="category-list">
           {categories.map((category) => (
             <div className="category-item" key={category.id}>
               <div className="category-left">
                 <span className="category-dot" style={{ background: category.color }} />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 12 }}>{category.name}</div>
-                  <div className="muted" style={{ fontSize: 10, marginTop: 3 }}>
-                    {category.subcategories.length > 0 ? category.subcategories.join(" · ") : "No sub-categories yet"}
+                  <div style={{ fontWeight: 600, fontSize: 11 }}>{category.name}</div>
+                  <div className="muted" style={{ fontSize: 9, marginTop: 3 }}>
+                    {category.subcategories.length ? category.subcategories.join(" · ") : "No sub-categories yet"}
                   </div>
                 </div>
               </div>
-
               <button
                 className="btn btn-icon"
                 onClick={() => setCategories((prev) => prev.filter((c) => c.id !== category.id))}
                 title="Delete category"
+                type="button"
               >
-                <Trash2 size={12} />
+                <Trash2 size={11} />
               </button>
             </div>
           ))}
@@ -2582,7 +2203,7 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           <div className="brand-sub" style={{ marginBottom: 8 }}>Currency Settings</div>
           <div className="split-2">
             <div>
-              <div className="muted" style={{ marginBottom: 6, fontSize: 10 }}>Base Currency</div>
+              <div className="muted" style={{ marginBottom: 6, fontSize: 9 }}>Base Currency</div>
               <select value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value })}>
                 <option>GBP</option>
                 <option>EUR</option>
@@ -2595,12 +2216,12 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
         <div className="card" style={{ marginTop: 10 }}>
           <div className="brand-sub" style={{ marginBottom: 8 }}>Theme</div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className={`btn ${theme === "dark" ? "btn-soft" : ""}`} onClick={() => setTheme("dark")}>
-              <Moon size={12} />
+            <button className={`btn ${theme === "dark" ? "btn-soft" : ""}`} onClick={() => setTheme("dark")} type="button">
+              <Moon size={11} />
               Dark
             </button>
-            <button className={`btn ${theme === "light" ? "btn-soft" : ""}`} onClick={() => setTheme("light")}>
-              <Sun size={12} />
+            <button className={`btn ${theme === "light" ? "btn-soft" : ""}`} onClick={() => setTheme("light")} type="button">
+              <Sun size={11} />
               Light
             </button>
           </div>
@@ -2610,20 +2231,20 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target Settings</div>
           <div className="grid-2" style={{ marginBottom: 10 }}>
             <div className="card" style={{ padding: 10 }}>
-              <div className="muted" style={{ fontSize: 10 }}>Auto-calculated target</div>
-              <div style={{ fontSize: 20, fontWeight: 600 }}>{formatCurrency(autoTarget)}</div>
+              <div className="muted" style={{ fontSize: 9 }}>Auto-calculated target</div>
+              <div style={{ fontSize: 18, fontWeight: 600 }}>{formatCurrency(autoTarget)}</div>
               <div className="muted" style={{ fontSize: 10 }}>Fixed daily + variable avg</div>
             </div>
             <div className="card" style={{ padding: 10 }}>
-              <div className="muted" style={{ fontSize: 10 }}>Fixed monthly total</div>
-              <div style={{ fontSize: 20, fontWeight: 600, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
+              <div className="muted" style={{ fontSize: 9 }}>Fixed monthly total</div>
+              <div style={{ fontSize: 18, fontWeight: 600, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
               <div className="muted" style={{ fontSize: 10 }}>All active fixed expenses</div>
             </div>
           </div>
 
           <div className="form-grid">
             <div>
-              <div className="muted" style={{ fontSize: 10, marginBottom: 6 }}>Daily Target Override</div>
+              <div className="muted" style={{ fontSize: 9, marginBottom: 6 }}>Daily Target Override</div>
               <input
                 className="input"
                 value={settings.customDailyTarget}
@@ -2633,7 +2254,7 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
             </div>
 
             <div>
-              <div className="muted" style={{ fontSize: 10, marginBottom: 6 }}>Variable Average Window (Days)</div>
+              <div className="muted" style={{ fontSize: 9, marginBottom: 6 }}>Variable Average Window (Days)</div>
               <input
                 className="input"
                 type="number"
@@ -2644,8 +2265,8 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
           </div>
         </div>
 
-        <button className="btn btn-primary" style={{ marginTop: 12 }}>
-          <Save size={13} />
+        <button className="btn btn-primary" style={{ marginTop: 12 }} type="button">
+          <Save size={12} />
           Save Settings
         </button>
       </div>
@@ -2666,8 +2287,8 @@ function AdminPanelPage({ user }) {
       <div className="card" style={{ marginTop: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <h3 className="section-title" style={{ marginBottom: 0 }}>Users</h3>
-          <button className="btn">
-            <RefreshCw size={13} />
+          <button className="btn" type="button">
+            <RefreshCw size={12} />
             Refresh
           </button>
         </div>
@@ -2694,8 +2315,8 @@ function AdminPanelPage({ user }) {
                 <td>29 Apr 2026</td>
                 <td>09 Apr 2026</td>
                 <td style={{ display: "flex", gap: 8 }}>
-                  <button className="btn">Licence</button>
-                  <button className="btn">Demote</button>
+                  <button className="btn" type="button">Licence</button>
+                  <button className="btn" type="button">Demote</button>
                 </td>
               </tr>
             </tbody>
@@ -2713,13 +2334,9 @@ function ImportCsvPage() {
     <div className="card">
       <h3 className="section-title">Import CSV</h3>
       <p className="section-sub">Upload bank statements and categorise transactions automatically.</p>
-      <div
-        className="empty-box"
-        onClick={() => inputRef.current?.click()}
-        style={{ cursor: "pointer" }}
-      >
+      <div className="empty-box" onClick={() => inputRef.current?.click()} style={{ cursor: "pointer" }}>
         <div>
-          <Upload size={24} style={{ marginBottom: 10 }} />
+          <Upload size={20} style={{ marginBottom: 8 }} />
           <div>Drop or select your CSV statement</div>
         </div>
         <input ref={inputRef} type="file" accept=".csv" style={{ display: "none" }} />
@@ -2755,9 +2372,7 @@ export default function App() {
     styleTag.setAttribute("data-sentimo-styles", "true");
     styleTag.innerHTML = appStyles();
     document.head.appendChild(styleTag);
-    return () => {
-      styleTag.remove();
-    };
+    return () => styleTag.remove();
   }, []);
 
   useEffect(() => {
@@ -2780,11 +2395,8 @@ export default function App() {
       if (savedSessions) setSessions(JSON.parse(savedSessions));
 
       if (savedUser) {
-        if (pin && authMode !== "password") {
-          setAuthView("pin");
-        } else {
-          setAuthView("password");
-        }
+        if (pin && authMode !== "password") setAuthView("pin");
+        else setAuthView("password");
         setUser(JSON.parse(savedUser));
       } else {
         setAuthView("password");
@@ -2799,36 +2411,18 @@ export default function App() {
     localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-  }, [transactions]);
-
-  useEffect(() => {
-    localStorage.setItem(FIXED_KEY, JSON.stringify(fixedExpenses));
-  }, [fixedExpenses]);
-
-  useEffect(() => {
-    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
-  }, [categories]);
-
-  useEffect(() => {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  }, [settings]);
-
-  useEffect(() => {
-    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
-  }, [sessions]);
+  useEffect(() => localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions)), [transactions]);
+  useEffect(() => localStorage.setItem(FIXED_KEY, JSON.stringify(fixedExpenses)), [fixedExpenses]);
+  useEffect(() => localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories)), [categories]);
+  useEffect(() => localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)), [settings]);
+  useEffect(() => localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions)), [sessions]);
 
   function handlePasswordLogin(nextUser) {
     setUser(nextUser);
     localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
-
     const existingPin = localStorage.getItem(PIN_KEY);
-    if (!existingPin) {
-      setNeedsPinSetup(true);
-    } else {
-      localStorage.setItem(AUTH_MODE_KEY, "pin");
-    }
+    if (!existingPin) setNeedsPinSetup(true);
+    else localStorage.setItem(AUTH_MODE_KEY, "pin");
   }
 
   function handlePinSaved(pin) {
@@ -2846,12 +2440,7 @@ export default function App() {
   const storedPin = typeof window !== "undefined" ? localStorage.getItem(PIN_KEY) : null;
 
   if (authView === "pin" && storedPin) {
-    return (
-      <PinUnlockScreen
-        onUnlock={() => setAuthView("app")}
-        onUsePassword={usePasswordInstead}
-      />
-    );
+    return <PinUnlockScreen onUnlock={() => setAuthView("app")} onUsePassword={usePasswordInstead} />;
   }
 
   if (!user) {
@@ -2884,7 +2473,7 @@ export default function App() {
                   : activePage}
               </div>
               <h1>{activePage}</h1>
-              <p className="muted" style={{ marginTop: 7, maxWidth: 900, fontSize: 12, lineHeight: 1.45 }}>
+              <p className="muted" style={{ marginTop: 6, maxWidth: 900, fontSize: 11, lineHeight: 1.45, fontWeight: 400 }}>
                 {activePage === "Income & Deposits" && "All money received — trading draws, commissions, dividends, and more."}
                 {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
                 {activePage === "Daily Expenses" && "Day-to-day spending control with category and period filters."}
@@ -2902,87 +2491,25 @@ export default function App() {
             </div>
 
             <div className="header-actions">
-              <button className="btn">
-                <Cloud size={13} />
+              <button className="btn" type="button">
+                <Cloud size={12} />
                 Cloud Connected
               </button>
             </div>
           </div>
 
-          {activePage === "Dashboard" && (
-            <DashboardPage transactions={transactions} fixedExpenses={fixedExpenses} />
-          )}
-
-          {activePage === "Trading P&L" && (
-            <TradingPnLPage
-              transactions={transactions}
-              sessions={sessions}
-              setSessions={setSessions}
-            />
-          )}
-
-          {activePage === "Fixed Expenses" && (
-            <FixedExpensesPage fixedExpenses={fixedExpenses} setFixedExpenses={setFixedExpenses} />
-          )}
-
-          {activePage === "Daily Expenses" && (
-            <DailyExpensesPage
-              transactions={transactions}
-              setTransactions={setTransactions}
-              categories={categories}
-            />
-          )}
-
-          {activePage === "Income & Deposits" && (
-            <IncomeDepositsPage
-              transactions={transactions}
-              setTransactions={setTransactions}
-            />
-          )}
-
-          {activePage === "Daily Target" && (
-            <DailyTargetPage
-              transactions={transactions}
-              fixedExpenses={fixedExpenses}
-              settings={settings}
-            />
-          )}
-
-          {activePage === "Analytics" && (
-            <AnalyticsPage
-              transactions={transactions}
-              fixedExpenses={fixedExpenses}
-              settings={settings}
-            />
-          )}
-
-          {activePage === "Overall" && (
-            <OverallPage
-              transactions={transactions}
-              fixedExpenses={fixedExpenses}
-            />
-          )}
-
-          {activePage === "Categories" && (
-            <CategoriesPage
-              categories={categories}
-              setCategories={setCategories}
-            />
-          )}
-
+          {activePage === "Dashboard" && <DashboardPage transactions={transactions} fixedExpenses={fixedExpenses} />}
+          {activePage === "Trading P&L" && <TradingPnLPage transactions={transactions} sessions={sessions} setSessions={setSessions} />}
+          {activePage === "Fixed Expenses" && <FixedExpensesPage fixedExpenses={fixedExpenses} setFixedExpenses={setFixedExpenses} />}
+          {activePage === "Daily Expenses" && <DailyExpensesPage transactions={transactions} setTransactions={setTransactions} categories={categories} />}
+          {activePage === "Income & Deposits" && <IncomeDepositsPage transactions={transactions} setTransactions={setTransactions} />}
+          {activePage === "Daily Target" && <DailyTargetPage transactions={transactions} fixedExpenses={fixedExpenses} settings={settings} />}
+          {activePage === "Analytics" && <AnalyticsPage transactions={transactions} fixedExpenses={fixedExpenses} settings={settings} />}
+          {activePage === "Overall" && <OverallPage transactions={transactions} fixedExpenses={fixedExpenses} />}
+          {activePage === "Categories" && <CategoriesPage categories={categories} setCategories={setCategories} />}
           {activePage === "Import CSV" && <ImportCsvPage />}
           {activePage === "Rules" && <RulesPage />}
-
-          {activePage === "Settings" && (
-            <SettingsPage
-              theme={theme}
-              setTheme={setTheme}
-              settings={settings}
-              setSettings={setSettings}
-              fixedExpenses={fixedExpenses}
-            />
-          )}
-
+          {activePage === "Settings" && <SettingsPage theme={theme} setTheme={setTheme} settings={settings} setSettings={setSettings} fixedExpenses={fixedExpenses} />}
           {activePage === "Admin Panel" && <AdminPanelPage user={user} />}
         </main>
       </div>
