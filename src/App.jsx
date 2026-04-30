@@ -30,15 +30,15 @@ import {
   KeyRound,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v10";
-const USER_KEY = "sentimo_user_v10";
-const THEME_KEY = "sentimo_theme_v8";
-const FIXED_KEY = "sentimo_fixed_expenses_v9";
-const CATEGORIES_KEY = "sentimo_categories_v8";
-const SETTINGS_KEY = "sentimo_settings_v8";
-const SESSIONS_KEY = "sentimo_trading_sessions_v7";
-const PIN_KEY = "sentimo_pin_v6";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v6";
+const STORAGE_KEY = "sentimo_transactions_v11";
+const USER_KEY = "sentimo_user_v11";
+const THEME_KEY = "sentimo_theme_v9";
+const FIXED_KEY = "sentimo_fixed_expenses_v10";
+const CATEGORIES_KEY = "sentimo_categories_v9";
+const SETTINGS_KEY = "sentimo_settings_v9";
+const SESSIONS_KEY = "sentimo_trading_sessions_v8";
+const PIN_KEY = "sentimo_pin_v7";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v7";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -97,10 +97,6 @@ function formatCurrency(value) {
 
 function daysInMonth(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-}
-
-function toDateInput(date = new Date()) {
-  return date.toISOString().slice(0, 10);
 }
 
 function monthlyEquivalent(frequency, amount) {
@@ -233,7 +229,7 @@ function appStyles() {
     .layout {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 156px 1fr;
+      grid-template-columns: 188px 1fr;
     }
 
     .sidebar {
@@ -250,13 +246,13 @@ function appStyles() {
     .brand {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 13px 4px 8px;
+      gap: 8px;
+      padding: 16px 10px 10px;
     }
 
     .brand-badge {
-      width: 23px;
-      height: 23px;
+      width: 25px;
+      height: 25px;
       border-radius: 7px;
       display: grid;
       place-items: center;
@@ -268,7 +264,7 @@ function appStyles() {
     .brand-title {
       font-weight: 600;
       line-height: 1.05;
-      font-size: 10.5px;
+      font-size: 11px;
       color: var(--nav-text);
     }
 
@@ -289,8 +285,8 @@ function appStyles() {
     }
 
     .daily-card {
-      margin: 6px 1px 8px;
-      padding: 9px 8px;
+      margin: 6px 10px 10px;
+      padding: 10px 10px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.10);
       box-shadow: none;
@@ -314,8 +310,8 @@ function appStyles() {
     .sidebar-nav {
       display: grid;
       align-content: start;
-      gap: 0;
-      padding: 0 1px;
+      gap: 1px;
+      padding: 0 8px;
     }
 
     .sidebar-nav button {
@@ -324,13 +320,13 @@ function appStyles() {
       background: transparent;
       color: var(--nav-muted);
       text-align: left;
-      padding: 8px 6px;
-      border-radius: 8px;
+      padding: 9px 10px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 5px;
-      font-size: 10.5px;
+      gap: 7px;
+      font-size: 11px;
       font-weight: 500;
       position: relative;
       z-index: 2;
@@ -342,21 +338,21 @@ function appStyles() {
     }
 
     .sidebar-footer {
-      padding: 6px 1px 8px;
+      padding: 8px 10px 10px;
     }
 
     .sidebar-bottom-card {
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.03);
       border-radius: 10px;
-      padding: 5px;
+      padding: 7px;
     }
 
     .theme-single-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 4px;
-      margin-bottom: 6px;
+      gap: 5px;
+      margin-bottom: 7px;
     }
 
     .theme-chip {
@@ -364,13 +360,13 @@ function appStyles() {
       background: rgba(255,255,255,0.05);
       color: var(--nav-text);
       border-radius: 8px;
-      padding: 7px 5px;
+      padding: 7px 6px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
-      font-size: 9.5px;
-      min-height: 29px;
+      font-size: 10px;
+      min-height: 30px;
       font-weight: 500;
       position: relative;
       z-index: 2;
@@ -383,7 +379,7 @@ function appStyles() {
 
     .sidebar-userrow {
       display: flex;
-      gap: 6px;
+      gap: 7px;
       align-items: center;
       padding-top: 3px;
       position: relative;
@@ -1107,7 +1103,7 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
             onClick={() => setActivePage(label)}
             type="button"
           >
-            <Icon size={11.5} />
+            <Icon size={12} />
             <span style={{ flex: 1, textAlign: "left" }}>{label}</span>
           </button>
         ))}
@@ -1117,20 +1113,20 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
         <div className="sidebar-bottom-card">
           <div className="theme-single-row">
             <button className={`theme-chip ${theme === "dark" ? "active" : ""}`} onClick={() => setTheme("dark")} type="button">
-              <Moon size={9.5} />
+              <Moon size={10} />
               Dark
             </button>
             <button className={`theme-chip ${theme === "light" ? "active" : ""}`} onClick={() => setTheme("light")} type="button">
-              <Sun size={9.5} />
+              <Sun size={10} />
               Light
             </button>
           </div>
 
           <div className="sidebar-userrow">
-            <UserCircle2 size={16} />
+            <UserCircle2 size={17} />
             <div>
-              <div style={{ fontWeight: 600, fontSize: 10.5 }}>{user.name}</div>
-              <div style={{ fontSize: 8, color: "var(--nav-muted)" }}>{user.email}</div>
+              <div style={{ fontWeight: 600, fontSize: 11 }}>{user.name}</div>
+              <div style={{ fontSize: 8.5, color: "var(--nav-muted)" }}>{user.email}</div>
             </div>
           </div>
         </div>
