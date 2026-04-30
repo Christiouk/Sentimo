@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
@@ -11,6 +12,7 @@ import {
   CreditCard,
   LayoutDashboard,
   LineChart,
+  LogOut,
   Moon,
   Pencil,
   Plus,
@@ -30,26 +32,27 @@ import {
   KeyRound,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v11";
-const USER_KEY = "sentimo_user_v11";
-const THEME_KEY = "sentimo_theme_v9";
-const FIXED_KEY = "sentimo_fixed_expenses_v10";
-const CATEGORIES_KEY = "sentimo_categories_v9";
-const SETTINGS_KEY = "sentimo_settings_v9";
-const SESSIONS_KEY = "sentimo_trading_sessions_v8";
-const PIN_KEY = "sentimo_pin_v7";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v7";
+const STORAGE_KEY = "sentimo_transactions_v12";
+const USER_KEY = "sentimo_user_v12";
+const THEME_KEY = "sentimo_theme_v10";
+const FIXED_KEY = "sentimo_fixed_expenses_v11";
+const CATEGORIES_KEY = "sentimo_categories_v10";
+const SETTINGS_KEY = "sentimo_settings_v10";
+const SESSIONS_KEY = "sentimo_trading_sessions_v9";
+const PIN_KEY = "sentimo_pin_v8";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v8";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
   currency: "GBP",
 });
-
-const demoUser = {
-  id: "demo-founder-user",
-  name: "Chris Holanda",
-  email: "c.mail@me.com",
-};
 
 const seedCategories = [
   { id: "cat-housing", name: "Housing", color: "#64748b", subcategories: ["Rent", "Council Tax", "Repairs"] },
@@ -200,6 +203,21 @@ function matchPeriod(dateStr, mode) {
 
 function sameDay(a, b) {
   return a === b;
+}
+
+function buildUserFromSession(session) {
+  const authUser = session?.user;
+  if (!authUser) return null;
+
+  return {
+    id: authUser.id,
+    name:
+      authUser.user_metadata?.full_name ||
+      authUser.user_metadata?.name ||
+      authUser.email?.split("@")[0] ||
+      "Sentimo User",
+    email: authUser.email || "",
+  };
 }
 
 function appStyles() {
@@ -419,6 +437,20 @@ function appStyles() {
 
     .muted { color: var(--muted); }
 
+    .error-text {
+      color: var(--danger);
+      font-size: 10px;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .success-text {
+      color: var(--success);
+      font-size: 10px;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
     .header-actions {
       display: flex;
       gap: 8px;
@@ -439,6 +471,11 @@ function appStyles() {
       font-weight: 500;
       position: relative;
       z-index: 2;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: default;
     }
 
     .btn-primary {
@@ -880,9 +917,9 @@ function MetricCard({ icon: Icon, label, value, sub }) {
   );
 }
 
-function LoginScreen({ onLogin, theme }) {
-  const [email, setEmail] = useState("c.mail@me.com");
-  const [password, setPassword] = useState("founder-demo");
+function LoginScreen({ onLogin, onSignUp, loading, authMessage, authError, theme }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <div className="auth-wrap">
@@ -899,14 +936,46 @@ function LoginScreen({ onLogin, theme }) {
 
         <h2 style={{ margin: "0 0 8px", fontSize: 19, letterSpacing: "-0.02em", fontWeight: 600 }}>Sign in</h2>
         <p className="muted" style={{ marginTop: 0, fontSize: 11, lineHeight: 1.45 }}>
-          Enter your email and password. After sign-in, you’ll create a PIN for faster access next time.
+          Enter your email and password. After your first login, you can create a PIN for faster future access.
         </p>
 
         <div className="form-grid" style={{ marginTop: 12 }}>
-          <input className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-          <input className="input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
-          <button className="btn btn-primary" onClick={() => onLogin({ ...demoUser, email })}>
-            Sign in
+          <input
+            className="input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+            autoComplete="email"
+          />
+          <input
+            className="input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            type="password"
+            autoComplete="current-password"
+          />
+
+          {authError ? <div className="error-text">{authError}</div> : null}
+          {authMessage ? <div className="success-text">{authMessage}</div> : null}
+
+          <button
+            className="btn btn-primary"
+            onClick={() => onLogin({ email, password })}
+            disabled={loading}
+            type="button"
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
+
+          <button
+            className="btn"
+            onClick={() => onSignUp({ email, password })}
+            disabled={loading}
+            type="button"
+          >
+            {loading ? "Please wait..." : "Create account"}
           </button>
         </div>
 
@@ -977,23 +1046,23 @@ function PinSetupModal({ open, onSave }) {
           })}
         </div>
 
-        {ready && !match && (
+        {ready && !match ? (
           <div style={{ color: "var(--danger)", textAlign: "center", fontSize: 11, marginBottom: 10 }}>
             PINs do not match. Press clear and try again.
           </div>
-        )}
+        ) : null}
 
         <div className="pin-keypad">
           {["1","2","3","4","5","6","7","8","9"].map((n) => (
-            <button key={n} className="pin-key" onClick={() => press(n)}>{n}</button>
+            <button key={n} className="pin-key" onClick={() => press(n)} type="button">{n}</button>
           ))}
-          <button className="pin-key" onClick={() => { setPin(""); setConfirmPin(""); setStep(1); }}>Clear</button>
-          <button className="pin-key" onClick={() => press("0")}>0</button>
-          <button className="pin-key" onClick={backspace}>⌫</button>
+          <button className="pin-key" onClick={() => { setPin(""); setConfirmPin(""); setStep(1); }} type="button">Clear</button>
+          <button className="pin-key" onClick={() => press("0")} type="button">0</button>
+          <button className="pin-key" onClick={backspace} type="button">⌫</button>
         </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
-          <button className="btn btn-primary" disabled={!match} style={{ opacity: match ? 1 : 0.45 }} onClick={() => match && onSave(pin)}>
+          <button className="btn btn-primary" disabled={!match} style={{ opacity: match ? 1 : 0.45 }} onClick={() => match && onSave(pin)} type="button">
             Save PIN
           </button>
         </div>
@@ -1041,14 +1110,14 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
 
         <div className="pin-keypad">
           {["1","2","3","4","5","6","7","8","9"].map((n) => (
-            <button key={n} className="pin-key" onClick={() => press(n)}>{n}</button>
+            <button key={n} className="pin-key" onClick={() => press(n)} type="button">{n}</button>
           ))}
-          <button className="pin-key" onClick={() => setPin("")}>Clear</button>
-          <button className="pin-key" onClick={() => press("0")}>0</button>
-          <button className="pin-key" onClick={() => setPin((s) => s.slice(0, -1))}>⌫</button>
+          <button className="pin-key" onClick={() => setPin("")} type="button">Clear</button>
+          <button className="pin-key" onClick={() => press("0")} type="button">0</button>
+          <button className="pin-key" onClick={() => setPin((s) => s.slice(0, -1))} type="button">⌫</button>
         </div>
 
-        <button className="btn" style={{ width: "100%", justifyContent: "center", marginTop: 12 }} onClick={onUsePassword}>
+        <button className="btn" style={{ width: "100%", justifyContent: "center", marginTop: 12 }} onClick={onUsePassword} type="button">
           Sign in with email instead
         </button>
       </div>
@@ -1056,7 +1125,7 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
   );
 }
 
-function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
+function Sidebar({ activePage, setActivePage, user, theme, setTheme, onLogout }) {
   const nav = [
     [LayoutDashboard, "Dashboard"],
     [LineChart, "Trading P&L"],
@@ -1122,12 +1191,17 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
             </button>
           </div>
 
-          <div className="sidebar-userrow">
-            <UserCircle2 size={17} />
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 11 }}>{user.name}</div>
-              <div style={{ fontSize: 8.5, color: "var(--nav-muted)" }}>{user.email}</div>
+          <div className="sidebar-userrow" style={{ justifyContent: "space-between" }}>
+            <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
+              <UserCircle2 size={17} />
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 11 }}>{user.name}</div>
+                <div style={{ fontSize: 8.5, color: "var(--nav-muted)" }}>{user.email}</div>
+              </div>
             </div>
+            <button className="btn btn-icon" onClick={onLogout} type="button" title="Logout">
+              <LogOut size={11} />
+            </button>
           </div>
         </div>
       </div>
@@ -1364,7 +1438,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                   </td>
                 </tr>
               ))}
-              {visible.length === 0 && (
+              {visible.length === 0 ? (
                 <tr>
                   <td colSpan="8">
                     <div className="empty-box" style={{ minHeight: 100 }}>
@@ -1372,7 +1446,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                     </div>
                   </td>
                 </tr>
-              )}
+              ) : null}
             </tbody>
           </table>
         </div>
@@ -1629,10 +1703,9 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
         </div>
 
         <div style={{ marginTop: 12, fontSize: 11 }}>
-          {todaySessions.length === 0 && todayExpenses === 0 && (
+          {todaySessions.length === 0 && todayExpenses === 0 ? (
             <span className="muted">No trading sessions or expenses logged today.</span>
-          )}
-          {(todaySessions.length > 0 || todayExpenses > 0) && (
+          ) : (
             <span className={todayNet >= 0 ? "cover-good" : "cover-bad"}>
               {todayNet >= 0 ? "Trading covered the day." : "Trading did not cover the day yet."}
             </span>
@@ -2182,7 +2255,11 @@ export default function App() {
   const [settings, setSettings] = useState(defaultSettings);
   const [sessions, setSessions] = useState(seedTradingSessions);
   const [needsPinSetup, setNeedsPinSetup] = useState(false);
-  const [authView, setAuthView] = useState("pin_or_password");
+  const [authView, setAuthView] = useState("password");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const styleTag = document.createElement("style");
@@ -2194,15 +2271,12 @@ export default function App() {
 
   useEffect(() => {
     try {
-      const savedUser = localStorage.getItem(USER_KEY);
       const savedTheme = localStorage.getItem(THEME_KEY);
       const savedTransactions = localStorage.getItem(STORAGE_KEY);
       const savedFixed = localStorage.getItem(FIXED_KEY);
       const savedCategories = localStorage.getItem(CATEGORIES_KEY);
       const savedSettings = localStorage.getItem(SETTINGS_KEY);
       const savedSessions = localStorage.getItem(SESSIONS_KEY);
-      const pin = localStorage.getItem(PIN_KEY);
-      const authMode = localStorage.getItem(AUTH_MODE_KEY);
 
       if (savedTheme) setTheme(savedTheme);
       if (savedTransactions) setTransactions(JSON.parse(savedTransactions));
@@ -2210,16 +2284,8 @@ export default function App() {
       if (savedCategories) setCategories(JSON.parse(savedCategories));
       if (savedSettings) setSettings(JSON.parse(savedSettings));
       if (savedSessions) setSessions(JSON.parse(savedSessions));
-
-      if (savedUser) {
-        if (pin && authMode !== "password") setAuthView("pin");
-        else setAuthView("password");
-        setUser(JSON.parse(savedUser));
-      } else {
-        setAuthView("password");
-      }
     } catch {
-      setAuthView("password");
+      // ignore local storage parse errors
     }
   }, []);
 
@@ -2234,12 +2300,171 @@ export default function App() {
   useEffect(() => localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)), [settings]);
   useEffect(() => localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions)), [sessions]);
 
-  function handlePasswordLogin(nextUser) {
-    setUser(nextUser);
-    localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
-    const existingPin = localStorage.getItem(PIN_KEY);
-    if (!existingPin) setNeedsPinSetup(true);
-    else localStorage.setItem(AUTH_MODE_KEY, "pin");
+  useEffect(() => {
+    let mounted = true;
+
+    async function initAuth() {
+      if (!supabase) {
+        if (mounted) {
+          setAuthError("Supabase environment variables are missing.");
+          setAuthReady(true);
+          setAuthView("password");
+        }
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      const builtUser = buildUserFromSession(session);
+      const pin = localStorage.getItem(PIN_KEY);
+      const authMode = localStorage.getItem(AUTH_MODE_KEY);
+
+      if (!mounted) return;
+
+      if (builtUser) {
+        setUser(builtUser);
+        localStorage.setItem(USER_KEY, JSON.stringify(builtUser));
+
+        if (pin && authMode !== "password") {
+          setAuthView("pin");
+        } else {
+          setAuthView("app");
+        }
+      } else {
+        setAuthView("password");
+      }
+
+      setAuthReady(true);
+    }
+
+    initAuth();
+
+    let subscription;
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        const builtUser = buildUserFromSession(session);
+
+        if (builtUser) {
+          setUser(builtUser);
+          localStorage.setItem(USER_KEY, JSON.stringify(builtUser));
+          const pin = localStorage.getItem(PIN_KEY);
+          const authMode = localStorage.getItem(AUTH_MODE_KEY);
+          if (pin && authMode !== "password") {
+            setAuthView("pin");
+          } else {
+            setAuthView("app");
+          }
+        } else {
+          setUser(null);
+          localStorage.removeItem(USER_KEY);
+          setAuthView("password");
+        }
+      });
+
+      subscription = data.subscription;
+    }
+
+    return () => {
+      mounted = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  async function handlePasswordLogin({ email, password }) {
+    setAuthError("");
+    setAuthMessage("");
+
+    if (!supabase) {
+      setAuthError("Supabase client is not configured.");
+      return;
+    }
+
+    if (!email || !password) {
+      setAuthError("Please enter both email and password.");
+      return;
+    }
+
+    try {
+      setAuthLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        setAuthError(error.message || "Unable to sign in.");
+        return;
+      }
+
+      const builtUser = buildUserFromSession(data.session);
+      if (builtUser) {
+        setUser(builtUser);
+        localStorage.setItem(USER_KEY, JSON.stringify(builtUser));
+      }
+
+      const existingPin = localStorage.getItem(PIN_KEY);
+      if (!existingPin) {
+        setNeedsPinSetup(true);
+      } else {
+        localStorage.setItem(AUTH_MODE_KEY, "pin");
+      }
+
+      setAuthView("app");
+    } catch (err) {
+      setAuthError(err?.message || "Unexpected sign-in error.");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleSignUp({ email, password }) {
+    setAuthError("");
+    setAuthMessage("");
+
+    if (!supabase) {
+      setAuthError("Supabase client is not configured.");
+      return;
+    }
+
+    if (!email || !password) {
+      setAuthError("Please enter both email and password.");
+      return;
+    }
+
+    try {
+      setAuthLoading(true);
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
+        setAuthError(error.message || "Unable to create account.");
+        return;
+      }
+
+      setAuthMessage("Account created. If email confirmation is enabled, please confirm your email before signing in.");
+    } catch (err) {
+      setAuthError(err?.message || "Unexpected sign-up error.");
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    setAuthError("");
+    setAuthMessage("");
+
+    if (!supabase) {
+      setUser(null);
+      setAuthView("password");
+      return;
+    }
+
+    await supabase.auth.signOut();
+    setUser(null);
+    setAuthView("password");
+    localStorage.setItem(AUTH_MODE_KEY, "password");
   }
 
   function handlePinSaved(pin) {
@@ -2249,19 +2474,44 @@ export default function App() {
   }
 
   function usePasswordInstead() {
-    setUser(null);
     setAuthView("password");
     localStorage.setItem(AUTH_MODE_KEY, "password");
   }
 
-  const storedPin = typeof window !== "undefined" ? localStorage.getItem(PIN_KEY) : null;
+  if (!authReady) {
+    return (
+      <div className="auth-wrap">
+        <div className="auth-card">
+          <div className="auth-head">
+            <div className="auth-logo">
+              <LineChart size={17} />
+            </div>
+            <div>
+              <div className="auth-title">Sentimo</div>
+              <div className="auth-sub">Loading session</div>
+            </div>
+          </div>
+          <div className="muted" style={{ fontSize: 11 }}>Please wait...</div>
+        </div>
+      </div>
+    );
+  }
 
-  if (authView === "pin" && storedPin) {
+  if (authView === "pin" && user && localStorage.getItem(PIN_KEY)) {
     return <PinUnlockScreen onUnlock={() => setAuthView("app")} onUsePassword={usePasswordInstead} />;
   }
 
-  if (!user) {
-    return <LoginScreen onLogin={handlePasswordLogin} theme={theme} />;
+  if (!user || authView === "password") {
+    return (
+      <LoginScreen
+        onLogin={handlePasswordLogin}
+        onSignUp={handleSignUp}
+        loading={authLoading}
+        authError={authError}
+        authMessage={authMessage}
+        theme={theme}
+      />
+    );
   }
 
   return (
@@ -2273,6 +2523,7 @@ export default function App() {
           user={user}
           theme={theme}
           setTheme={setTheme}
+          onLogout={handleLogout}
         />
 
         <main className="main">
