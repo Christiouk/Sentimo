@@ -30,15 +30,15 @@ import {
   KeyRound,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v8";
-const USER_KEY = "sentimo_user_v8";
-const THEME_KEY = "sentimo_theme_v6";
-const FIXED_KEY = "sentimo_fixed_expenses_v7";
-const CATEGORIES_KEY = "sentimo_categories_v6";
-const SETTINGS_KEY = "sentimo_settings_v6";
-const SESSIONS_KEY = "sentimo_trading_sessions_v5";
-const PIN_KEY = "sentimo_pin_v4";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v4";
+const STORAGE_KEY = "sentimo_transactions_v10";
+const USER_KEY = "sentimo_user_v10";
+const THEME_KEY = "sentimo_theme_v8";
+const FIXED_KEY = "sentimo_fixed_expenses_v9";
+const CATEGORIES_KEY = "sentimo_categories_v8";
+const SETTINGS_KEY = "sentimo_settings_v8";
+const SESSIONS_KEY = "sentimo_trading_sessions_v7";
+const PIN_KEY = "sentimo_pin_v6";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v6";
 
 const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
@@ -233,7 +233,7 @@ function appStyles() {
     .layout {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 164px 1fr;
+      grid-template-columns: 156px 1fr;
     }
 
     .sidebar {
@@ -250,13 +250,13 @@ function appStyles() {
     .brand {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 14px 8px 8px;
+      gap: 6px;
+      padding: 13px 4px 8px;
     }
 
     .brand-badge {
-      width: 24px;
-      height: 24px;
+      width: 23px;
+      height: 23px;
       border-radius: 7px;
       display: grid;
       place-items: center;
@@ -268,7 +268,7 @@ function appStyles() {
     .brand-title {
       font-weight: 600;
       line-height: 1.05;
-      font-size: 11px;
+      font-size: 10.5px;
       color: var(--nav-text);
     }
 
@@ -289,8 +289,8 @@ function appStyles() {
     }
 
     .daily-card {
-      margin: 6px 4px 8px;
-      padding: 10px 10px;
+      margin: 6px 1px 8px;
+      padding: 9px 8px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.10);
       box-shadow: none;
@@ -314,8 +314,8 @@ function appStyles() {
     .sidebar-nav {
       display: grid;
       align-content: start;
-      gap: 1px;
-      padding: 0 3px;
+      gap: 0;
+      padding: 0 1px;
     }
 
     .sidebar-nav button {
@@ -324,12 +324,13 @@ function appStyles() {
       background: transparent;
       color: var(--nav-muted);
       text-align: left;
-      padding: 10px 10px;
-      border-radius: 9px;
+      padding: 8px 6px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 11px;
+      justify-content: flex-start;
+      gap: 5px;
+      font-size: 10.5px;
       font-weight: 500;
       position: relative;
       z-index: 2;
@@ -341,21 +342,21 @@ function appStyles() {
     }
 
     .sidebar-footer {
-      padding: 6px 4px 8px;
+      padding: 6px 1px 8px;
     }
 
     .sidebar-bottom-card {
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.03);
       border-radius: 10px;
-      padding: 7px;
+      padding: 5px;
     }
 
     .theme-single-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      margin-bottom: 7px;
+      gap: 4px;
+      margin-bottom: 6px;
     }
 
     .theme-chip {
@@ -363,13 +364,13 @@ function appStyles() {
       background: rgba(255,255,255,0.05);
       color: var(--nav-text);
       border-radius: 8px;
-      padding: 7px 6px;
+      padding: 7px 5px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
-      font-size: 10px;
-      min-height: 30px;
+      font-size: 9.5px;
+      min-height: 29px;
       font-weight: 500;
       position: relative;
       z-index: 2;
@@ -382,7 +383,7 @@ function appStyles() {
 
     .sidebar-userrow {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       align-items: center;
       padding-top: 3px;
       position: relative;
@@ -1080,7 +1081,7 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
     <aside className="sidebar">
       <div className="brand">
         <div className="brand-badge">
-          <LineChart size={14} />
+          <LineChart size={13} />
         </div>
         <div>
           <div className="brand-title">Sentimo</div>
@@ -1106,8 +1107,8 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
             onClick={() => setActivePage(label)}
             type="button"
           >
-            <Icon size={13} />
-            <span style={{ flex: 1 }}>{label}</span>
+            <Icon size={11.5} />
+            <span style={{ flex: 1, textAlign: "left" }}>{label}</span>
           </button>
         ))}
       </div>
@@ -1116,20 +1117,20 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme }) {
         <div className="sidebar-bottom-card">
           <div className="theme-single-row">
             <button className={`theme-chip ${theme === "dark" ? "active" : ""}`} onClick={() => setTheme("dark")} type="button">
-              <Moon size={10} />
+              <Moon size={9.5} />
               Dark
             </button>
             <button className={`theme-chip ${theme === "light" ? "active" : ""}`} onClick={() => setTheme("light")} type="button">
-              <Sun size={10} />
+              <Sun size={9.5} />
               Light
             </button>
           </div>
 
           <div className="sidebar-userrow">
-            <UserCircle2 size={17} />
+            <UserCircle2 size={16} />
             <div>
-              <div style={{ fontWeight: 600, fontSize: 11 }}>{user.name}</div>
-              <div style={{ fontSize: 8.5, color: "var(--nav-muted)" }}>{user.email}</div>
+              <div style={{ fontWeight: 600, fontSize: 10.5 }}>{user.name}</div>
+              <div style={{ fontSize: 8, color: "var(--nav-muted)" }}>{user.email}</div>
             </div>
           </div>
         </div>
@@ -1254,14 +1255,6 @@ function DashboardPage({ transactions, fixedExpenses }) {
 
 function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
   const [tab, setTab] = useState("All");
-  const [draft, setDraft] = useState({
-    name: "",
-    category: "Housing",
-    subcategory: "Rent",
-    frequency: "Monthly",
-    amount: "",
-    dueDay: "",
-  });
 
   const monthlyTotal = fixedExpenses
     .filter((x) => x.status !== "Paid" && x.status !== "Archived")
@@ -1285,33 +1278,6 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
     .filter((x) => x.status !== "Archived" && x.status !== "Paid")
     .reduce((sum, x) => sum + monthlyEquivalent(x.frequency, x.amount), 0);
 
-  function addExpense() {
-    if (!draft.name || !draft.amount) return;
-    setFixedExpenses([
-      {
-        id: `fx-${Date.now()}`,
-        name: draft.name,
-        category: draft.category,
-        subcategory: draft.subcategory,
-        frequency: draft.frequency,
-        amount: Number(draft.amount),
-        dueDay: Number(draft.dueDay || 1),
-        nextDueDate: "",
-        status: "Scheduled",
-        autoIncludeTarget: true,
-      },
-      ...fixedExpenses,
-    ]);
-    setDraft({
-      name: "",
-      category: "Housing",
-      subcategory: "Rent",
-      frequency: "Monthly",
-      amount: "",
-      dueDay: "",
-    });
-  }
-
   function cycleStatus(id) {
     const order = ["Scheduled", "Pending", "Paid", "Overdue"];
     setFixedExpenses((prev) =>
@@ -1326,13 +1292,6 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
 
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn btn-primary" onClick={addExpense} type="button">
-          <Plus size={12} />
-          Add Expense
-        </button>
-      </div>
-
       <div className="grid-4">
         <MetricCard icon={CreditCard} label="Monthly Total" value={formatCurrency(monthlyTotal)} sub="Excl. paid" />
         <MetricCard icon={CalendarDays} label="Weekly Equiv." value={formatCurrency(weeklyEquiv)} sub="Recurring burden" />
@@ -1431,81 +1390,22 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
   );
 }
 
-function DailyExpensesPage({ transactions, setTransactions, categories }) {
+function DailyExpensesPage({ transactions, setTransactions }) {
   const [period, setPeriod] = useState("30d");
-  const [categoryFilter, setCategoryFilter] = useState("All categories");
-  const [draft, setDraft] = useState({
-    date: toDateInput(new Date("2026-04-29")),
-    description: "",
-    merchant: "",
-    category: "Food",
-    subcategory: "Groceries",
-    amount: "",
-  });
 
-  const expenseRows = getCountedRealExpenses(transactions).filter((t) => {
-    const periodMatch = matchPeriod(t.date, period);
-    const categoryMatch = categoryFilter === "All categories" ? true : t.category === categoryFilter;
-    return periodMatch && categoryMatch;
-  });
-
+  const expenseRows = getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, period));
   const total = sumAmounts(expenseRows);
   const transactionsCount = expenseRows.length;
   const dailyAvg = total / (period === "7d" ? 7 : period === "30d" ? 30 : 30);
 
-  function addExpense() {
-    if (!draft.description || !draft.amount) return;
-    setTransactions([
-      {
-        id: `tx-${Date.now()}`,
-        date: draft.date,
-        description: draft.description,
-        merchant: draft.merchant || draft.description,
-        category: draft.category,
-        subcategory: draft.subcategory,
-        direction: "expense",
-        nature: "real",
-        status: "counted",
-        amount: Number(draft.amount),
-      },
-      ...transactions,
-    ]);
-    setDraft({
-      date: toDateInput(new Date("2026-04-29")),
-      description: "",
-      merchant: "",
-      category: "Food",
-      subcategory: "Groceries",
-      amount: "",
-    });
-  }
-
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn" type="button">
-          <Plus size={12} />
-          Log Multiple
-        </button>
-        <button className="btn btn-primary" onClick={addExpense} type="button">
-          <Plus size={12} />
-          Add Single
-        </button>
-      </div>
-
       <div className="card">
         <div className="mini-tabs">
           <button className={period === "7d" ? "active" : ""} onClick={() => setPeriod("7d")} type="button">7 Days</button>
           <button className={period === "30d" ? "active" : ""} onClick={() => setPeriod("30d")} type="button">30 Days</button>
           <button className={period === "month" ? "active" : ""} onClick={() => setPeriod("month")} type="button">This Month</button>
           <button type="button">This Year</button>
-        </div>
-
-        <div className="split-2" style={{ marginBottom: 10 }}>
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-            <option>All categories</option>
-            {categories.map((c) => <option key={c.id}>{c.name}</option>)}
-          </select>
         </div>
 
         <div className="grid-3">
@@ -1516,12 +1416,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
 
         <div style={{ marginTop: 10 }}>
           {expenseRows.length === 0 ? (
-            <div className="empty-box">
-              <div>
-                <div style={{ marginBottom: 10 }}>No expenses in this period</div>
-                <button className="btn btn-primary" onClick={addExpense} type="button">Log Expense</button>
-              </div>
-            </div>
+            <div className="empty-box">No expenses in this period</div>
           ) : (
             <div className="table-wrap">
               <table>
@@ -1562,14 +1457,7 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
   );
 }
 
-function IncomeDepositsPage({ transactions, setTransactions }) {
-  const [draft, setDraft] = useState({
-    date: "2026-04-29",
-    source: "Trading Income",
-    description: "",
-    amount: "",
-  });
-
+function IncomeDepositsPage({ transactions }) {
   const rows = getCountedRealIncome(transactions);
   const totalReceived = sumAmounts(rows);
   const totalSpentMonth = sumAmounts(getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "month")));
@@ -1584,44 +1472,8 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
     return Array.from(map.entries()).map(([name, amount]) => ({ name, amount }));
   }, [rows]);
 
-  function addIncome() {
-    if (!draft.description || !draft.amount) return;
-    setTransactions([
-      {
-        id: `tx-${Date.now()}`,
-        date: draft.date,
-        description: draft.description,
-        merchant: draft.source,
-        category: "Income",
-        subcategory: draft.source,
-        direction: "income",
-        nature: "real",
-        status: "counted",
-        amount: Number(draft.amount),
-      },
-      ...transactions,
-    ]);
-    setDraft({
-      date: "2026-04-29",
-      source: "Trading Income",
-      description: "",
-      amount: "",
-    });
-  }
-
   return (
     <>
-      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
-        <button className="btn" type="button">
-          <Plus size={12} />
-          Log Multiple
-        </button>
-        <button className="btn btn-primary" onClick={addIncome} type="button">
-          <Plus size={12} />
-          Add Single
-        </button>
-      </div>
-
       <div className="grid-3">
         <MetricCard icon={ArrowDownToLine} label="Total Received" value={formatCurrency(totalReceived)} sub="In selected period" />
         <MetricCard icon={ArrowUpFromLine} label="Total Spent (Month)" value={formatCurrency(totalSpentMonth)} sub="Variable expenses this month" />
@@ -1642,37 +1494,6 @@ function IncomeDepositsPage({ transactions, setTransactions }) {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      <div className="card" style={{ marginTop: 10 }}>
-        <h3 className="section-title">Entries</h3>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Source</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Running Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, index) => {
-                const running = rows.slice(0, index + 1).reduce((s, x) => s + Number(x.amount), 0);
-                return (
-                  <tr key={r.id}>
-                    <td>{r.date}</td>
-                    <td><span className="status-pill status-blue">{r.subcategory}</span></td>
-                    <td>{r.description}</td>
-                    <td style={{ fontWeight: 600 }}>+{formatCurrency(r.amount)}</td>
-                    <td>{formatCurrency(running)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
     </>
@@ -2501,8 +2322,8 @@ export default function App() {
           {activePage === "Dashboard" && <DashboardPage transactions={transactions} fixedExpenses={fixedExpenses} />}
           {activePage === "Trading P&L" && <TradingPnLPage transactions={transactions} sessions={sessions} setSessions={setSessions} />}
           {activePage === "Fixed Expenses" && <FixedExpensesPage fixedExpenses={fixedExpenses} setFixedExpenses={setFixedExpenses} />}
-          {activePage === "Daily Expenses" && <DailyExpensesPage transactions={transactions} setTransactions={setTransactions} categories={categories} />}
-          {activePage === "Income & Deposits" && <IncomeDepositsPage transactions={transactions} setTransactions={setTransactions} />}
+          {activePage === "Daily Expenses" && <DailyExpensesPage transactions={transactions} setTransactions={setTransactions} />}
+          {activePage === "Income & Deposits" && <IncomeDepositsPage transactions={transactions} />}
           {activePage === "Daily Target" && <DailyTargetPage transactions={transactions} fixedExpenses={fixedExpenses} settings={settings} />}
           {activePage === "Analytics" && <AnalyticsPage transactions={transactions} fixedExpenses={fixedExpenses} settings={settings} />}
           {activePage === "Overall" && <OverallPage transactions={transactions} fixedExpenses={fixedExpenses} />}
