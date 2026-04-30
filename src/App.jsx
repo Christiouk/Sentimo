@@ -1,15 +1,19 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
+  AlertTriangle,
   ArrowDownToLine,
   ArrowUpFromLine,
   BarChart3,
   CalendarDays,
   Check,
   CheckCircle2,
+  ChevronRight,
+  CircleDollarSign,
   Clock3,
   Cloud,
   CreditCard,
+  KeyRound,
   LayoutDashboard,
   LineChart,
   LogOut,
@@ -29,22 +33,18 @@ import {
   UserCircle2,
   Wallet,
   X,
-  KeyRound,
-  AlertTriangle,
-  CircleDollarSign,
-  ChevronRight,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v13";
-const USER_KEY = "sentimo_user_v13";
-const THEME_KEY = "sentimo_theme_v11";
-const FIXED_KEY = "sentimo_fixed_expenses_v12";
-const CATEGORIES_KEY = "sentimo_categories_v11";
-const SETTINGS_KEY = "sentimo_settings_v11";
-const SESSIONS_KEY = "sentimo_trading_sessions_v10";
-const PIN_KEY = "sentimo_pin_v9";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v9";
-const PRIORITY_KEY = "sentimo_priority_payments_v1";
+const STORAGE_KEY = "sentimo_transactions_v14";
+const USER_KEY = "sentimo_user_v14";
+const THEME_KEY = "sentimo_theme_v12";
+const FIXED_KEY = "sentimo_fixed_expenses_v13";
+const CATEGORIES_KEY = "sentimo_categories_v12";
+const SETTINGS_KEY = "sentimo_settings_v12";
+const SESSIONS_KEY = "sentimo_trading_sessions_v11";
+const PIN_KEY = "sentimo_pin_v10";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v10";
+const PRIORITY_KEY = "sentimo_priority_payments_v2";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -280,6 +280,11 @@ function buildUserFromSession(session) {
       "Sentimo User",
     email: authUser.email || "",
   };
+}
+
+function getSubcategoriesForCategory(categories, categoryName) {
+  const found = categories.find((c) => c.name === categoryName);
+  return found?.subcategories || [];
 }
 
 function appStyles() {
@@ -1354,6 +1359,145 @@ function PriorityPaymentModal({ open, onClose, onSave }) {
   );
 }
 
+function ExpenseModal({ open, onClose, onSave, categories }) {
+  const defaultCategory = categories[0]?.name || "";
+  const defaultSub = getSubcategoriesForCategory(categories, defaultCategory)[0] || "";
+
+  const [form, setForm] = useState({
+    date: TODAY,
+    merchant: "",
+    description: "",
+    category: defaultCategory,
+    subcategory: defaultSub,
+    amount: "",
+  });
+
+  useEffect(() => {
+    if (open) {
+      const firstCategory = categories[0]?.name || "";
+      const firstSub = getSubcategoriesForCategory(categories, firstCategory)[0] || "";
+      setForm({
+        date: TODAY,
+        merchant: "",
+        description: "",
+        category: firstCategory,
+        subcategory: firstSub,
+        amount: "",
+      });
+    }
+  }, [open, categories]);
+
+  if (!open) return null;
+
+  const subcategories = getSubcategoriesForCategory(categories, form.category);
+
+  function updateCategory(nextCategory) {
+    const nextSubs = getSubcategoriesForCategory(categories, nextCategory);
+    setForm((prev) => ({
+      ...prev,
+      category: nextCategory,
+      subcategory: nextSubs[0] || "",
+    }));
+  }
+
+  function submit() {
+    if (!form.date || !form.category || !form.amount) return;
+
+    onSave({
+      id: `tx-${Date.now()}`,
+      date: form.date,
+      merchant: form.merchant || form.description || "Manual Expense",
+      description: form.description || form.merchant || "Manual Expense",
+      category: form.category,
+      subcategory: form.subcategory || "General",
+      direction: "expense",
+      nature: "real",
+      status: "counted",
+      amount: Number(form.amount),
+    });
+    onClose();
+  }
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-card">
+        <div className="modal-head">
+          <div>
+            <div className="fx-kicker">Daily expenses</div>
+            <h3 className="section-title" style={{ fontSize: 16, marginBottom: 4 }}>Add Expense</h3>
+            <div className="section-sub" style={{ marginBottom: 0 }}>
+              Log a real expense and classify it properly.
+            </div>
+          </div>
+          <button className="btn btn-icon" onClick={onClose} type="button">
+            <X size={12} />
+          </button>
+        </div>
+
+        <div className="form-grid">
+          <div className="split-2">
+            <input
+              className="input"
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+            />
+            <input
+              className="input"
+              type="number"
+              placeholder="Amount"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            />
+          </div>
+
+          <div className="split-2">
+            <input
+              className="input"
+              placeholder="Merchant"
+              value={form.merchant}
+              onChange={(e) => setForm({ ...form, merchant: e.target.value })}
+            />
+            <input
+              className="input"
+              placeholder="Description"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+
+          <div className="split-2">
+            <select value={form.category} onChange={(e) => updateCategory(e.target.value)}>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+
+            <select value={form.subcategory} onChange={(e) => setForm({ ...form, subcategory: e.target.value })}>
+              {subcategories.length ? (
+                subcategories.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))
+              ) : (
+                <option value="">No sub-category</option>
+              )}
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+          <button className="btn" onClick={onClose} type="button">Cancel</button>
+          <button className="btn btn-primary" onClick={submit} type="button">Add Expense</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Sidebar({ activePage, setActivePage, user, theme, setTheme, onLogout }) {
   const nav = [
     [LayoutDashboard, "Dashboard"],
@@ -1898,16 +2042,28 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
   );
 }
 
-function DailyExpensesPage({ transactions, setTransactions }) {
+function DailyExpensesPage({ transactions, setTransactions, categories }) {
   const [period, setPeriod] = useState("30d");
+  const [openModal, setOpenModal] = useState(false);
 
   const expenseRows = getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, period));
   const total = sumAmounts(expenseRows);
   const transactionsCount = expenseRows.length;
   const dailyAvg = total / (period === "7d" ? 7 : period === "30d" ? 30 : 30);
 
+  function addExpense(item) {
+    setTransactions((prev) => [item, ...prev]);
+  }
+
   return (
     <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
+        <button className="btn btn-primary" onClick={() => setOpenModal(true)} type="button">
+          <Plus size={12} />
+          Add Expense
+        </button>
+      </div>
+
       <div className="card">
         <div className="mini-tabs">
           <button className={period === "7d" ? "active" : ""} onClick={() => setPeriod("7d")} type="button">7 Days</button>
@@ -1961,6 +2117,8 @@ function DailyExpensesPage({ transactions, setTransactions }) {
           )}
         </div>
       </div>
+
+      <ExpenseModal open={openModal} onClose={() => setOpenModal(false)} onSave={addExpense} categories={categories} />
     </>
   );
 }
@@ -2996,7 +3154,7 @@ export default function App() {
                 {activePage === "Priority Payments" && "Track urgent payments, travel cash, priority obligations, and items you may need to move forward."}
                 {activePage === "Income & Deposits" && "All money received — trading draws, commissions, dividends, and more."}
                 {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
-                {activePage === "Daily Expenses" && "Day-to-day spending control with category and period filters."}
+                {activePage === "Daily Expenses" && "Day-to-day spending control with real entry logging and category classification."}
                 {activePage === "Daily Target" && "How much you can spend today — or need to earn — including urgent obligations due now."}
                 {activePage === "Analytics" && "Budgeting and spending intelligence across categories and periods."}
                 {activePage === "Overall" && "Compare this period, previous period, and target budget side by side."}
@@ -3034,7 +3192,13 @@ export default function App() {
           )}
           {activePage === "Trading P&L" && <TradingPnLPage transactions={transactions} sessions={sessions} setSessions={setSessions} />}
           {activePage === "Fixed Expenses" && <FixedExpensesPage fixedExpenses={fixedExpenses} setFixedExpenses={setFixedExpenses} />}
-          {activePage === "Daily Expenses" && <DailyExpensesPage transactions={transactions} setTransactions={setTransactions} />}
+          {activePage === "Daily Expenses" && (
+            <DailyExpensesPage
+              transactions={transactions}
+              setTransactions={setTransactions}
+              categories={categories}
+            />
+          )}
           {activePage === "Income & Deposits" && <IncomeDepositsPage transactions={transactions} />}
           {activePage === "Daily Target" && (
             <DailyTargetPage
