@@ -35,16 +35,16 @@ import {
   X,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v14";
-const USER_KEY = "sentimo_user_v14";
-const THEME_KEY = "sentimo_theme_v12";
-const FIXED_KEY = "sentimo_fixed_expenses_v13";
-const CATEGORIES_KEY = "sentimo_categories_v12";
-const SETTINGS_KEY = "sentimo_settings_v12";
-const SESSIONS_KEY = "sentimo_trading_sessions_v11";
-const PIN_KEY = "sentimo_pin_v10";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v10";
-const PRIORITY_KEY = "sentimo_priority_payments_v2";
+const STORAGE_KEY = "sentimo_transactions_v15";
+const USER_KEY = "sentimo_user_v15";
+const THEME_KEY = "sentimo_theme_v13";
+const FIXED_KEY = "sentimo_fixed_expenses_v14";
+const CATEGORIES_KEY = "sentimo_categories_v13";
+const SETTINGS_KEY = "sentimo_settings_v13";
+const SESSIONS_KEY = "sentimo_trading_sessions_v12";
+const PIN_KEY = "sentimo_pin_v11";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v11";
+const PRIORITY_KEY = "sentimo_priority_payments_v3";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -69,6 +69,7 @@ const seedCategories = [
   { id: "cat-business", name: "Business", color: "#3b82f6", subcategories: ["Software", "Services", "Contractors"] },
   { id: "cat-trading", name: "Trading", color: "#ec4899", subcategories: ["Deposits", "Withdrawals", "Broker Fees"] },
   { id: "cat-savings", name: "Savings / Internal", color: "#94a3b8", subcategories: ["To Savings", "From Savings"] },
+  { id: "cat-income", name: "Income", color: "#10b981", subcategories: ["Salary", "Trading Income", "Rental Income", "Commission", "Dividend", "Other Income"] },
 ];
 
 const seedFixedExpenses = [
@@ -1360,7 +1361,7 @@ function PriorityPaymentModal({ open, onClose, onSave }) {
 }
 
 function ExpenseModal({ open, onClose, onSave, categories }) {
-  const defaultCategory = categories[0]?.name || "";
+  const defaultCategory = categories.find((c) => c.name !== "Income")?.name || categories[0]?.name || "";
   const defaultSub = getSubcategoriesForCategory(categories, defaultCategory)[0] || "";
 
   const [form, setForm] = useState({
@@ -1374,7 +1375,7 @@ function ExpenseModal({ open, onClose, onSave, categories }) {
 
   useEffect(() => {
     if (open) {
-      const firstCategory = categories[0]?.name || "";
+      const firstCategory = categories.find((c) => c.name !== "Income")?.name || categories[0]?.name || "";
       const firstSub = getSubcategoriesForCategory(categories, firstCategory)[0] || "";
       setForm({
         date: TODAY,
@@ -1468,7 +1469,7 @@ function ExpenseModal({ open, onClose, onSave, categories }) {
 
           <div className="split-2">
             <select value={form.category} onChange={(e) => updateCategory(e.target.value)}>
-              {categories.map((cat) => (
+              {categories.filter((cat) => cat.name !== "Income").map((cat) => (
                 <option key={cat.id} value={cat.name}>
                   {cat.name}
                 </option>
@@ -1492,6 +1493,168 @@ function ExpenseModal({ open, onClose, onSave, categories }) {
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
           <button className="btn" onClick={onClose} type="button">Cancel</button>
           <button className="btn btn-primary" onClick={submit} type="button">Add Expense</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IncomeEntryModal({ open, onClose, onSave, categories }) {
+  const defaultCategory = "Income";
+  const defaultSub = getSubcategoriesForCategory(categories, defaultCategory)[0] || "Other Income";
+
+  const [form, setForm] = useState({
+    date: TODAY,
+    merchant: "",
+    description: "",
+    entryType: "real_income",
+    category: defaultCategory,
+    subcategory: defaultSub,
+    amount: "",
+  });
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        date: TODAY,
+        merchant: "",
+        description: "",
+        entryType: "real_income",
+        category: "Income",
+        subcategory: getSubcategoriesForCategory(categories, "Income")[0] || "Other Income",
+        amount: "",
+      });
+    }
+  }, [open, categories]);
+
+  if (!open) return null;
+
+  const entryTypeMap = {
+    real_income: { category: "Income", direction: "income", nature: "real", status: "counted" },
+    broker_transfer: { category: "Trading", direction: "income", nature: "broker_transfer", status: "watch" },
+    savings_transfer: { category: "Savings / Internal", direction: "income", nature: "savings_transfer", status: "excluded" },
+    internal_transfer: { category: "Savings / Internal", direction: "income", nature: "internal_transfer", status: "excluded" },
+  };
+
+  const typeMeta = entryTypeMap[form.entryType];
+  const subcategories =
+    form.entryType === "real_income"
+      ? getSubcategoriesForCategory(categories, "Income")
+      : form.entryType === "broker_transfer"
+      ? getSubcategoriesForCategory(categories, "Trading")
+      : getSubcategoriesForCategory(categories, "Savings / Internal");
+
+  useEffect(() => {
+    const nextCategory = typeMeta.category;
+    const nextSubs =
+      form.entryType === "real_income"
+        ? getSubcategoriesForCategory(categories, "Income")
+        : form.entryType === "broker_transfer"
+        ? getSubcategoriesForCategory(categories, "Trading")
+        : getSubcategoriesForCategory(categories, "Savings / Internal");
+
+    setForm((prev) => ({
+      ...prev,
+      category: nextCategory,
+      subcategory: nextSubs[0] || "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.entryType]);
+
+  function submit() {
+    if (!form.date || !form.amount) return;
+
+    const meta = entryTypeMap[form.entryType];
+
+    onSave({
+      id: `tx-${Date.now()}`,
+      date: form.date,
+      merchant: form.merchant || form.description || "Manual Entry",
+      description: form.description || form.merchant || "Manual Entry",
+      category: meta.category,
+      subcategory: form.subcategory || "General",
+      direction: meta.direction,
+      nature: meta.nature,
+      status: meta.status,
+      amount: Number(form.amount),
+    });
+    onClose();
+  }
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-card">
+        <div className="modal-head">
+          <div>
+            <div className="fx-kicker">Income & deposits</div>
+            <h3 className="section-title" style={{ fontSize: 16, marginBottom: 4 }}>Add Entry</h3>
+            <div className="section-sub" style={{ marginBottom: 0 }}>
+              Log income, broker transfers, savings returns, or internal movements correctly.
+            </div>
+          </div>
+          <button className="btn btn-icon" onClick={onClose} type="button">
+            <X size={12} />
+          </button>
+        </div>
+
+        <div className="form-grid">
+          <div className="split-2">
+            <input
+              className="input"
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+            />
+            <input
+              className="input"
+              type="number"
+              placeholder="Amount"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            />
+          </div>
+
+          <div className="split-2">
+            <input
+              className="input"
+              placeholder="Source / merchant"
+              value={form.merchant}
+              onChange={(e) => setForm({ ...form, merchant: e.target.value })}
+            />
+            <input
+              className="input"
+              placeholder="Description"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+
+          <select value={form.entryType} onChange={(e) => setForm({ ...form, entryType: e.target.value })}>
+            <option value="real_income">Real Income</option>
+            <option value="broker_transfer">Broker Transfer</option>
+            <option value="savings_transfer">Savings Transfer</option>
+            <option value="internal_transfer">Internal Transfer</option>
+          </select>
+
+          <div className="split-2">
+            <input className="input" value={form.category} readOnly />
+            <select value={form.subcategory} onChange={(e) => setForm({ ...form, subcategory: e.target.value })}>
+              {subcategories.length ? (
+                subcategories.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))
+              ) : (
+                <option value="">No sub-category</option>
+              )}
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+          <button className="btn" onClick={onClose} type="button">Cancel</button>
+          <button className="btn btn-primary" onClick={submit} type="button">Add Entry</button>
         </div>
       </div>
     </div>
@@ -1744,12 +1907,15 @@ function DashboardPage({ transactions, fixedExpenses, priorityPayments, setActiv
           <div style={{ marginTop: 16 }}>
             <h3 className="section-title">Recent Income</h3>
             <div className="form-grid">
-              {getCountedRealIncome(transactions).slice(0, 3).map((t) => (
-                <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 11 }}>
-                  <span>{t.description}</span>
-                  <strong style={{ fontWeight: 600 }}>{formatCurrency(t.amount)}</strong>
-                </div>
-              ))}
+              {transactions
+                .filter((t) => t.direction === "income")
+                .slice(0, 3)
+                .map((t) => (
+                  <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 11 }}>
+                    <span>{t.description}</span>
+                    <strong style={{ fontWeight: 600 }}>{formatCurrency(t.amount)}</strong>
+                  </div>
+                ))}
             </div>
           </div>
         </div>
@@ -2123,11 +2289,13 @@ function DailyExpensesPage({ transactions, setTransactions, categories }) {
   );
 }
 
-function IncomeDepositsPage({ transactions }) {
-  const rows = getCountedRealIncome(transactions);
+function IncomeDepositsPage({ transactions, setTransactions, categories }) {
+  const [openModal, setOpenModal] = useState(false);
+  const rows = transactions.filter((t) => t.direction === "income");
   const totalReceived = sumAmounts(rows);
+  const totalRealIncome = sumAmounts(getCountedRealIncome(transactions));
   const totalSpentMonth = sumAmounts(getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "month")));
-  const net = totalReceived - totalSpentMonth;
+  const net = totalRealIncome - totalSpentMonth;
 
   const bySource = useMemo(() => {
     const map = new Map();
@@ -2138,18 +2306,30 @@ function IncomeDepositsPage({ transactions }) {
     return Array.from(map.entries()).map(([name, amount]) => ({ name, amount }));
   }, [rows]);
 
+  function addEntry(item) {
+    setTransactions((prev) => [item, ...prev]);
+  }
+
   return (
     <>
-      <div className="grid-3">
-        <MetricCard icon={ArrowDownToLine} label="Total Received" value={formatCurrency(totalReceived)} sub="In selected period" />
-        <MetricCard icon={ArrowUpFromLine} label="Total Spent (Month)" value={formatCurrency(totalSpentMonth)} sub="Variable expenses this month" />
-        <MetricCard icon={LineChart} label="Net Position" value={`${net >= 0 ? "+" : ""}${formatCurrency(net)}`} sub="Received minus spent" />
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
+        <button className="btn btn-primary" onClick={() => setOpenModal(true)} type="button">
+          <Plus size={12} />
+          Add Entry
+        </button>
+      </div>
+
+      <div className="grid-4">
+        <MetricCard icon={ArrowDownToLine} label="All Inflows" value={formatCurrency(totalReceived)} sub="All income-direction entries" />
+        <MetricCard icon={CheckCircle2} label="Real Income" value={formatCurrency(totalRealIncome)} sub="Counted only" />
+        <MetricCard icon={ArrowUpFromLine} label="Spent (Month)" value={formatCurrency(totalSpentMonth)} sub="Variable expenses this month" />
+        <MetricCard icon={LineChart} label="Net Position" value={`${net >= 0 ? "+" : ""}${formatCurrency(net)}`} sub="Real income minus expenses" />
       </div>
 
       <div className="card" style={{ marginTop: 10 }}>
         <h3 className="section-title">Income by Source</h3>
         <div className="grid-2">
-          {bySource.map((item) => {
+          {bySource.length ? bySource.map((item) => {
             const pct = totalReceived > 0 ? Math.round((item.amount / totalReceived) * 100) : 0;
             return (
               <div key={item.name} className="card" style={{ padding: 10 }}>
@@ -2159,9 +2339,66 @@ function IncomeDepositsPage({ transactions }) {
                 <div className="muted" style={{ marginTop: 5, fontSize: 9 }}>{pct}%</div>
               </div>
             );
-          })}
+          }) : <div className="empty-box">No income entries yet</div>}
         </div>
       </div>
+
+      <div className="card" style={{ marginTop: 10 }}>
+        <h3 className="section-title">Income & Deposits Ledger</h3>
+        <p className="section-sub">Real income, broker withdrawals, savings returns, and internal movements.</p>
+
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Source</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Sub-category</th>
+                <th>Nature</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.date}</td>
+                  <td>{row.merchant}</td>
+                  <td>{row.description}</td>
+                  <td>{row.category}</td>
+                  <td>{row.subcategory}</td>
+                  <td>{row.nature}</td>
+                  <td>
+                    <span className={`status-pill ${statusClass(row.status)}`}>
+                      {row.status}
+                    </span>
+                  </td>
+                  <td style={{ fontWeight: 600 }}>{formatCurrency(row.amount)}</td>
+                  <td>
+                    <button className="btn btn-icon" onClick={() => setTransactions((prev) => prev.filter((x) => x.id !== row.id))} type="button">
+                      <Trash2 size={11} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {rows.length === 0 ? (
+                <tr>
+                  <td colSpan="9">
+                    <div className="empty-box" style={{ minHeight: 100 }}>
+                      No income or deposit entries yet.
+                    </div>
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <IncomeEntryModal open={openModal} onClose={() => setOpenModal(false)} onSave={addEntry} categories={categories} />
     </>
   );
 }
@@ -3152,7 +3389,7 @@ export default function App() {
               <h1>{activePage}</h1>
               <p className="muted" style={{ marginTop: 6, maxWidth: 900, fontSize: 11, lineHeight: 1.45, fontWeight: 400 }}>
                 {activePage === "Priority Payments" && "Track urgent payments, travel cash, priority obligations, and items you may need to move forward."}
-                {activePage === "Income & Deposits" && "All money received — trading draws, commissions, dividends, and more."}
+                {activePage === "Income & Deposits" && "Log real income, broker withdrawals, savings returns, and internal inflows with correct treatment."}
                 {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
                 {activePage === "Daily Expenses" && "Day-to-day spending control with real entry logging and category classification."}
                 {activePage === "Daily Target" && "How much you can spend today — or need to earn — including urgent obligations due now."}
@@ -3199,7 +3436,13 @@ export default function App() {
               categories={categories}
             />
           )}
-          {activePage === "Income & Deposits" && <IncomeDepositsPage transactions={transactions} />}
+          {activePage === "Income & Deposits" && (
+            <IncomeDepositsPage
+              transactions={transactions}
+              setTransactions={setTransactions}
+              categories={categories}
+            />
+          )}
           {activePage === "Daily Target" && (
             <DailyTargetPage
               transactions={transactions}
