@@ -35,16 +35,16 @@ import {
   X,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v15";
-const USER_KEY = "sentimo_user_v15";
-const THEME_KEY = "sentimo_theme_v13";
-const FIXED_KEY = "sentimo_fixed_expenses_v14";
-const CATEGORIES_KEY = "sentimo_categories_v13";
-const SETTINGS_KEY = "sentimo_settings_v13";
-const SESSIONS_KEY = "sentimo_trading_sessions_v12";
-const PIN_KEY = "sentimo_pin_v11";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v11";
-const PRIORITY_KEY = "sentimo_priority_payments_v3";
+const STORAGE_KEY = "sentimo_transactions_v16";
+const USER_KEY = "sentimo_user_v16";
+const THEME_KEY = "sentimo_theme_v14";
+const FIXED_KEY = "sentimo_fixed_expenses_v15";
+const CATEGORIES_KEY = "sentimo_categories_v14";
+const SETTINGS_KEY = "sentimo_settings_v14";
+const SESSIONS_KEY = "sentimo_trading_sessions_v13";
+const PIN_KEY = "sentimo_pin_v12";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v12";
+const PRIORITY_KEY = "sentimo_priority_payments_v4";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -1500,16 +1500,13 @@ function ExpenseModal({ open, onClose, onSave, categories }) {
 }
 
 function IncomeEntryModal({ open, onClose, onSave, categories }) {
-  const defaultCategory = "Income";
-  const defaultSub = getSubcategoriesForCategory(categories, defaultCategory)[0] || "Other Income";
-
   const [form, setForm] = useState({
     date: TODAY,
     merchant: "",
     description: "",
     entryType: "real_income",
-    category: defaultCategory,
-    subcategory: defaultSub,
+    category: "Income",
+    subcategory: getSubcategoriesForCategory(categories, "Income")[0] || "Other Income",
     amount: "",
   });
 
@@ -1537,6 +1534,7 @@ function IncomeEntryModal({ open, onClose, onSave, categories }) {
   };
 
   const typeMeta = entryTypeMap[form.entryType];
+
   const subcategories =
     form.entryType === "real_income"
       ? getSubcategoriesForCategory(categories, "Income")
@@ -1655,6 +1653,210 @@ function IncomeEntryModal({ open, onClose, onSave, categories }) {
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
           <button className="btn" onClick={onClose} type="button">Cancel</button>
           <button className="btn btn-primary" onClick={submit} type="button">Add Entry</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FixedExpenseModal({ open, onClose, onSave, categories, initialData }) {
+  const defaultCategory = categories.find((c) => c.name !== "Income")?.name || categories[0]?.name || "";
+  const defaultSub = getSubcategoriesForCategory(categories, defaultCategory)[0] || "";
+
+  const [form, setForm] = useState({
+    id: "",
+    name: "",
+    category: defaultCategory,
+    subcategory: defaultSub,
+    frequency: "Monthly",
+    amount: "",
+    dueDay: 1,
+    nextDueDate: "",
+    status: "Scheduled",
+    autoIncludeTarget: true,
+  });
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (initialData) {
+      setForm({
+        id: initialData.id,
+        name: initialData.name || "",
+        category: initialData.category || defaultCategory,
+        subcategory: initialData.subcategory || defaultSub,
+        frequency: initialData.frequency || "Monthly",
+        amount: String(initialData.amount ?? ""),
+        dueDay: initialData.dueDay ?? 1,
+        nextDueDate: initialData.nextDueDate || "",
+        status: initialData.status || "Scheduled",
+        autoIncludeTarget: Boolean(initialData.autoIncludeTarget),
+      });
+    } else {
+      setForm({
+        id: "",
+        name: "",
+        category: defaultCategory,
+        subcategory: defaultSub,
+        frequency: "Monthly",
+        amount: "",
+        dueDay: 1,
+        nextDueDate: "",
+        status: "Scheduled",
+        autoIncludeTarget: true,
+      });
+    }
+  }, [open, initialData, defaultCategory, defaultSub]);
+
+  if (!open) return null;
+
+  const subcategories = getSubcategoriesForCategory(categories, form.category).filter(Boolean);
+
+  function updateCategory(nextCategory) {
+    const nextSubs = getSubcategoriesForCategory(categories, nextCategory);
+    setForm((prev) => ({
+      ...prev,
+      category: nextCategory,
+      subcategory: nextSubs[0] || "",
+    }));
+  }
+
+  function submit() {
+    if (!form.name || !form.category || !form.amount) return;
+
+    onSave({
+      id: form.id || `fx-${Date.now()}`,
+      name: form.name,
+      category: form.category,
+      subcategory: form.subcategory || "General",
+      frequency: form.frequency,
+      amount: Number(form.amount),
+      dueDay: Number(form.dueDay || 1),
+      nextDueDate: form.nextDueDate || "",
+      status: form.status,
+      autoIncludeTarget: Boolean(form.autoIncludeTarget),
+    });
+
+    onClose();
+  }
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-card">
+        <div className="modal-head">
+          <div>
+            <div className="fx-kicker">Fixed expenses</div>
+            <h3 className="section-title" style={{ fontSize: 16, marginBottom: 4 }}>
+              {initialData ? "Edit Fixed Expense" : "Add Fixed Expense"}
+            </h3>
+            <div className="section-sub" style={{ marginBottom: 0 }}>
+              Configure recurring obligations and decide whether they affect the daily target.
+            </div>
+          </div>
+          <button className="btn btn-icon" onClick={onClose} type="button">
+            <X size={12} />
+          </button>
+        </div>
+
+        <div className="form-grid">
+          <input
+            className="input"
+            placeholder="Name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+
+          <div className="split-2">
+            <select value={form.category} onChange={(e) => updateCategory(e.target.value)}>
+              {categories.filter((cat) => cat.name !== "Income").map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+
+            <select value={form.subcategory} onChange={(e) => setForm({ ...form, subcategory: e.target.value })}>
+              {subcategories.length ? (
+                subcategories.map((sub) => (
+                  <option key={sub} value={sub}>
+                    {sub}
+                  </option>
+                ))
+              ) : (
+                <option value="">No sub-category</option>
+              )}
+            </select>
+          </div>
+
+          <div className="split-2">
+            <select value={form.frequency} onChange={(e) => setForm({ ...form, frequency: e.target.value })}>
+              <option>Weekly</option>
+              <option>Monthly</option>
+              <option>Quarterly</option>
+              <option>Annual</option>
+            </select>
+
+            <input
+              className="input"
+              type="number"
+              placeholder="Amount"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            />
+          </div>
+
+          <div className="split-2">
+            <input
+              className="input"
+              type="number"
+              min="1"
+              max="31"
+              placeholder="Due day"
+              value={form.dueDay}
+              onChange={(e) => setForm({ ...form, dueDay: e.target.value })}
+            />
+            <input
+              className="input"
+              type="date"
+              value={form.nextDueDate}
+              onChange={(e) => setForm({ ...form, nextDueDate: e.target.value })}
+            />
+          </div>
+
+          <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+            <option>Scheduled</option>
+            <option>Pending</option>
+            <option>Paid</option>
+            <option>Overdue</option>
+          </select>
+
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 11,
+              color: "var(--text)",
+              border: "1px solid var(--border)",
+              borderRadius: 10,
+              padding: "10px 12px",
+              background: "var(--panel-2)",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={form.autoIncludeTarget}
+              onChange={(e) => setForm({ ...form, autoIncludeTarget: e.target.checked })}
+            />
+            Auto include in daily target
+          </label>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+          <button className="btn" onClick={onClose} type="button">Cancel</button>
+          <button className="btn btn-primary" onClick={submit} type="button">
+            {initialData ? "Save Changes" : "Add Fixed Expense"}
+          </button>
         </div>
       </div>
     </div>
@@ -2071,8 +2273,10 @@ function PriorityPaymentsPage({ priorityPayments, setPriorityPayments }) {
   );
 }
 
-function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
+function FixedExpensesPage({ fixedExpenses, setFixedExpenses, categories }) {
   const [tab, setTab] = useState("All");
+  const [openModal, setOpenModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
 
   const monthlyTotal = fixedExpenses
     .filter((x) => x.status !== "Paid" && x.status !== "Archived")
@@ -2108,8 +2312,35 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
     );
   }
 
+  function handleSave(expense) {
+    setFixedExpenses((prev) => {
+      const exists = prev.some((x) => x.id === expense.id);
+      if (exists) {
+        return prev.map((x) => (x.id === expense.id ? expense : x));
+      }
+      return [expense, ...prev];
+    });
+  }
+
+  function openAdd() {
+    setEditingExpense(null);
+    setOpenModal(true);
+  }
+
+  function openEdit(item) {
+    setEditingExpense(item);
+    setOpenModal(true);
+  }
+
   return (
     <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
+        <button className="btn btn-primary" onClick={openAdd} type="button">
+          <Plus size={12} />
+          Add Fixed Expense
+        </button>
+      </div>
+
       <div className="grid-4">
         <MetricCard icon={CreditCard} label="Monthly Total" value={formatCurrency(monthlyTotal)} sub="Excl. paid" />
         <MetricCard icon={CalendarDays} label="Weekly Equiv." value={formatCurrency(weeklyEquiv)} sub="Recurring burden" />
@@ -2147,6 +2378,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                 <th>Frequency</th>
                 <th>Amount</th>
                 <th>Monthly Eq.</th>
+                <th>Target</th>
                 <th>Due Date</th>
                 <th>Actions</th>
               </tr>
@@ -2168,15 +2400,20 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
                   <td style={{ fontWeight: 600 }}>{formatCurrency(item.amount)}</td>
                   <td style={{ fontWeight: 600 }}>{formatCurrency(monthlyEquivalent(item.frequency, item.amount))}</td>
                   <td>
+                    <span className={`status-pill ${item.autoIncludeTarget ? "status-green" : "status-gray"}`}>
+                      {item.autoIncludeTarget ? "Included" : "Excluded"}
+                    </span>
+                  </td>
+                  <td>
                     <div>{item.nextDueDate || `Day ${item.dueDay}`}</div>
-                    <div className="fx-sub">{item.status === "Paid" ? "Completed" : "Upcoming"}</div>
+                    <div className="fx-sub">{item.nextDueDate ? `Day ${item.dueDay}` : "Upcoming"}</div>
                   </td>
                   <td>
                     <div className="action-row">
                       <button className="btn btn-icon" title="Cycle status" onClick={() => cycleStatus(item.id)} type="button">
                         {item.status === "Paid" ? <Check size={11} /> : <Clock3 size={11} />}
                       </button>
-                      <button className="btn btn-icon" title="Edit" type="button">
+                      <button className="btn btn-icon" title="Edit" onClick={() => openEdit(item)} type="button">
                         <Pencil size={11} />
                       </button>
                       <button className="btn btn-icon" title="Delete" onClick={() => setFixedExpenses((prev) => prev.filter((x) => x.id !== item.id))} type="button">
@@ -2188,7 +2425,7 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
               ))}
               {visible.length === 0 ? (
                 <tr>
-                  <td colSpan="8">
+                  <td colSpan="9">
                     <div className="empty-box" style={{ minHeight: 100 }}>
                       No fixed expenses in this status.
                     </div>
@@ -2204,6 +2441,17 @@ function FixedExpensesPage({ fixedExpenses, setFixedExpenses }) {
           <span>{formatCurrency(activeMonthlyTotal)} / mo</span>
         </div>
       </div>
+
+      <FixedExpenseModal
+        open={openModal}
+        onClose={() => {
+          setOpenModal(false);
+          setEditingExpense(null);
+        }}
+        onSave={handleSave}
+        categories={categories}
+        initialData={editingExpense}
+      />
     </>
   );
 }
@@ -2924,7 +3172,9 @@ function CategoriesPage({ categories, setCategories }) {
 
 function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses }) {
   const fixedMonthly = fixedExpenses.reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
-  const autoTarget = fixedMonthly / 30;
+  const autoTarget = fixedExpenses
+    .filter((item) => item.autoIncludeTarget && item.status !== "Archived")
+    .reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0) / 30;
 
   return (
     <>
@@ -2965,12 +3215,12 @@ function SettingsPage({ theme, setTheme, settings, setSettings, fixedExpenses })
             <div className="card" style={{ padding: 10 }}>
               <div className="muted" style={{ fontSize: 9 }}>Auto-calculated target</div>
               <div style={{ fontSize: 18, fontWeight: 600 }}>{formatCurrency(autoTarget)}</div>
-              <div className="muted" style={{ fontSize: 10 }}>Fixed daily + variable avg</div>
+              <div className="muted" style={{ fontSize: 10 }}>Included fixed daily portion</div>
             </div>
             <div className="card" style={{ padding: 10 }}>
               <div className="muted" style={{ fontSize: 9 }}>Fixed monthly total</div>
               <div style={{ fontSize: 18, fontWeight: 600, color: "var(--danger)" }}>{formatCurrency(fixedMonthly)}</div>
-              <div className="muted" style={{ fontSize: 10 }}>All active fixed expenses</div>
+              <div className="muted" style={{ fontSize: 10 }}>All fixed expenses</div>
             </div>
           </div>
 
@@ -3390,7 +3640,7 @@ export default function App() {
               <p className="muted" style={{ marginTop: 6, maxWidth: 900, fontSize: 11, lineHeight: 1.45, fontWeight: 400 }}>
                 {activePage === "Priority Payments" && "Track urgent payments, travel cash, priority obligations, and items you may need to move forward."}
                 {activePage === "Income & Deposits" && "Log real income, broker withdrawals, savings returns, and internal inflows with correct treatment."}
-                {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
+                {activePage === "Fixed Expenses" && "Recurring obligations with add, edit, delete, due structure, and daily target inclusion control."}
                 {activePage === "Daily Expenses" && "Day-to-day spending control with real entry logging and category classification."}
                 {activePage === "Daily Target" && "How much you can spend today — or need to earn — including urgent obligations due now."}
                 {activePage === "Analytics" && "Budgeting and spending intelligence across categories and periods."}
@@ -3428,7 +3678,13 @@ export default function App() {
             />
           )}
           {activePage === "Trading P&L" && <TradingPnLPage transactions={transactions} sessions={sessions} setSessions={setSessions} />}
-          {activePage === "Fixed Expenses" && <FixedExpensesPage fixedExpenses={fixedExpenses} setFixedExpenses={setFixedExpenses} />}
+          {activePage === "Fixed Expenses" && (
+            <FixedExpensesPage
+              fixedExpenses={fixedExpenses}
+              setFixedExpenses={setFixedExpenses}
+              categories={categories}
+            />
+          )}
           {activePage === "Daily Expenses" && (
             <DailyExpensesPage
               transactions={transactions}
