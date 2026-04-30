@@ -30,17 +30,21 @@ import {
   Wallet,
   X,
   KeyRound,
+  AlertTriangle,
+  CircleDollarSign,
+  ChevronRight,
 } from "lucide-react";
 
-const STORAGE_KEY = "sentimo_transactions_v12";
-const USER_KEY = "sentimo_user_v12";
-const THEME_KEY = "sentimo_theme_v10";
-const FIXED_KEY = "sentimo_fixed_expenses_v11";
-const CATEGORIES_KEY = "sentimo_categories_v10";
-const SETTINGS_KEY = "sentimo_settings_v10";
-const SESSIONS_KEY = "sentimo_trading_sessions_v9";
-const PIN_KEY = "sentimo_pin_v8";
-const AUTH_MODE_KEY = "sentimo_auth_mode_v8";
+const STORAGE_KEY = "sentimo_transactions_v13";
+const USER_KEY = "sentimo_user_v13";
+const THEME_KEY = "sentimo_theme_v11";
+const FIXED_KEY = "sentimo_fixed_expenses_v12";
+const CATEGORIES_KEY = "sentimo_categories_v11";
+const SETTINGS_KEY = "sentimo_settings_v11";
+const SESSIONS_KEY = "sentimo_trading_sessions_v10";
+const PIN_KEY = "sentimo_pin_v9";
+const AUTH_MODE_KEY = "sentimo_auth_mode_v9";
+const PRIORITY_KEY = "sentimo_priority_payments_v1";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -53,6 +57,8 @@ const gbp = new Intl.NumberFormat("en-GB", {
   style: "currency",
   currency: "GBP",
 });
+
+const TODAY = "2026-04-29";
 
 const seedCategories = [
   { id: "cat-housing", name: "Housing", color: "#64748b", subcategories: ["Rent", "Council Tax", "Repairs"] },
@@ -86,6 +92,29 @@ const seedTransactions = [
 const seedTradingSessions = [
   { id: "sess-1", date: "2026-04-24", instrument: "DAX", currency: "GBP", pnl: 380, notes: "Morning session, short from rejection area." },
   { id: "sess-2", date: "2026-04-26", instrument: "MARA", currency: "GBP", pnl: -95, notes: "Late entry, cut quickly." },
+];
+
+const seedPriorityPayments = [
+  {
+    id: "pp-1",
+    title: "Trip with Lewis",
+    amount: 500,
+    dueDate: "2026-04-30",
+    priority: "High",
+    type: "Payment",
+    status: "Open",
+    note: "Need to make money trading or separate £500 before travel.",
+  },
+  {
+    id: "pp-2",
+    title: "Fuel / travel cash",
+    amount: 120,
+    dueDate: "2026-04-30",
+    priority: "Medium",
+    type: "Travel",
+    status: "Open",
+    note: "Keep ready for immediate trip spending.",
+  },
 ];
 
 const defaultSettings = {
@@ -183,16 +212,24 @@ function sumAmounts(rows) {
 
 function statusClass(status) {
   const value = String(status || "").toLowerCase();
-  if (value === "counted" || value === "paid") return "status-green";
+  if (value === "counted" || value === "paid" || value === "completed") return "status-green";
   if (value === "excluded" || value === "scheduled") return "status-blue";
-  if (value === "watch" || value === "pending") return "status-amber";
-  if (value === "overdue") return "status-red";
+  if (value === "watch" || value === "pending" || value === "open") return "status-amber";
+  if (value === "overdue" || value === "high") return "status-red";
+  return "status-gray";
+}
+
+function priorityClass(priority) {
+  const value = String(priority || "").toLowerCase();
+  if (value === "high") return "status-red";
+  if (value === "medium") return "status-amber";
+  if (value === "low") return "status-blue";
   return "status-gray";
 }
 
 function matchPeriod(dateStr, mode) {
   const d = new Date(dateStr);
-  const now = new Date("2026-04-29T12:00:00");
+  const now = new Date(`${TODAY}T12:00:00`);
   const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
   if (mode === "7d") return diffDays <= 7;
   if (mode === "30d") return diffDays <= 30;
@@ -203,6 +240,31 @@ function matchPeriod(dateStr, mode) {
 
 function sameDay(a, b) {
   return a === b;
+}
+
+function datePlusDays(dateStr, days) {
+  const d = new Date(`${dateStr}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function daysDiffFromToday(dateStr) {
+  const today = new Date(`${TODAY}T12:00:00`);
+  const due = new Date(`${dateStr}T12:00:00`);
+  return Math.floor((due - today) / (1000 * 60 * 60 * 24));
+}
+
+function getPriorityGroups(items) {
+  const openItems = items.filter((x) => x.status === "Open");
+  const today = openItems.filter((x) => daysDiffFromToday(x.dueDate) === 0);
+  const tomorrow = openItems.filter((x) => daysDiffFromToday(x.dueDate) === 1);
+  const week = openItems.filter((x) => {
+    const diff = daysDiffFromToday(x.dueDate);
+    return diff >= 0 && diff <= 7;
+  });
+  const overdue = openItems.filter((x) => daysDiffFromToday(x.dueDate) < 0);
+
+  return { today, tomorrow, week, overdue, openItems };
 }
 
 function buildUserFromSession(session) {
@@ -769,6 +831,57 @@ function appStyles() {
       letter-spacing: -0.01em;
     }
 
+    .priority-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .priority-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px;
+      background: rgba(255,255,255,0.02);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .priority-left {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .priority-title {
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .priority-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .priority-note {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .priority-right {
+      text-align: right;
+      min-width: 122px;
+    }
+
+    .priority-amount {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -900,6 +1013,8 @@ function appStyles() {
       .header { flex-direction: column; }
       .header h1 { font-size: 21px; }
       .main { padding: 12px; }
+      .priority-item { flex-direction: column; }
+      .priority-right { text-align: left; min-width: 0; width: 100%; }
     }
   `;
 }
@@ -1125,9 +1240,124 @@ function PinUnlockScreen({ onUnlock, onUsePassword }) {
   );
 }
 
+function PriorityPaymentModal({ open, onClose, onSave }) {
+  const [form, setForm] = useState({
+    title: "",
+    amount: "",
+    dueDate: datePlusDays(TODAY, 1),
+    priority: "High",
+    type: "Payment",
+    note: "",
+  });
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        title: "",
+        amount: "",
+        dueDate: datePlusDays(TODAY, 1),
+        priority: "High",
+        type: "Payment",
+        note: "",
+      });
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  function submit() {
+    if (!form.title || !form.amount || !form.dueDate) return;
+
+    onSave({
+      id: `pp-${Date.now()}`,
+      title: form.title,
+      amount: Number(form.amount),
+      dueDate: form.dueDate,
+      priority: form.priority,
+      type: form.type,
+      status: "Open",
+      note: form.note,
+    });
+    onClose();
+  }
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-card">
+        <div className="modal-head">
+          <div>
+            <div className="fx-kicker">Urgent cash / payment</div>
+            <h3 className="section-title" style={{ fontSize: 16, marginBottom: 4 }}>Add Priority Payment</h3>
+            <div className="section-sub" style={{ marginBottom: 0 }}>
+              Track what cannot be delayed and roll it forward if needed.
+            </div>
+          </div>
+          <button className="btn btn-icon" onClick={onClose} type="button">
+            <X size={12} />
+          </button>
+        </div>
+
+        <div className="form-grid">
+          <input
+            className="input"
+            placeholder="Title e.g. Trip with Lewis"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+
+          <div className="split-2">
+            <input
+              className="input"
+              type="number"
+              placeholder="Amount"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            />
+            <input
+              className="input"
+              type="date"
+              value={form.dueDate}
+              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+            />
+          </div>
+
+          <div className="split-2">
+            <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+              <option>High</option>
+              <option>Medium</option>
+              <option>Low</option>
+            </select>
+
+            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+              <option>Payment</option>
+              <option>Travel</option>
+              <option>Target</option>
+              <option>Reminder</option>
+            </select>
+          </div>
+
+          <textarea
+            className="input"
+            rows="3"
+            placeholder="Note"
+            value={form.note}
+            onChange={(e) => setForm({ ...form, note: e.target.value })}
+          />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+          <button className="btn" onClick={onClose} type="button">Cancel</button>
+          <button className="btn btn-primary" onClick={submit} type="button">Add Priority</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Sidebar({ activePage, setActivePage, user, theme, setTheme, onLogout }) {
   const nav = [
     [LayoutDashboard, "Dashboard"],
+    [AlertTriangle, "Priority Payments"],
     [LineChart, "Trading P&L"],
     [CreditCard, "Fixed Expenses"],
     [Wallet, "Daily Expenses"],
@@ -1156,11 +1386,11 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme, onLogout })
 
       <div className="daily-card">
         <div className="brand-sub" style={{ marginBottom: 8 }}>Daily Target</div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "var(--nav-text)" }}>0%</div>
-        <div className="daily-line"><span /></div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: "var(--nav-text)" }}>Live</div>
+        <div className="daily-line"><span style={{ width: "46%" }} /></div>
         <div style={{ display: "flex", justifyContent: "space-between", color: "var(--nav-muted)", fontSize: 9 }}>
-          <span>Spent £0</span>
-          <span>£151 left</span>
+          <span>Track</span>
+          <span>Plan</span>
         </div>
       </div>
 
@@ -1209,7 +1439,7 @@ function Sidebar({ activePage, setActivePage, user, theme, setTheme, onLogout })
   );
 }
 
-function DashboardPage({ transactions, fixedExpenses }) {
+function DashboardPage({ transactions, fixedExpenses, priorityPayments, setActivePage }) {
   const realIncome = sumAmounts(getCountedRealIncome(transactions));
   const realExpenses = sumAmounts(getCountedRealExpenses(transactions));
   const net = realIncome - realExpenses;
@@ -1227,6 +1457,12 @@ function DashboardPage({ transactions, fixedExpenses }) {
     });
     return Array.from(map.entries()).map(([name, amount]) => ({ name, amount }));
   }, [transactions]);
+
+  const { today, tomorrow, week, overdue } = getPriorityGroups(priorityPayments);
+  const todayTotal = sumAmounts(today);
+  const tomorrowTotal = sumAmounts(tomorrow);
+  const weekTotal = sumAmounts(week);
+  const overdueTotal = sumAmounts(overdue);
 
   return (
     <>
@@ -1288,7 +1524,63 @@ function DashboardPage({ transactions, fixedExpenses }) {
         </div>
       </div>
 
-      <div className="grid-3" style={{ marginTop: 10 }}>
+      <div className="grid-2" style={{ marginTop: 10 }}>
+        <div className="card">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div>
+              <h3 className="section-title" style={{ marginBottom: 4 }}>Priority Payments</h3>
+              <p className="section-sub" style={{ marginBottom: 0 }}>What cannot be delayed.</p>
+            </div>
+            <button className="btn" onClick={() => setActivePage("Priority Payments")} type="button">
+              Open
+              <ChevronRight size={12} />
+            </button>
+          </div>
+
+          <div className="grid-4">
+            <div className="tcard">
+              <div className="tcard-label">Today</div>
+              <div className="tcard-value">{formatCurrency(todayTotal)}</div>
+              <div className="muted" style={{ fontSize: 9, marginTop: 4 }}>{today.length} item(s)</div>
+            </div>
+            <div className="tcard">
+              <div className="tcard-label">Tomorrow</div>
+              <div className="tcard-value">{formatCurrency(tomorrowTotal)}</div>
+              <div className="muted" style={{ fontSize: 9, marginTop: 4 }}>{tomorrow.length} item(s)</div>
+            </div>
+            <div className="tcard">
+              <div className="tcard-label">This Week</div>
+              <div className="tcard-value">{formatCurrency(weekTotal)}</div>
+              <div className="muted" style={{ fontSize: 9, marginTop: 4 }}>{week.length} item(s)</div>
+            </div>
+            <div className="tcard">
+              <div className="tcard-label">Overdue</div>
+              <div className="tcard-value" style={{ color: overdue.length ? "var(--danger)" : "var(--text)" }}>{formatCurrency(overdueTotal)}</div>
+              <div className="muted" style={{ fontSize: 9, marginTop: 4 }}>{overdue.length} item(s)</div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 10 }} className="priority-list">
+            {week.slice(0, 3).map((item) => (
+              <div key={item.id} className="priority-item">
+                <div className="priority-left">
+                  <div className="priority-title">{item.title}</div>
+                  <div className="priority-meta">
+                    <span className={`status-pill ${priorityClass(item.priority)}`}>{item.priority}</span>
+                    <span className="status-pill status-blue">{item.type}</span>
+                    <span className="status-pill status-gray">{item.dueDate}</span>
+                  </div>
+                  <div className="priority-note">{item.note || "—"}</div>
+                </div>
+                <div className="priority-right">
+                  <div className="priority-amount">{formatCurrency(item.amount)}</div>
+                </div>
+              </div>
+            ))}
+            {week.length === 0 ? <div className="empty-box" style={{ minHeight: 90 }}>No urgent items this week</div> : null}
+          </div>
+        </div>
+
         <div className="card">
           <h3 className="section-title">Monthly Net Position</h3>
           <p className="section-sub">Income received minus total expenses this month.</p>
@@ -1298,27 +1590,173 @@ function DashboardPage({ transactions, fixedExpenses }) {
           <div className="muted" style={{ marginTop: 5, fontSize: 10 }}>
             {formatCurrency(realIncome)} in · {formatCurrency(realExpenses)} out
           </div>
-        </div>
 
-        <div className="card">
-          <h3 className="section-title">Savings / Internal</h3>
-          <p className="section-sub">Tracked but excluded from real totals.</p>
-          <div style={{ fontSize: 21, fontWeight: 600 }}>{formatCurrency(internalTotal)}</div>
-        </div>
+          <div style={{ marginTop: 16 }}>
+            <h3 className="section-title">Savings / Internal</h3>
+            <p className="section-sub">Tracked but excluded from real totals.</p>
+            <div style={{ fontSize: 21, fontWeight: 600 }}>{formatCurrency(internalTotal)}</div>
+          </div>
 
-        <div className="card">
-          <h3 className="section-title">Recent Income</h3>
-          <p className="section-sub">Latest counted inflows.</p>
-          <div className="form-grid">
-            {getCountedRealIncome(transactions).slice(0, 3).map((t) => (
-              <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 11 }}>
-                <span>{t.description}</span>
-                <strong style={{ fontWeight: 600 }}>{formatCurrency(t.amount)}</strong>
-              </div>
-            ))}
+          <div style={{ marginTop: 16 }}>
+            <h3 className="section-title">Recent Income</h3>
+            <div className="form-grid">
+              {getCountedRealIncome(transactions).slice(0, 3).map((t) => (
+                <div key={t.id} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 11 }}>
+                  <span>{t.description}</span>
+                  <strong style={{ fontWeight: 600 }}>{formatCurrency(t.amount)}</strong>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+function PriorityPaymentsPage({ priorityPayments, setPriorityPayments }) {
+  const [activeTab, setActiveTab] = useState("Today");
+  const [openModal, setOpenModal] = useState(false);
+
+  const { today, tomorrow, week, overdue, openItems } = getPriorityGroups(priorityPayments);
+  const completed = priorityPayments.filter((x) => x.status === "Completed");
+
+  const visible =
+    activeTab === "Today"
+      ? today
+      : activeTab === "Tomorrow"
+      ? tomorrow
+      : activeTab === "This Week"
+      ? week
+      : activeTab === "Overdue"
+      ? overdue
+      : activeTab === "Completed"
+      ? completed
+      : openItems;
+
+  function addPriority(item) {
+    setPriorityPayments((prev) => [item, ...prev]);
+  }
+
+  function markCompleted(id) {
+    setPriorityPayments((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, status: "Completed" } : item
+      )
+    );
+  }
+
+  function moveTomorrow(id) {
+    setPriorityPayments((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, dueDate: datePlusDays(TODAY, 1), status: "Open" }
+          : item
+      )
+    );
+  }
+
+  function moveNextWeek(id) {
+    setPriorityPayments((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, dueDate: datePlusDays(TODAY, 7), status: "Open" }
+          : item
+      )
+    );
+  }
+
+  function deleteItem(id) {
+    setPriorityPayments((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  const todayTotal = sumAmounts(today);
+  const weekTotal = sumAmounts(week);
+  const overdueTotal = sumAmounts(overdue);
+
+  return (
+    <>
+      <div className="header-actions" style={{ justifyContent: "flex-end", marginBottom: 10 }}>
+        <button className="btn btn-primary" onClick={() => setOpenModal(true)} type="button">
+          <Plus size={12} />
+          Add Priority
+        </button>
+      </div>
+
+      <div className="grid-3">
+        <MetricCard icon={AlertTriangle} label="Today" value={formatCurrency(todayTotal)} sub={`${today.length} urgent item(s)`} />
+        <MetricCard icon={CalendarDays} label="This Week" value={formatCurrency(weekTotal)} sub={`${week.length} planned item(s)`} />
+        <MetricCard icon={CircleDollarSign} label="Overdue" value={formatCurrency(overdueTotal)} sub={`${overdue.length} overdue item(s)`} />
+      </div>
+
+      <div className="card" style={{ marginTop: 10 }}>
+        <div className="mini-tabs">
+          {[
+            ["Today", today.length],
+            ["Tomorrow", tomorrow.length],
+            ["This Week", week.length],
+            ["Overdue", overdue.length],
+            ["All Open", openItems.length],
+            ["Completed", completed.length],
+          ].map(([label, count]) => (
+            <button
+              key={label}
+              className={activeTab === label ? "active" : ""}
+              onClick={() => setActiveTab(label)}
+              type="button"
+            >
+              {label} ({count})
+            </button>
+          ))}
+        </div>
+
+        <div className="priority-list">
+          {visible.map((item) => (
+            <div className="priority-item" key={item.id}>
+              <div className="priority-left">
+                <div className="priority-title">{item.title}</div>
+                <div className="priority-meta">
+                  <span className={`status-pill ${priorityClass(item.priority)}`}>{item.priority}</span>
+                  <span className="status-pill status-blue">{item.type}</span>
+                  <span className={`status-pill ${statusClass(item.status)}`}>{item.status}</span>
+                  <span className="status-pill status-gray">{item.dueDate}</span>
+                </div>
+                <div className="priority-note">{item.note || "—"}</div>
+              </div>
+
+              <div className="priority-right">
+                <div className="priority-amount">{formatCurrency(item.amount)}</div>
+                <div className="action-row" style={{ justifyContent: "flex-end" }}>
+                  {item.status !== "Completed" ? (
+                    <>
+                      <button className="btn btn-icon" onClick={() => markCompleted(item.id)} type="button" title="Complete">
+                        <Check size={11} />
+                      </button>
+                      <button className="btn btn-icon" onClick={() => moveTomorrow(item.id)} type="button" title="Move to tomorrow">
+                        <Clock3 size={11} />
+                      </button>
+                      <button className="btn btn-icon" onClick={() => moveNextWeek(item.id)} type="button" title="Move to next week">
+                        <CalendarDays size={11} />
+                      </button>
+                    </>
+                  ) : null}
+                  <button className="btn btn-icon" onClick={() => deleteItem(item.id)} type="button" title="Delete">
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {visible.length === 0 ? (
+            <div className="empty-box">
+              No items in this view.
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <PriorityPaymentModal open={openModal} onClose={() => setOpenModal(false)} onSave={addPriority} />
     </>
   );
 }
@@ -1572,7 +2010,7 @@ function IncomeDepositsPage({ transactions }) {
 
 function TradingPnlModal({ open, onClose, onSave }) {
   const [form, setForm] = useState({
-    date: "2026-04-29",
+    date: TODAY,
     currency: "GBP",
     instrument: "",
     pnl: "",
@@ -1582,7 +2020,7 @@ function TradingPnlModal({ open, onClose, onSave }) {
   useEffect(() => {
     if (open) {
       setForm({
-        date: "2026-04-29",
+        date: TODAY,
         currency: "GBP",
         instrument: "",
         pnl: "",
@@ -1649,7 +2087,7 @@ function TradingPnlModal({ open, onClose, onSave }) {
 function TradingPnLPage({ transactions, sessions, setSessions }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const today = "2026-04-29";
+  const today = TODAY;
   const todaySessions = sessions.filter((s) => sameDay(s.date, today));
   const todayTrading = todaySessions.reduce((sum, s) => sum + Number(s.pnl || 0), 0);
   const todayExpenses = getCountedRealExpenses(transactions)
@@ -1765,16 +2203,21 @@ function TradingPnLPage({ transactions, sessions, setSessions }) {
   );
 }
 
-function DailyTargetPage({ transactions, fixedExpenses, settings }) {
+function DailyTargetPage({ transactions, fixedExpenses, settings, priorityPayments }) {
   const fixedMonthly = fixedExpenses
     .filter((f) => f.autoIncludeTarget && f.status !== "Archived")
     .reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
 
   const variableExpenses = getCountedRealExpenses(transactions).filter((t) => matchPeriod(t.date, "30d"));
   const variableAvg = sumAmounts(variableExpenses) / Number(settings.variableAverageDays || 30);
-  const autoTarget = fixedMonthly / daysInMonth(new Date("2026-04-29")) + variableAvg;
-  const target = settings.customDailyTarget ? Number(settings.customDailyTarget) : autoTarget;
-  const todaySpent = sumAmounts(getCountedRealExpenses(transactions).filter((t) => t.date === "2026-04-29"));
+  const baseTarget = settings.customDailyTarget ? Number(settings.customDailyTarget) : fixedMonthly / daysInMonth(new Date(`${TODAY}T12:00:00`)) + variableAvg;
+
+  const { today, week } = getPriorityGroups(priorityPayments);
+  const urgentToday = sumAmounts(today);
+  const urgentWeek = sumAmounts(week);
+  const target = baseTarget + urgentToday;
+
+  const todaySpent = sumAmounts(getCountedRealExpenses(transactions).filter((t) => t.date === TODAY));
   const remaining = target - todaySpent;
   const pct = target > 0 ? Math.max(0, Math.min(100, Math.round((todaySpent / target) * 100))) : 0;
 
@@ -1809,7 +2252,7 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
               <div style={{ fontSize: 13, fontWeight: 600 }}>{formatCurrency(todaySpent)}</div>
             </div>
             <div>
-              <div className="muted" style={{ fontSize: 9 }}>Target</div>
+              <div className="muted" style={{ fontSize: 9 }}>Required Today</div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>{formatCurrency(target)}</div>
             </div>
             <div>
@@ -1826,22 +2269,26 @@ function DailyTargetPage({ transactions, fixedExpenses, settings }) {
           <div style={{ fontSize: 28, fontWeight: 600 }}>
             {formatCurrency(target)} <span className="muted" style={{ fontSize: 13 }}>/ day</span>
           </div>
-          <p className="section-sub">Auto-calculated from fixed monthly obligations plus variable rolling average.</p>
+          <p className="section-sub">Base target plus urgent non-delayable cash needs due today.</p>
 
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, marginTop: 8 }}>
             <div style={{ color: "var(--muted)", marginBottom: 8, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
               Target Composition
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
-              <span className="muted">Fixed expenses (daily equiv.)</span>
-              <strong style={{ fontWeight: 600 }}>{formatCurrency(fixedMonthly / daysInMonth(new Date("2026-04-29")))}</strong>
+              <span className="muted">Base daily target</span>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(baseTarget)}</strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
-              <span className="muted">Variable avg (rolling)</span>
-              <strong style={{ fontWeight: 600 }}>{formatCurrency(variableAvg)}</strong>
+              <span className="muted">Urgent payments today</span>
+              <strong style={{ fontWeight: 600, color: urgentToday > 0 ? "var(--danger)" : "var(--text)" }}>{formatCurrency(urgentToday)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 11 }}>
+              <span className="muted">Urgent this week</span>
+              <strong style={{ fontWeight: 600 }}>{formatCurrency(urgentWeek)}</strong>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontWeight: 600, fontSize: 11 }}>
-              <span>Daily target</span>
+              <span>Required today</span>
               <span>{formatCurrency(target)}</span>
             </div>
           </div>
@@ -1867,7 +2314,7 @@ function AnalyticsPage({ transactions, fixedExpenses, settings }) {
     .reduce((sum, item) => sum + monthlyEquivalent(item.frequency, item.amount), 0);
   const dailyTarget = settings.customDailyTarget
     ? Number(settings.customDailyTarget)
-    : fixedMonthly / daysInMonth(new Date("2026-04-29")) + dailyAvg;
+    : fixedMonthly / daysInMonth(new Date(`${TODAY}T12:00:00`)) + dailyAvg;
 
   return (
     <>
@@ -2254,6 +2701,7 @@ export default function App() {
   const [categories, setCategories] = useState(seedCategories);
   const [settings, setSettings] = useState(defaultSettings);
   const [sessions, setSessions] = useState(seedTradingSessions);
+  const [priorityPayments, setPriorityPayments] = useState(seedPriorityPayments);
   const [needsPinSetup, setNeedsPinSetup] = useState(false);
   const [authView, setAuthView] = useState("password");
   const [authLoading, setAuthLoading] = useState(false);
@@ -2277,6 +2725,7 @@ export default function App() {
       const savedCategories = localStorage.getItem(CATEGORIES_KEY);
       const savedSettings = localStorage.getItem(SETTINGS_KEY);
       const savedSessions = localStorage.getItem(SESSIONS_KEY);
+      const savedPriorities = localStorage.getItem(PRIORITY_KEY);
 
       if (savedTheme) setTheme(savedTheme);
       if (savedTransactions) setTransactions(JSON.parse(savedTransactions));
@@ -2284,6 +2733,7 @@ export default function App() {
       if (savedCategories) setCategories(JSON.parse(savedCategories));
       if (savedSettings) setSettings(JSON.parse(savedSettings));
       if (savedSessions) setSessions(JSON.parse(savedSessions));
+      if (savedPriorities) setPriorityPayments(JSON.parse(savedPriorities));
     } catch {
       // ignore local storage parse errors
     }
@@ -2299,6 +2749,7 @@ export default function App() {
   useEffect(() => localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories)), [categories]);
   useEffect(() => localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)), [settings]);
   useEffect(() => localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions)), [sessions]);
+  useEffect(() => localStorage.setItem(PRIORITY_KEY, JSON.stringify(priorityPayments)), [priorityPayments]);
 
   useEffect(() => {
     let mounted = true;
@@ -2542,14 +2993,15 @@ export default function App() {
               </div>
               <h1>{activePage}</h1>
               <p className="muted" style={{ marginTop: 6, maxWidth: 900, fontSize: 11, lineHeight: 1.45, fontWeight: 400 }}>
+                {activePage === "Priority Payments" && "Track urgent payments, travel cash, priority obligations, and items you may need to move forward."}
                 {activePage === "Income & Deposits" && "All money received — trading draws, commissions, dividends, and more."}
                 {activePage === "Fixed Expenses" && "Recurring obligations and structured monthly commitments."}
                 {activePage === "Daily Expenses" && "Day-to-day spending control with category and period filters."}
-                {activePage === "Daily Target" && "How much you can spend today — or need to earn — to stay on track."}
+                {activePage === "Daily Target" && "How much you can spend today — or need to earn — including urgent obligations due now."}
                 {activePage === "Analytics" && "Budgeting and spending intelligence across categories and periods."}
                 {activePage === "Overall" && "Compare this period, previous period, and target budget side by side."}
                 {activePage === "Categories" && "Categories, sub-categories, and keyword-ready classification logic."}
-                {activePage === "Dashboard" && "Control panel for spending, income, fixed obligations, and overall position."}
+                {activePage === "Dashboard" && "Control panel for spending, income, fixed obligations, urgent payments, and overall position."}
                 {activePage === "Trading P&L" && "Daily performance vs expenses — did trading cover the day?"}
                 {activePage === "Settings" && "Portal configuration, target settings, and theme selection."}
                 {activePage === "Admin Panel" && "Future licence and user-management layer for commercial rollout."}
@@ -2566,12 +3018,32 @@ export default function App() {
             </div>
           </div>
 
-          {activePage === "Dashboard" && <DashboardPage transactions={transactions} fixedExpenses={fixedExpenses} />}
+          {activePage === "Dashboard" && (
+            <DashboardPage
+              transactions={transactions}
+              fixedExpenses={fixedExpenses}
+              priorityPayments={priorityPayments}
+              setActivePage={setActivePage}
+            />
+          )}
+          {activePage === "Priority Payments" && (
+            <PriorityPaymentsPage
+              priorityPayments={priorityPayments}
+              setPriorityPayments={setPriorityPayments}
+            />
+          )}
           {activePage === "Trading P&L" && <TradingPnLPage transactions={transactions} sessions={sessions} setSessions={setSessions} />}
           {activePage === "Fixed Expenses" && <FixedExpensesPage fixedExpenses={fixedExpenses} setFixedExpenses={setFixedExpenses} />}
           {activePage === "Daily Expenses" && <DailyExpensesPage transactions={transactions} setTransactions={setTransactions} />}
           {activePage === "Income & Deposits" && <IncomeDepositsPage transactions={transactions} />}
-          {activePage === "Daily Target" && <DailyTargetPage transactions={transactions} fixedExpenses={fixedExpenses} settings={settings} />}
+          {activePage === "Daily Target" && (
+            <DailyTargetPage
+              transactions={transactions}
+              fixedExpenses={fixedExpenses}
+              settings={settings}
+              priorityPayments={priorityPayments}
+            />
+          )}
           {activePage === "Analytics" && <AnalyticsPage transactions={transactions} fixedExpenses={fixedExpenses} settings={settings} />}
           {activePage === "Overall" && <OverallPage transactions={transactions} fixedExpenses={fixedExpenses} />}
           {activePage === "Categories" && <CategoriesPage categories={categories} setCategories={setCategories} />}
